@@ -21,7 +21,8 @@ package com.github.maven_nar.cpptasks.parser;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Vector;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * A parser that extracts INCLUDE statements from a Reader.
@@ -32,7 +33,7 @@ public final class FortranParser extends AbstractParser implements Parser {
   /**
    * List of included filenames.
    */
-  private final Vector<String> includes = new Vector<>();
+  private final List<String> includes = new ArrayList<>();
 
   /**
    * State that starts consuming content at the beginning of a line.
@@ -66,7 +67,7 @@ public final class FortranParser extends AbstractParser implements Parser {
    */
   @Override
   public void addFilename(final String include) {
-    this.includes.addElement(include);
+    this.includes.add(include);
   }
 
   /**
@@ -77,7 +78,7 @@ public final class FortranParser extends AbstractParser implements Parser {
   @Override
   public String[] getIncludes() {
     final String[] retval = new String[this.includes.size()];
-    this.includes.copyInto(retval);
+    this.includes.toArray(retval);
     return retval;
   }
 
@@ -101,7 +102,7 @@ public final class FortranParser extends AbstractParser implements Parser {
    */
   @Override
   public void parse(final Reader reader) throws IOException {
-    this.includes.setSize(0);
+    this.includes.clear();
     super.parse(reader);
   }
 }

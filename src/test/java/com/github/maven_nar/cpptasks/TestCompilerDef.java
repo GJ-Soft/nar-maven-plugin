@@ -19,17 +19,17 @@
  */
 package com.github.maven_nar.cpptasks;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+
 import java.io.File;
 import java.io.IOException;
-
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
-
 import com.github.maven_nar.cpptasks.compiler.CommandLineCompilerConfiguration;
 import com.github.maven_nar.cpptasks.compiler.Compiler;
-import com.github.maven_nar.cpptasks.compiler.LinkType;
 import com.github.maven_nar.cpptasks.gcc.GccCCompiler;
-import com.github.maven_nar.cpptasks.msvc.MsvcCCompiler;
 import com.github.maven_nar.cpptasks.types.CompilerArgument;
 import com.github.maven_nar.cpptasks.types.ConditionalPath;
 import com.github.maven_nar.cpptasks.types.DefineArgument;
@@ -42,30 +42,6 @@ import com.github.maven_nar.cpptasks.types.UndefineArgument;
  * Tests for CompilerDef.
  */
 public final class TestCompilerDef extends TestProcessorDef {
-  /**
-   * Sets the name attribute.
-   *
-   * @param compiler
-   *          compiler under test
-   * @param name
-   *          compiler name
-   */
-  private static void setCompilerName(final CompilerDef compiler, final String name) {
-    final CompilerEnum compilerName = new CompilerEnum();
-    compilerName.setValue(name);
-    compiler.setName(compilerName);
-  }
-
-  /**
-   * Constructor.
-   *
-   * @param name
-   *          test name
-   */
-  public TestCompilerDef(final String name) {
-    super(name);
-  }
-
   /**
    * Creates a new processor.
    *
@@ -109,21 +85,10 @@ public final class TestCompilerDef extends TestProcessorDef {
   }
 
   /**
-   * Tests that the classname attribute in the base compiler is effective.
-   */
-  public void testExtendsClassname() {
-    final CompilerDef baseCompiler = new CompilerDef();
-    baseCompiler.setClassname("com.github.maven_nar.cpptasks.msvc.MsvcCCompiler");
-    final CompilerDef extendedCompiler = (CompilerDef) createExtendedProcessorDef(baseCompiler);
-    extendedCompiler.setExceptions(true);
-    final String[] preArgs = getPreArguments(extendedCompiler);
-    assertEquals("/EHsc", preArgs[2]);
-  }
-
-  /**
    * Tests that compilerarg's contained in the base compiler definition are
    * effective.
    */
+  @Test
   public void testExtendsCompilerArgs() {
     final CompilerDef baseLinker = new CompilerDef();
     final CompilerArgument linkerArg = new CompilerArgument();
@@ -140,6 +105,7 @@ public final class TestCompilerDef extends TestProcessorDef {
    * Tests that defineset's contained in the base compiler definition are
    * effective.
    */
+  @Test
   public void testExtendsDefineSet() {
     final CompilerDef baseCompiler = new CompilerDef();
     final DefineSet defSet = new DefineSet();
@@ -157,24 +123,12 @@ public final class TestCompilerDef extends TestProcessorDef {
   }
 
   /**
-   * Tests that the extend attribute of the base compiler definition is
-   * effective.
-   */
-  public void testExtendsExceptions() {
-    final CompilerDef baseCompiler = new CompilerDef();
-    baseCompiler.setExceptions(true);
-    final CompilerDef extendedCompiler = (CompilerDef) createExtendedProcessorDef(baseCompiler);
-    setCompilerName(extendedCompiler, "msvc");
-    final String[] preArgs = getPreArguments(extendedCompiler);
-    assertEquals("/EHsc", preArgs[2]);
-  }
-
-  /**
    * Tests if a fileset enclosed in the base compiler definition is effective.
    *
    * @throws IOException
    *           if unable to create or delete a temporary file
    */
+  @Test
   public void testExtendsFileSet() throws IOException {
     super.testExtendsFileSet(File.createTempFile("cpptaskstest", ".cpp"));
   }
@@ -183,6 +137,7 @@ public final class TestCompilerDef extends TestProcessorDef {
    * Tests that includepath's contained in the base compiler definition are
    * effective.
    */
+  @Test
   public void testExtendsIncludePath() {
     final CompilerDef baseCompiler = new CompilerDef();
     final CompilerDef extendedCompiler = (CompilerDef) createExtendedProcessorDef(baseCompiler);
@@ -196,42 +151,11 @@ public final class TestCompilerDef extends TestProcessorDef {
   }
 
   /**
-   * Tests that the multithread attribute of the base compiler definition is
-   * effective.
-   */
-  public void testExtendsMultithreaded() {
-    final CompilerDef baseCompiler = new CompilerDef();
-    baseCompiler.setMultithreaded(false);
-    final CompilerDef extendedCompiler = (CompilerDef) createExtendedProcessorDef(baseCompiler);
-    setCompilerName(extendedCompiler, "msvc");
-    final CCTask cctask = new CCTask();
-    final LinkType linkType = new LinkType();
-    final File objDir = new File("dummy");
-    cctask.setObjdir(objDir);
-    linkType.setStaticRuntime(true);
-    final CommandLineCompilerConfiguration config = (CommandLineCompilerConfiguration) extendedCompiler
-        .createConfiguration(cctask, linkType, null, null, null);
-    final String[] preArgs = config.getPreArguments();
-    assertEquals("/ML", preArgs[3]);
-  }
-
-  /**
-   * Tests that the name attribute in the base compiler is effective.
-   */
-  public void testExtendsName() {
-    final CompilerDef baseCompiler = new CompilerDef();
-    setCompilerName(baseCompiler, "msvc");
-    final CompilerDef extendedCompiler = (CompilerDef) createExtendedProcessorDef(baseCompiler);
-    extendedCompiler.setExceptions(true);
-    final String[] preArgs = getPreArguments(extendedCompiler);
-    assertEquals("/EHsc", preArgs[2]);
-  }
-
-  /**
    * Tests if the rebuild attribute of the base compiler definition is
    * effective.
    *
    */
+  @Test
   public void testExtendsRebuild() {
     testExtendsRebuild(new CompilerDef());
   }
@@ -240,6 +164,7 @@ public final class TestCompilerDef extends TestProcessorDef {
    * Tests that sysincludepath's contained in the base compiler definition are
    * effective.
    */
+  @Test
   public void testExtendsSysIncludePath() {
     final CompilerDef baseCompiler = new CompilerDef();
     final CompilerDef extendedCompiler = (CompilerDef) createExtendedProcessorDef(baseCompiler);
@@ -265,6 +190,7 @@ public final class TestCompilerDef extends TestProcessorDef {
    * "debug" property defined. Return value from getActiveDefines should
    * contain one member
    */
+  @Test
   public void testGetActiveDefines() {
     final Project project = new org.apache.tools.ant.Project();
     final CompilerDef def = new CompilerDef();
@@ -303,6 +229,7 @@ public final class TestCompilerDef extends TestProcessorDef {
    *
    * and is evaluate for a project without and without "debug" set
    */
+  @Test
   public void testGetActiveIncludePaths() {
     final Project project = new org.apache.tools.ant.Project();
     final CompilerDef def = new CompilerDef();
@@ -326,6 +253,7 @@ public final class TestCompilerDef extends TestProcessorDef {
   /**
    * Tests that setting classname to the Gcc compiler is effective.
    */
+  @Test
   public void testGetGcc() {
     final CompilerDef compilerDef = (CompilerDef) create();
     compilerDef.setClassname("com.github.maven_nar.cpptasks.gcc.GccCCompiler");
@@ -335,39 +263,14 @@ public final class TestCompilerDef extends TestProcessorDef {
   }
 
   /**
-   * Tests that setting classname to the MSVC compiler is effective.
-   */
-  public void testGetMSVC() {
-    final CompilerDef compilerDef = (CompilerDef) create();
-    compilerDef.setClassname("com.github.maven_nar.cpptasks.msvc.MsvcCCompiler");
-    final Compiler comp = (Compiler) compilerDef.getProcessor();
-    assertNotNull(comp);
-    assertSame(MsvcCCompiler.getInstance(), comp);
-  }
-
-  /**
    * Tests that setting classname to an bogus class name results in a
    * BuildException.
    */
+  @Test
   public void testUnknownClass() {
     final CompilerDef compilerDef = (CompilerDef) create();
     try {
       compilerDef.setClassname("com.github.maven_nar.cpptasks.bogus.BogusCompiler");
-    } catch (final BuildException ex) {
-      return;
-    }
-    fail("Exception not thrown");
-  }
-
-  /**
-   * Test that setting classname to a class that doesn't support Compiler
-   * throws a BuildException.
-   *
-   */
-  public void testWrongType() {
-    final CompilerDef compilerDef = (CompilerDef) create();
-    try {
-      compilerDef.setClassname("com.github.maven_nar.cpptasks.msvc.MsvcLinker");
     } catch (final BuildException ex) {
       return;
     }

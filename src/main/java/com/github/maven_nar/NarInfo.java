@@ -245,7 +245,7 @@ public class NarInfo {
 
   @Override
   public final String toString() {
-    final StringBuffer s = new StringBuffer("NarInfo for ");
+    final StringBuilder s = new StringBuilder("NarInfo for ");
     s.append(this.groupId);
     s.append(":");
     s.append(this.artifactId);

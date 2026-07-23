@@ -19,7 +19,9 @@
  */
 package com.github.maven_nar.cpptasks.types;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -27,11 +29,9 @@ import org.apache.tools.ant.Project;
 /**
  * Tests for the DefineArgument class
  */
-public class TestDefineArgument extends TestCase {
-  public TestDefineArgument(final String name) {
-    super(name);
-  }
+public class TestDefineArgument {
 
+  @Test
   public void testIsActive1() {
     final DefineArgument arg = new DefineArgument();
     final Project project = new Project();
@@ -43,6 +43,7 @@ public class TestDefineArgument extends TestCase {
     fail("isActive should throw exception if name is not set");
   }
 
+  @Test
   public void testIsActive2() {
     final DefineArgument arg = new DefineArgument();
     arg.setName("TEST");
@@ -52,6 +53,7 @@ public class TestDefineArgument extends TestCase {
     assertTrue(arg.isActive(project));
   }
 
+  @Test
   public void testIsActive3() {
     final DefineArgument arg = new DefineArgument();
     arg.setName("TEST");
@@ -60,6 +62,7 @@ public class TestDefineArgument extends TestCase {
     assertTrue(!arg.isActive(project));
   }
 
+  @Test
   public void testIsActive4() {
     final DefineArgument arg = new DefineArgument();
     arg.setName("TEST");
@@ -74,6 +77,7 @@ public class TestDefineArgument extends TestCase {
     fail("Should throw exception for suspicious value");
   }
 
+  @Test
   public void testIsActive5() {
     final DefineArgument arg = new DefineArgument();
     arg.setName("TEST");
@@ -83,6 +87,7 @@ public class TestDefineArgument extends TestCase {
     assertTrue(!arg.isActive(project));
   }
 
+  @Test
   public void testIsActive6() {
     final DefineArgument arg = new DefineArgument();
     arg.setName("TEST");
@@ -91,6 +96,7 @@ public class TestDefineArgument extends TestCase {
     assertTrue(arg.isActive(project));
   }
 
+  @Test
   public void testIsActive7() {
     final DefineArgument arg = new DefineArgument();
     arg.setName("TEST");
@@ -105,6 +111,7 @@ public class TestDefineArgument extends TestCase {
     fail("Should throw exception for suspicious value");
   }
 
+  @Test
   public void testIsActive8() {
     final DefineArgument arg = new DefineArgument();
     arg.setName("TEST");
@@ -115,6 +122,7 @@ public class TestDefineArgument extends TestCase {
     assertTrue(!arg.isActive(project));
   }
 
+  @Test
   public void testMerge() {
     final UndefineArgument[] base = new UndefineArgument[2];
     final UndefineArgument[] specific = new UndefineArgument[2];

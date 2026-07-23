@@ -19,27 +19,27 @@
  */
 package com.github.maven_nar.cpptasks;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 import org.apache.tools.ant.BuildException;
 
 /**
  * Tests for CompilerEnum.
  */
-public class TestCompilerEnum extends TestCase {
+public class TestCompilerEnum {
   /**
    * Create instance of TestCompilerEnum.
    * 
    * @param name
    *          test name.
    */
-  public TestCompilerEnum(final String name) {
-    super(name);
-  }
 
   /**
    * Test that "gcc" is recognized as a compiler enum.
    */
+  @Test
   public void testCompilerEnum1() {
     final CompilerEnum compilerEnum = new CompilerEnum();
     compilerEnum.setValue("gcc");
@@ -49,6 +49,7 @@ public class TestCompilerEnum extends TestCase {
   /**
    * Test that "bogus" is not recognized as a compiler enum.
    */
+  @Test
   public void testCompilerEnum2() {
     final CompilerEnum compilerEnum = new CompilerEnum();
     try {

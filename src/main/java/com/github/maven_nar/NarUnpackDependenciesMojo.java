@@ -30,32 +30,35 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * List all the dependencies of the project and downloads the NAR files in local
- * maven repository if needed, this
- * includes the noarch and aol type NAR files, and then unpack the files in the
- * project target folder. This also sets
- * flags on binaries and corrects static libraries.
+ * maven repository if needed, this includes the noarch and aol type NAR files,
+ * and then unpack the files in the project target folder. This also sets flags
+ * on binaries and corrects static libraries.
  *
  * @author Mark Donszelmann
  */
-@Mojo(name = "nar-unpack-dependencies", defaultPhase = LifecyclePhase.GENERATE_SOURCES,
-  requiresDependencyResolution = ResolutionScope.TEST, requiresProject = true)
+@Mojo(name = "nar-unpack-dependencies", defaultPhase = LifecyclePhase.GENERATE_SOURCES, requiresDependencyResolution = ResolutionScope.TEST, requiresProject = true)
 public class NarUnpackDependenciesMojo extends NarDownloadDependenciesMojo {
 
-  /**
-   * List of tests to create
-   */
-  @Parameter
-  private List tests;
-  
-  @Override
-  public void narExecute() throws MojoFailureException, MojoExecutionException {
-    // download the dependencies if needed in local maven repository using
-    // NarDownloadDependenciesMojo
-    super.narExecute();
+	@Override
+	protected String getGoalName() {
+		return "nar-unpack-dependencies";
+	}
 
-    // unpack the nar files
-    final List<AttachedNarArtifact> attachedNarArtifacts = getAttachedNarArtifacts(tests);
-    unpackAttachedNars(attachedNarArtifacts);
-  }
+	/**
+	 * List of tests to create
+	 */
+	@Parameter
+	private List<Test> tests;
+
+	@Override
+	public void narExecute() throws MojoFailureException, MojoExecutionException {
+		// download the dependencies if needed in local maven repository using
+		// NarDownloadDependenciesMojo
+		super.narExecute();
+
+		// unpack the nar files
+		final List<AttachedNarArtifact> attachedNarArtifacts = getAttachedNarArtifacts(tests);
+		unpackAttachedNars(attachedNarArtifacts);
+	}
 
 }

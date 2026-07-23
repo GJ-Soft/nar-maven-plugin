@@ -19,7 +19,9 @@
  */
 package com.github.maven_nar.cpptasks.compiler;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.maven_nar.cpptasks.OutputTypeEnum;
 
@@ -28,22 +30,20 @@ import com.github.maven_nar.cpptasks.OutputTypeEnum;
  *
  * @author CurtA
  */
-public class TestLinkType extends TestCase {
+public class TestLinkType {
   /**
    * Constructor
    * 
    * @param name
    *          test case name
    */
-  public TestLinkType(final String name) {
-    super(name);
-  }
 
   /**
    * Tests if isPluginModule returns true when set to plugin output type
    * 
    * See patch [ 676276 ] Enhanced support for Mac OS X
    */
+  @Test
   public void testIsPluginFalse() {
     final LinkType type = new LinkType();
     final OutputTypeEnum pluginType = new OutputTypeEnum();
@@ -57,6 +57,7 @@ public class TestLinkType extends TestCase {
    * 
    * See patch [ 676276 ] Enhanced support for Mac OS X
    */
+  @Test
   public void testIsPluginTrue() {
     final LinkType type = new LinkType();
     final OutputTypeEnum pluginType = new OutputTypeEnum();

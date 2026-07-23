@@ -20,7 +20,7 @@
 package com.github.maven_nar.cpptasks.parser;
 
 public class FilenameState extends AbstractParserState {
-  private final StringBuffer buf = new StringBuffer();
+  private final StringBuilder buf = new StringBuilder();
   private final char[] terminators;
 
   public FilenameState(final AbstractParser parser, final char[] terminators) {

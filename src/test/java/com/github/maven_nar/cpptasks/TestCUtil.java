@@ -19,30 +19,31 @@
  */
 package com.github.maven_nar.cpptasks;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+
 import java.io.File;
 import java.io.IOException;
-
-import junit.framework.TestCase;
 
 /**
  * Tests for CUtil class
  */
-public class TestCUtil extends TestCase {
-  public TestCUtil(final String name) {
-    super(name);
-  }
-
+public class TestCUtil {
+  @Test
   public void testGetPathFromEnvironment() {
     final File[] files = CUtil.getPathFromEnvironment("LIB", ";");
     assertNotNull(files);
   }
 
+  @Test
   public void testGetRelativePath1() throws IOException {
     final String canonicalBase = new File("/foo/bar/").getCanonicalPath();
     final String rel = CUtil.getRelativePath(canonicalBase, new File("/foo/bar/baz"));
     assertEquals("baz", rel);
   }
 
+  @Test
   public void testGetRelativePath10() throws IOException {
     final String canonicalBase = new File("/foo/bar/something").getCanonicalPath();
     final String rel = CUtil.getRelativePath(canonicalBase, new File("/foo/bar/something else"));
@@ -50,24 +51,28 @@ public class TestCUtil extends TestCase {
     assertEquals(expected, rel);
   }
 
+  @Test
   public void testGetRelativePath2() throws IOException {
     final String canonicalBase = new File("/foo/bar/").getCanonicalPath();
     final String rel = CUtil.getRelativePath(canonicalBase, new File("/foo/bar/"));
     assertEquals(".", rel);
   }
 
+  @Test
   public void testGetRelativePath3() throws IOException {
     final String canonicalBase = new File("/foo/bar/").getCanonicalPath();
     final String rel = CUtil.getRelativePath(canonicalBase, new File("/foo/bar/a"));
     assertEquals("a", rel);
   }
 
+  @Test
   public void testGetRelativePath4() throws IOException {
     final String canonicalBase = new File("/foo/bar/").getCanonicalPath();
     final String rel = CUtil.getRelativePath(canonicalBase, new File("/foo/"));
     assertEquals("..", rel);
   }
 
+  @Test
   public void testGetRelativePath5() throws IOException {
     final String canonicalBase = new File("/foo/bar/").getCanonicalPath();
     final String rel = CUtil.getRelativePath(canonicalBase, new File("/a"));
@@ -75,6 +80,7 @@ public class TestCUtil extends TestCase {
     assertEquals(expected, rel);
   }
 
+  @Test
   public void testGetRelativePath6() throws IOException {
     final String canonicalBase = new File("/foo/bar/").getCanonicalPath();
     final String rel = CUtil.getRelativePath(canonicalBase, new File("/foo/baz/bar"));
@@ -82,6 +88,7 @@ public class TestCUtil extends TestCase {
     assertEquals(expected, rel);
   }
 
+  @Test
   public void testGetRelativePath7() throws IOException {
     final String canonicalBase = new File("/foo/bar/").getCanonicalPath();
     //
@@ -101,6 +108,7 @@ public class TestCUtil extends TestCase {
     }
   }
 
+  @Test
   public void testGetRelativePath8() throws IOException {
     final String canonicalBase = new File("/foo/bar/something").getCanonicalPath();
     final String rel = CUtil.getRelativePath(canonicalBase, new File("/foo/bar/something.extension"));
@@ -108,6 +116,7 @@ public class TestCUtil extends TestCase {
     assertEquals(expected, rel);
   }
 
+  @Test
   public void testGetRelativePath9() throws IOException {
     final String canonicalBase = new File("/foo/bar/something").getCanonicalPath();
     final String rel = CUtil.getRelativePath(canonicalBase, new File("/foo/bar/somethingElse"));
@@ -115,11 +124,13 @@ public class TestCUtil extends TestCase {
     assertEquals(expected, rel);
   }
 
+  @Test
   public void testParsePath1() {
     final File[] files = CUtil.parsePath("", ";");
     assertEquals(0, files.length);
   }
 
+  @Test
   public void testParsePath2() {
     final String workingDir = System.getProperty("user.dir");
     final File[] files = CUtil.parsePath(workingDir, ";");
@@ -128,6 +139,7 @@ public class TestCUtil extends TestCase {
     assertEquals(workingDirFile, files[0]);
   }
 
+  @Test
   public void testParsePath3() {
     final String workingDir = System.getProperty("user.dir");
     final File[] files = CUtil.parsePath(workingDir + ";", ";");
@@ -135,6 +147,7 @@ public class TestCUtil extends TestCase {
     assertEquals(new File(workingDir), files[0]);
   }
 
+  @Test
   public void testParsePath4() {
     final String workingDir = System.getProperty("user.dir");
     final String javaHome = System.getProperty("java.home");
@@ -144,6 +157,7 @@ public class TestCUtil extends TestCase {
     assertEquals(new File(javaHome), files[1]);
   }
 
+  @Test
   public void testParsePath5() {
     final String workingDir = System.getProperty("user.dir");
     final String javaHome = System.getProperty("java.home");
@@ -158,6 +172,7 @@ public class TestCUtil extends TestCase {
    *
    * See patch 1267472 and bug 1032302.
    */
+  @Test
   public void testXmlEncode() {
     assertEquals("&lt;&quot;boo&quot;&gt;", CUtil.xmlAttribEncode("<\"boo\">"));
   }

@@ -19,11 +19,13 @@
  */
 package com.github.maven_nar.cpptasks.gcc;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
+
 import java.io.File;
 import java.util.Vector;
-
-import junit.framework.TestCase;
-
 import com.github.maven_nar.cpptasks.CCTask;
 import com.github.maven_nar.cpptasks.CUtil;
 import com.github.maven_nar.cpptasks.OutputTypeEnum;
@@ -36,11 +38,10 @@ import com.github.maven_nar.cpptasks.types.LibraryTypeEnum;
  *
  * Override create to test concrete compiler implementions
  */
-public class TestAbstractLdLinker extends TestCase {
+public class TestAbstractLdLinker {
   private final String realOSName;
 
-  public TestAbstractLdLinker(final String name) {
-    super(name);
+  public TestAbstractLdLinker() {
     this.realOSName = System.getProperty("os.name");
   }
 
@@ -48,7 +49,7 @@ public class TestAbstractLdLinker extends TestCase {
     return GccLinker.getInstance();
   }
 
-  @Override
+  @AfterEach
   protected void tearDown() throws java.lang.Exception {
     System.setProperty("os.name", this.realOSName);
   }
@@ -58,6 +59,7 @@ public class TestAbstractLdLinker extends TestCase {
    * 
    * See [ 676276 ] Enhanced support for Mac OS X
    */
+  @Test
   public void testAddImpliedArgsDarwinPlugin() {
     System.setProperty("os.name", "Mac OS X");
     final AbstractLdLinker linker = getLinker();
@@ -76,6 +78,7 @@ public class TestAbstractLdLinker extends TestCase {
    * 
    * See [ 676276 ] Enhanced support for Mac OS X
    */
+  @Test
   public void testAddImpliedArgsDarwinShared() {
     System.setProperty("os.name", "Mac OS X");
     final AbstractLdLinker linker = getLinker();
@@ -97,6 +100,7 @@ public class TestAbstractLdLinker extends TestCase {
    * 
    * See [ 676276 ] Enhanced support for Mac OS X
    */
+  @Test
   public void testAddImpliedArgsNonDarwinPlugin() {
     System.setProperty("os.name", "VAX/VMS");
     final AbstractLdLinker linker = getLinker();
@@ -115,6 +119,7 @@ public class TestAbstractLdLinker extends TestCase {
    * 
    * See [ 676276 ] Enhanced support for Mac OS X
    */
+  @Test
   public void testAddImpliedArgsNonDarwinShared() {
     System.setProperty("os.name", "VAX/VMS");
     final AbstractLdLinker linker = getLinker();
@@ -128,6 +133,7 @@ public class TestAbstractLdLinker extends TestCase {
     assertEquals("-shared", args.elementAt(0));
   }
 
+  @Test
   public void testAddLibrarySetDirSwitch() {
     final AbstractLdLinker linker = getLinker();
     final CCTask task = new CCTask();
@@ -151,6 +157,7 @@ public class TestAbstractLdLinker extends TestCase {
     assertEquals(libdirSwitch.substring(libdirSwitch.length() - 3), "foo");
   }
 
+  @Test
   public void testAddLibrarySetLibFrameworkDarwin() {
     System.setProperty("os.name", "Mac OS X");
     final AbstractLdLinker linker = getLinker();
@@ -187,6 +194,7 @@ public class TestAbstractLdLinker extends TestCase {
     // ENDFREEHEP
   }
 
+  @Test
   public void testAddLibrarySetLibFrameworkNonDarwin() {
     System.setProperty("os.name", "VAX/VMS");
     final AbstractLdLinker linker = getLinker();
@@ -216,6 +224,7 @@ public class TestAbstractLdLinker extends TestCase {
     // ENDFREEHEP
   }
 
+  @Test
   public void testAddLibrarySetLibSwitch() {
     final AbstractLdLinker linker = getLinker();
     final CCTask task = new CCTask();
@@ -236,6 +245,7 @@ public class TestAbstractLdLinker extends TestCase {
     assertEquals(endargs.size(), 4);
   }
 
+  @Test
   public void testAddLibraryStatic() {
     final AbstractLdLinker linker = getLinker();
     final CCTask task = new CCTask();
@@ -276,6 +286,7 @@ public class TestAbstractLdLinker extends TestCase {
     // ENDFREEHEP
   }
 
+  @Test
   public void testLibReturnValue() {
     final AbstractLdLinker linker = getLinker();
     final CCTask task = new CCTask();

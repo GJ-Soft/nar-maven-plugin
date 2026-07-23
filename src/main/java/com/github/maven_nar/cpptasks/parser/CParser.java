@@ -21,7 +21,8 @@ package com.github.maven_nar.cpptasks.parser;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Vector;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * A parser that extracts #include statements from a Reader.
@@ -30,7 +31,7 @@ import java.util.Vector;
  * @author Curt Arnold
  */
 public final class CParser extends AbstractParser implements Parser {
-  private final Vector<String> includes = new Vector<>();
+  private final List<String> includes = new ArrayList<>();
   private final AbstractParserState newLineState;
 
   /**
@@ -76,13 +77,13 @@ public final class CParser extends AbstractParser implements Parser {
 
   @Override
   public void addFilename(final String include) {
-    this.includes.addElement(include);
+    this.includes.add(include);
   }
 
   @Override
   public String[] getIncludes() {
     final String[] retval = new String[this.includes.size()];
-    this.includes.copyInto(retval);
+    this.includes.toArray(retval);
     return retval;
   }
 
@@ -93,7 +94,7 @@ public final class CParser extends AbstractParser implements Parser {
 
   @Override
   public void parse(final Reader reader) throws IOException {
-    this.includes.setSize(0);
+    this.includes.clear();
     super.parse(reader);
   }
 }

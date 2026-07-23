@@ -19,11 +19,11 @@
  */
 package com.github.maven_nar.cpptasks;
 
+import org.junit.jupiter.api.Test;
+
 import java.io.File;
 import java.io.IOException;
-
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.xml.sax.SAXException;
 
 /**
@@ -38,15 +38,13 @@ public class TestDependencyTable extends TestXMLConsumer {
    * @param testName
    *          test name
    */
-  public TestDependencyTable(final String testName) {
-    super(testName);
-  }
 
   /**
    * Loads a dependency file from OpenSHORE (http://www.openshore.org)
    * 
    * @throws IOException
    */
+  @Test
   public void testLoadOpenshore() throws IOException, ParserConfigurationException, SAXException {
     final String tmpDir = System.getProperty("java.io.tmpdir");
     try {
@@ -63,6 +61,7 @@ public class TestDependencyTable extends TestXMLConsumer {
    * 
    * @throws IOException
    */
+  @Test
   public void testLoadXerces() throws IOException, ParserConfigurationException, SAXException {
     final String tmpDir = System.getProperty("java.io.tmpdir");
     try {

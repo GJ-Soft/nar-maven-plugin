@@ -19,24 +19,23 @@
  */
 package com.github.maven_nar.cpptasks.parser;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+
 import java.io.CharArrayReader;
 import java.io.IOException;
-
-import junit.framework.TestCase;
 
 /**
  * Tests for the CParser class.
  */
-public final class TestFortranParser extends TestCase {
+public final class TestFortranParser {
   /**
    * Constructor.
    * 
    * @param name
    *          String test name
    */
-  public TestFortranParser(final String name) {
-    super(name);
-  }
 
   /**
    * Checks parsing of InClUdE 'foo.inc'.
@@ -44,6 +43,7 @@ public final class TestFortranParser extends TestCase {
    * @throws IOException
    *           test fails on IOException
    */
+  @Test
   public void testInClUdE() throws IOException {
     final CharArrayReader reader = new CharArrayReader("InClUdE 'foo.inc'  ".toCharArray());
     final FortranParser parser = new FortranParser();
@@ -59,6 +59,7 @@ public final class TestFortranParser extends TestCase {
    * @throws IOException
    *           test fails on IOException
    */
+  @Test
   public void testINCLUDE() throws IOException {
     final CharArrayReader reader = new CharArrayReader("INCLUDE 'foo.inc' nowhatever  ".toCharArray());
     final FortranParser parser = new FortranParser();
@@ -74,6 +75,7 @@ public final class TestFortranParser extends TestCase {
    * @throws IOException
    *           test fails on IOException
    */
+  @Test
   public void testMultipleInClUdE() throws IOException {
     final CharArrayReader reader = new CharArrayReader("InClUdE 'foo.inc'\ninclude 'bar.inc'  ".toCharArray());
     final FortranParser parser = new FortranParser();

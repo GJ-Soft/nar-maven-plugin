@@ -19,24 +19,23 @@
  */
 package com.github.maven_nar.cpptasks.parser;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+
 import java.io.CharArrayReader;
 import java.io.IOException;
-
-import junit.framework.TestCase;
 
 /**
  * Tests for the CParser class.
  */
-public final class TestCParser extends TestCase {
+public final class TestCParser {
   /**
    * Constructor.
    * 
    * @param name
    *          String test name
    */
-  public TestCParser(final String name) {
-    super(name);
-  }
 
   /**
    * Checks parsing of #include <foo.h>.
@@ -44,6 +43,7 @@ public final class TestCParser extends TestCase {
    * @throws IOException
    *           test fails on IOException
    */
+  @Test
   public void testImmediateImportBracket() throws IOException {
     final CharArrayReader reader = new CharArrayReader("#import <foo.h> nowhatever  ".toCharArray());
     final CParser parser = new CParser();
@@ -59,6 +59,7 @@ public final class TestCParser extends TestCase {
    * @throws IOException
    *           test fails on IOException
    */
+  @Test
   public void testImmediateImportQuote() throws IOException {
     final CharArrayReader reader = new CharArrayReader("#import \"foo.h\"   ".toCharArray());
     final CParser parser = new CParser();
@@ -74,6 +75,7 @@ public final class TestCParser extends TestCase {
    * @throws IOException
    *           test fails on IOException
    */
+  @Test
   public void testImmediateIncludeBracket() throws IOException {
     final CharArrayReader reader = new CharArrayReader("#include      <foo.h>   ".toCharArray());
     final CParser parser = new CParser();
@@ -89,6 +91,7 @@ public final class TestCParser extends TestCase {
    * @throws IOException
    *           test fails on IOException.
    */
+  @Test
   public void testImmediateIncludeQuote() throws IOException {
     final CharArrayReader reader = new CharArrayReader("#include     \"foo.h\"   ".toCharArray());
     final CParser parser = new CParser();
@@ -104,6 +107,7 @@ public final class TestCParser extends TestCase {
    * @throws IOException
    *           test fails on IOException
    */
+  @Test
   public void testIncompleteImmediateImportBracket() throws IOException {
     final CharArrayReader reader = new CharArrayReader("#import <foo.h   ".toCharArray());
     final CParser parser = new CParser();
@@ -118,6 +122,7 @@ public final class TestCParser extends TestCase {
    * @throws IOException
    *           test fails on IOException
    */
+  @Test
   public void testIncompleteImmediateImportQuote() throws IOException {
     final CharArrayReader reader = new CharArrayReader("#import \"foo.h   ".toCharArray());
     final CParser parser = new CParser();
@@ -132,6 +137,7 @@ public final class TestCParser extends TestCase {
    * @throws IOException
    *           test fails on IOException
    */
+  @Test
   public void testIncompleteImmediateIncludeBracket() throws IOException {
     final CharArrayReader reader = new CharArrayReader("#include <foo.h   ".toCharArray());
     final CParser parser = new CParser();
@@ -146,6 +152,7 @@ public final class TestCParser extends TestCase {
    * @throws IOException
    *           test fails on IOException
    */
+  @Test
   public void testIncompleteImmediateIncludeQuote() throws IOException {
     final CharArrayReader reader = new CharArrayReader("#include     \"foo.h    ".toCharArray());
     final CParser parser = new CParser();
@@ -160,6 +167,7 @@ public final class TestCParser extends TestCase {
    * @throws IOException
    *           test fails on IOException.
    */
+  @Test
   public void testLeadingSpace() throws IOException {
     final CharArrayReader reader = new CharArrayReader(" #include     \"foo.h\"   ".toCharArray());
     final CParser parser = new CParser();
@@ -175,6 +183,7 @@ public final class TestCParser extends TestCase {
    * @throws IOException
    *           test fails on IOException.
    */
+  @Test
   public void testLeadingTab() throws IOException {
     final CharArrayReader reader = new CharArrayReader("\t#include     \"foo.h\"   ".toCharArray());
     final CParser parser = new CParser();
@@ -190,6 +199,7 @@ public final class TestCParser extends TestCase {
    * @throws IOException
    *           test fails on IOException
    */
+  @Test
   public void testNoQuoteOrBracket() throws IOException {
     final CharArrayReader reader = new CharArrayReader("#include foo.h  ".toCharArray());
     final CParser parser = new CParser();
@@ -204,6 +214,7 @@ public final class TestCParser extends TestCase {
    * @throws IOException
    *           test fails on IOException
    */
+  @Test
   public void testNotFirstWhitespace() throws IOException {
     final CharArrayReader reader = new CharArrayReader("//#include \"foo.h\"".toCharArray());
     final CParser parser = new CParser();

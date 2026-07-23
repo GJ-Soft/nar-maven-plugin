@@ -19,8 +19,11 @@
  */
 package com.github.maven_nar.cpptasks.compiler;
 
-import java.io.File;
+import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.Test;
+
+import java.io.File;
 import com.github.maven_nar.cpptasks.ProcessorParam;
 import com.github.maven_nar.cpptasks.gcc.GccCCompiler;
 
@@ -30,8 +33,7 @@ public class TestCommandLineCompilerConfiguration extends TestCompilerConfigurat
   private final CommandLineCompiler compiler;
   private final String compilerId;
 
-  public TestCommandLineCompilerConfiguration(final String name) {
-    super(name);
+  public TestCommandLineCompilerConfiguration() {
     this.compiler = GccCCompiler.getInstance();
     this.compilerId = this.compiler.getIdentifier();
   }
@@ -44,6 +46,7 @@ public class TestCommandLineCompilerConfiguration extends TestCompilerConfigurat
         }, new ProcessorParam[0], false, new String[0]);
   }
 
+  @Test
   public void testConstructorNullCompiler() {
     try {
       new CommandLineCompilerConfiguration(null, "dummy", new File[0], new File[0], new File[0], "", new String[0],
@@ -53,12 +56,14 @@ public class TestCommandLineCompilerConfiguration extends TestCompilerConfigurat
     }
   }
 
+  @Test
   public void testGetIdentifier() {
     final CompilerConfiguration config = create();
     final String id = config.getIdentifier();
     assertEquals("dummy", id);
   }
 
+  @Test
   public void testToString() {
     final CompilerConfiguration config = create();
     final String toString = config.toString();

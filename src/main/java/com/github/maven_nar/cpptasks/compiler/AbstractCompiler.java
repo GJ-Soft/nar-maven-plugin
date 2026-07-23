@@ -24,7 +24,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Vector;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -141,8 +142,8 @@ public abstract class AbstractCompiler extends AbstractProcessor implements Comp
     long sourceLastModified = source.lastModified();
     final File[] sourcePath = new File[1];
     sourcePath[0] = new File(source.getParent());
-    final Vector onIncludePath = new Vector();
-    final Vector onSysIncludePath = new Vector();
+    final List<File> onIncludePath = new ArrayList<>();
+    final List<File> onSysIncludePath = new ArrayList<>();
     String baseDirPath;
     try {
       baseDirPath = baseDir.getCanonicalPath();
@@ -177,23 +178,23 @@ public abstract class AbstractCompiler extends AbstractProcessor implements Comp
         }
       }
     }
-    for (int i = 0; i < onIncludePath.size(); i++) {
-      final String relativeInclude = CUtil.getRelativePath(baseDirPath, (File) onIncludePath.elementAt(i));
-      onIncludePath.setElementAt(relativeInclude, i);
+    final List<String> relativeIncludes = new ArrayList<>(onIncludePath.size());
+    for (final File include : onIncludePath) {
+      relativeIncludes.add(CUtil.getRelativePath(baseDirPath, include));
     }
-    for (int i = 0; i < onSysIncludePath.size(); i++) {
-      final String relativeInclude = CUtil.getRelativePath(baseDirPath, (File) onSysIncludePath.elementAt(i));
-      onSysIncludePath.setElementAt(relativeInclude, i);
+    final List<String> relativeSysIncludes = new ArrayList<>(onSysIncludePath.size());
+    for (final File include : onSysIncludePath) {
+      relativeSysIncludes.add(CUtil.getRelativePath(baseDirPath, include));
     }
-    return new DependencyInfo(includePathIdentifier, relativeSource, sourceLastModified, onIncludePath,
-        onSysIncludePath);
+    return new DependencyInfo(includePathIdentifier, relativeSource, sourceLastModified, relativeIncludes,
+        relativeSysIncludes);
   }
 
-  protected boolean resolveInclude(final String includeName, final File[] includePath, final Vector onThisPath) {
+  protected boolean resolveInclude(final String includeName, final File[] includePath, final List<File> onThisPath) {
     for (final File element : includePath) {
       final File includeFile = new File(element, includeName);
       if (includeFile.exists()) {
-        onThisPath.addElement(includeFile);
+        onThisPath.add(includeFile);
         return true;
       }
     }

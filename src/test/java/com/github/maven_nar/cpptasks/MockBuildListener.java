@@ -20,7 +20,6 @@
 package com.github.maven_nar.cpptasks;
 
 import java.util.Vector;
-
 import org.apache.tools.ant.BuildEvent;
 import org.apache.tools.ant.BuildListener;
 

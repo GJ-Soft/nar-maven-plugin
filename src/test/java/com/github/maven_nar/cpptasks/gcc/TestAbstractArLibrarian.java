@@ -19,6 +19,10 @@
  */
 package com.github.maven_nar.cpptasks.gcc;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+
 import com.github.maven_nar.cpptasks.compiler.AbstractProcessor;
 import com.github.maven_nar.cpptasks.compiler.TestAbstractLinker;
 
@@ -35,9 +39,6 @@ public class TestAbstractArLibrarian extends TestAbstractLinker {
    *          test name
    * @see junit.framework.TestCase#TestCase(String)
    */
-  public TestAbstractArLibrarian(final String name) {
-    super(name);
-  }
 
   /**
    * Creates item under test @returns item under test
@@ -55,6 +56,7 @@ public class TestAbstractArLibrarian extends TestAbstractLinker {
    * @see com.github.maven_nar.cpptasks.compiler.TestAbstractProcessor#testBid()
    */
   @Override
+  @Test
   public void testBid() {
     final AbstractProcessor compiler = create();
     final int bid = compiler.bid("c:/foo\\bar\\hello.o");
@@ -62,6 +64,7 @@ public class TestAbstractArLibrarian extends TestAbstractLinker {
   }
 
   @Override
+  @Test
   public void testGetIdentfier() {
     final AbstractProcessor processor = create();
     final String id = processor.getIdentifier();
@@ -73,6 +76,7 @@ public class TestAbstractArLibrarian extends TestAbstractLinker {
    * 
    * See patch [ 676276 ] Enhanced support for Mac OS X
    */
+  @Test
   public void testGetLibraryPatterns() {
     final String[] libnames = new String[] {
       "foo"
@@ -86,6 +90,7 @@ public class TestAbstractArLibrarian extends TestAbstractLinker {
    * 
    * See bug [ 687732 ] Filenames for gcc static library does start with lib
    */
+  @Test
   public void testOutputFileName() {
     final String[] outputFiles = GccLibrarian.getInstance().getOutputFileNames("x", null);
     assertEquals("libx.a", outputFiles[0]);

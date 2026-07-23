@@ -19,8 +19,11 @@
  */
 package com.github.maven_nar.cpptasks.compiler;
 
-import java.io.File;
+import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.Test;
+
+import java.io.File;
 import com.github.maven_nar.cpptasks.CCTask;
 import com.github.maven_nar.cpptasks.LinkerDef;
 import com.github.maven_nar.cpptasks.ProcessorDef;
@@ -84,15 +87,12 @@ public class TestAbstractLinker extends TestAbstractProcessor {
     }
   }
 
-  public TestAbstractLinker(final String name) {
-    super(name);
-  }
-
   @Override
   protected AbstractProcessor create() {
     return new DummyAbstractLinker();
   }
 
+  @Test
   public void testBid() {
     final AbstractProcessor compiler = create();
     int bid = compiler.bid("c:/foo\\bar\\hello.obj");

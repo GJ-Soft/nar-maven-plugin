@@ -20,13 +20,10 @@
 package com.github.maven_nar;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,7 +32,6 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.tools.ant.Project;
-import org.codehaus.plexus.util.FileUtils;
 
 import com.github.maven_nar.cpptasks.CCTask;
 import com.github.maven_nar.cpptasks.CUtil;
@@ -276,83 +272,13 @@ public class Linker {
 		// tool path
 		if (this.toolPath != null) {
 			linker.setToolPath(this.toolPath);
-		} else if (Msvc.isMSVC(name)) {
-			linker.setToolPath(mojo.getMsvc().getToolPath());
 		}
-
 		linker.setSkipDepLink(this.skipDepLink);
 
 		// incremental, map
 		linker.setLinkerPrefix(this.prefix);
 		linker.setIncremental(this.incremental);
 		linker.setMap(this.map);
-
-		// Add definitions (Window only)
-		if (os.equals(OS.WINDOWS) && getName(null, null).equals("msvc")
-				&& (type.equals(Library.SHARED) || type.equals(Library.JNI))) {
-			final Set<File> defs = new HashSet<>();
-			try {
-				if (mojo.getC() != null) {
-					final List<File> cSrcDirs = mojo.getC().getSourceDirectories();
-					for (final Object cSrcDir : cSrcDirs) {
-						final File dir = (File) cSrcDir;
-						if (dir.exists()) {
-							defs.addAll(FileUtils.getFiles(dir, "**/*.def", null));
-						}
-					}
-				}
-			} catch (final IOException e) {
-			}
-			try {
-				if (mojo.getCpp() != null) {
-					final List<File> cppSrcDirs = mojo.getCpp().getSourceDirectories();
-					for (final Object cppSrcDir : cppSrcDirs) {
-						final File dir = (File) cppSrcDir;
-						if (dir.exists()) {
-							defs.addAll(FileUtils.getFiles(dir, "**/*.def", null));
-						}
-					}
-				}
-			} catch (final IOException e) {
-			}
-			try {
-				if (mojo.getFortran() != null) {
-					final List<File> fortranSrcDirs = mojo.getFortran().getSourceDirectories();
-					for (final Object fortranSrcDir : fortranSrcDirs) {
-						final File dir = (File) fortranSrcDir;
-						if (dir.exists()) {
-							defs.addAll(FileUtils.getFiles(dir, "**/*.def", null));
-						}
-					}
-				}
-			} catch (final IOException e) {
-			}
-
-			for (final Object def : defs) {
-				final LinkerArgument arg = new LinkerArgument();
-				arg.setValue("/def:" + def);
-				linker.addConfiguredLinkerArg(arg);
-			}
-		}
-
-		// FIXME, this should be done in CPPTasks at some point, and may not be
-		// necessary, but was for VS 2010 beta 2
-		if (os.equals(OS.WINDOWS) && getName(null, null).equals("msvc") && !getVersion(mojo).startsWith("6.")
-				&& (type.equals(Library.SHARED) || type.equals(Library.JNI) || type.equals(Library.EXECUTABLE))) {
-			final LinkerArgument arg = new LinkerArgument();
-			if (isGenerateManifest())
-				arg.setValue("/MANIFEST");
-			else
-				arg.setValue("/MANIFEST:NO");
-			linker.addConfiguredLinkerArg(arg);
-
-			if (isGenerateManifest()) {
-				final LinkerArgument arg2 = new LinkerArgument();
-				arg2.setValue("/MANIFESTFILE:" + task.getOutfile() + ".manifest");
-				linker.addConfiguredLinkerArg(arg2);
-			}
-
-		}
 
 		// Add options to linker
 		if (this.options != null) {
@@ -498,8 +424,6 @@ public class Linker {
 			addLibraries(sysLibsList, linker, antProject, true);
 		}
 
-		mojo.getMsvc().configureLinker(linker);
-
 		return linker;
 	}
 
@@ -561,43 +485,6 @@ public class Linker {
 		if (this.name.equals("g++") || this.name.equals("gcc")) {
 			NarUtil.runCommand(linkerPrefix + "gcc", new String[] { "--version" }, null, null, out, err, dbg, this.log);
 			final Pattern p = Pattern.compile("[0-9]+.[0-9]+(.[0-9]+)*");
-			final Matcher m = p.matcher(out.toString());
-			if (m.find()) {
-				version = m.group(0);
-			}
-		} else if (this.name.equals("msvc")) {
-			version = mojo.getMsvc().getVersion();
-		} else if (this.name.equals("icc") || this.name.equals("icpc")) {
-			NarUtil.runCommand("icc", new String[] { "--version" }, null, null, out, err, dbg, this.log);
-			final Pattern p = Pattern.compile("[0-9]+.[0-9]+(.[0-9]+)*");
-			final Matcher m = p.matcher(out.toString());
-			if (m.find()) {
-				version = m.group(0);
-			}
-		} else if (this.name.equals("icl")) {
-			NarUtil.runCommand("icl", new String[] { "/QV" }, null, null, out, err, dbg, this.log);
-			final Pattern p = Pattern.compile("\\d+\\.\\d+");
-			final Matcher m = p.matcher(err.toString());
-			if (m.find()) {
-				version = m.group(0);
-			}
-		} else if (this.name.equals("CC")) {
-			NarUtil.runCommand("CC", new String[] { "-V" }, null, null, out, err, dbg, this.log);
-			final Pattern p = Pattern.compile("[0-9]+.[0-9]+(.[0-9]+)*");
-			final Matcher m = p.matcher(err.toString());
-			if (m.find()) {
-				version = m.group(0);
-			}
-		} else if (this.name.equals("xlC")) {
-			NarUtil.runCommand("/usr/vacpp/bin/xlC", new String[] { "-qversion" }, null, null, out, err, dbg, this.log);
-			final Pattern p = Pattern.compile("[0-9]+.[0-9]+(.[0-9]+)*");
-			final Matcher m = p.matcher(out.toString());
-			if (m.find()) {
-				version = m.group(0);
-			}
-		} else if (this.name.equals("xlC_r")) {
-			NarUtil.runCommand("xlC_r", new String[] { "-qversion" }, null, null, out, err, dbg, this.log);
-			final Pattern p = Pattern.compile("\\d+\\.\\d+");
 			final Matcher m = p.matcher(out.toString());
 			if (m.find()) {
 				version = m.group(0);

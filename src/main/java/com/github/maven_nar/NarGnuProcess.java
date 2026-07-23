@@ -33,13 +33,19 @@ import org.apache.maven.plugins.annotations.Mojo;
  */
 @Mojo(name = "nar-gnu-process", defaultPhase = LifecyclePhase.PROCESS_CLASSES, requiresProject = true)
 public class NarGnuProcess extends AbstractGnuMojo {
-  @Override
-  public final void narExecute() throws MojoExecutionException, MojoFailureException {
-    final File srcDir = getGnuAOLTargetDirectory();
-    if (srcDir.exists()) {
-      getLog().info("Running GNU process");
 
-      copyResources(srcDir, getAOL().toString());
-    }
-  }
+	@Override
+	protected String getGoalName() {
+		return "nar-gnu-process";
+	}
+
+	@Override
+	public final void narExecute() throws MojoExecutionException, MojoFailureException {
+		final File srcDir = getGnuAOLTargetDirectory();
+		if (srcDir.exists()) {
+			getLog().info("Running GNU process");
+
+			copyResources(srcDir, getAOL().toString());
+		}
+	}
 }

@@ -22,6 +22,7 @@ package com.github.maven_nar;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -34,10 +35,8 @@ import java.util.jar.JarFile;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.maven.RepositoryUtils;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
@@ -61,7 +60,10 @@ import org.eclipse.aether.RepositorySystemSession;
 import org.eclipse.aether.collection.CollectRequest;
 import org.eclipse.aether.collection.DependencyCollectionException;
 import org.eclipse.aether.collection.DependencySelector;
+import org.eclipse.aether.repository.LocalRepository;
 import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.resolution.ArtifactRequest;
+import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.util.graph.selector.AndDependencySelector;
 import org.eclipse.aether.util.graph.selector.OptionalDependencySelector;
 import org.eclipse.aether.util.graph.selector.ScopeDependencySelector;
@@ -73,7 +75,7 @@ import org.eclipse.aether.util.graph.transformer.NoopDependencyGraphTransformer;
 public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 
 	@Parameter(defaultValue = "${localRepository}", required = true, readonly = true)
-	private ArtifactRepository localRepository;
+	private LocalRepository localRepository;
 
 	/**
 	 * Artifact resolver, needed to download the attached nar files.
@@ -85,7 +87,7 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 	 * Remote repositories which will be searched for nar attachments.
 	 */
 	@Parameter(defaultValue = "${project.remoteArtifactRepositories}", required = true, readonly = true)
-	protected List remoteArtifactRepositories;
+	protected List<RemoteRepository> remoteArtifactRepositories;
 
 	/**
 	 * Comma separated list of Artifact names to exclude.
@@ -202,7 +204,7 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 		// Get test scope dependencies if we are in the testCompile phase
 		if (this instanceof NarTestCompileMojo) {
 			DependencySelector dependencySelector = new AndDependencySelector(new OptionalDependencySelector(),
-					new ScopeDependencySelector(null));
+					new ScopeDependencySelector());
 			session.setDependencySelector(dependencySelector);
 		}
 
@@ -547,12 +549,15 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 		for (final AttachedNarArtifact attachedNarArtifact : dependencies) {
 			try {
 				getLog().debug("Resolving " + attachedNarArtifact);
-				this.artifactResolver.resolve(attachedNarArtifact, this.remoteArtifactRepositories,
-						getLocalRepository());
-			} catch (final ArtifactNotFoundException e) {
-				final String message = "nar not found " + attachedNarArtifact.getId();
-				throw new MojoExecutionException(message, e);
-			} catch (final ArtifactResolutionException e) {
+				ArtifactRequest request = new ArtifactRequest(RepositoryUtils.toArtifact(attachedNarArtifact),
+						this.remoteArtifactRepositories, null);
+				ArtifactResult result = repoSystem.resolveArtifact(repoSession, request);
+				getLog().debug("Result=" + result.isResolved());
+				if (!result.isResolved()) {
+					final String message = "nar missing artifact " + attachedNarArtifact.getId();
+					throw new MojoExecutionException(message);
+				}
+			} catch (final org.eclipse.aether.resolution.ArtifactResolutionException e) {
 				final String message = "nar cannot resolve " + attachedNarArtifact.getId();
 				throw new MojoExecutionException(message, e);
 			}
@@ -712,7 +717,7 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 	// @Parameter(defaultValue = "${project.pluginArtifactRepositories}")
 	// private List remotePluginRepositories;
 
-	protected final ArtifactRepository getLocalRepository() {
+	protected final LocalRepository getLocalRepository() {
 		return this.localRepository;
 	}
 
@@ -773,7 +778,9 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 					getLog(), dependency.getFile());
 		}
 
-		final File file = new File(getLocalRepository().getBasedir(), getLocalRepository().pathOf(dependency));
+		Path path = repoSession.getLocalRepositoryManager()
+				.getAbsolutePathForLocalArtifact(RepositoryUtils.toArtifact(dependency));
+		final File file = new File(path.toFile().getAbsolutePath());
 		if (!file.exists()) {
 			getLog().debug("Dependency nar file does not exist: " + file);
 			return null;
@@ -812,10 +819,10 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 
 	protected final NarManager getNarManager() throws MojoFailureException, MojoExecutionException {
 		return new NarManager(getLog(), getLocalRepository(), getMavenProject(), getArchitecture(), getOS(),
-				getLinker());
+				getLinker(), repoSystem, repoSession);
 	}
 
-	protected final List<ArtifactRepository> getRemoteRepositories() {
+	protected final List<RemoteRepository> getRemoteRepositories() {
 		return this.remoteArtifactRepositories;
 	}
 

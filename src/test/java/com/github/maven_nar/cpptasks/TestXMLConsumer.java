@@ -19,13 +19,13 @@
  */
 package com.github.maven_nar.cpptasks;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-
-import junit.framework.TestCase;
 
 /**
  * Base class for tests on classes that consume or public XML documents.
@@ -33,7 +33,7 @@ import junit.framework.TestCase;
  * @author Curt Arnold
  * 
  */
-public abstract class TestXMLConsumer extends TestCase {
+public abstract class TestXMLConsumer {
   /**
    * copies a resource to a temporary directory.
    * 
@@ -63,7 +63,7 @@ public abstract class TestXMLConsumer extends TestCase {
     if (src == null) {
       src = new FileInputStream(resourceName);
     }
-    assertNotNull("Could not locate resource " + resourceName, src);
+    assertNotNull(src, "Could not locate resource " + resourceName);
     try {
       final File destFile = new File(tmpDir, tmpFile);
       destFile.deleteOnExit();
@@ -96,10 +96,4 @@ public abstract class TestXMLConsumer extends TestCase {
     }
   }
 
-  /**
-   * @param testName
-   */
-  protected TestXMLConsumer(final String testName) {
-    super(testName);
-  }
 }

@@ -19,7 +19,10 @@
  */
 package com.github.maven_nar.cpptasks.gcc;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
 
 import com.github.maven_nar.cpptasks.OutputTypeEnum;
 import com.github.maven_nar.cpptasks.compiler.LinkType;
@@ -28,7 +31,7 @@ import com.github.maven_nar.cpptasks.compiler.Linker;
 /**
  * @author CurtA
  */
-public class TestGccLinker extends TestCase {
+public class TestGccLinker {
   private final String realOSName;
 
   /**
@@ -37,16 +40,16 @@ public class TestGccLinker extends TestCase {
    * @param name
    *          test name
    */
-  public TestGccLinker(final String name) {
-    super(name);
+  public TestGccLinker() {
     this.realOSName = System.getProperty("os.name");
   }
 
-  @Override
+  @AfterEach
   protected void tearDown() throws java.lang.Exception {
     System.setProperty("os.name", this.realOSName);
   }
 
+  @Test
   public void testGetLinkerDarwinPlugin() {
     System.setProperty("os.name", "Mac OS X");
     final GccLinker linker = GccLinker.getInstance();
@@ -58,6 +61,7 @@ public class TestGccLinker extends TestCase {
     assertEquals("libfoo.bundle", pluginLinker.getOutputFileNames("foo", null)[0]);
   }
 
+  @Test
   public void testGetLinkerDarwinShared() {
     System.setProperty("os.name", "Mac OS X");
     final GccLinker linker = GccLinker.getInstance();
@@ -69,6 +73,7 @@ public class TestGccLinker extends TestCase {
     assertEquals("libfoo.dylib", sharedLinker.getOutputFileNames("foo", null)[0]);
   }
 
+  @Test
   public void testGetLinkerNonDarwinPlugin() {
     System.setProperty("os.name", "Microsoft Windows");
     final GccLinker linker = GccLinker.getInstance();
@@ -80,6 +85,7 @@ public class TestGccLinker extends TestCase {
     assertEquals("libfoo.so", pluginLinker.getOutputFileNames("foo", null)[0]);
   }
 
+  @Test
   public void testGetLinkerNonDarwinShared() {
     System.setProperty("os.name", "Microsoft Windows");
     final GccLinker linker = GccLinker.getInstance();

@@ -32,39 +32,42 @@ import org.apache.maven.shared.artifact.filter.collection.ScopeFilter;
 
 /**
  * List all the dependencies which are needed by the project (for compilation,
- * tests, and execution) and downloads
- * the NAR files in local maven repository if needed. This includes the noarch
- * and aol type NAR files.
+ * tests, and execution) and downloads the NAR files in local maven repository
+ * if needed. This includes the noarch and aol type NAR files.
  *
  * Technical note : the requiresDependencyResolution = ResolutionScope.TEST in
- * the Mojo Annotation is important to
- * get all the dependencies including test dependencies.
+ * the Mojo Annotation is important to get all the dependencies including test
+ * dependencies.
  *
  * @author Mark Donszelmann
  */
-@Mojo(name = "nar-download", defaultPhase = LifecyclePhase.INITIALIZE, requiresProject = true,
-  requiresDependencyResolution = ResolutionScope.TEST)
+@Mojo(name = "nar-download", defaultPhase = LifecyclePhase.INITIALIZE, requiresProject = true, requiresDependencyResolution = ResolutionScope.TEST)
 public class NarDownloadMojo extends AbstractDependencyMojo {
-  
-  /**
-   * List of tests to create
-   */
-  @Parameter
-  private List tests;
-  
-  /**
-   * List all the dependencies which are needed by the project (for compilation,
-   * tests, and execution).
-   */
-  @Override
-  protected ScopeFilter getArtifactScopeFilter() {
-    return new ScopeFilter( Artifact.SCOPE_TEST, null );
-  }
 
-  @Override
-  public void narExecute() throws MojoFailureException, MojoExecutionException {
-    final List<AttachedNarArtifact> attachedNarArtifacts = getAttachedNarArtifacts(libraries);
-    attachedNarArtifacts.addAll( getAttachedNarArtifacts(tests) );
-    downloadAttachedNars(attachedNarArtifacts);
-  }
+	@Override
+	protected String getGoalName() {
+		return "nar-download";
+	}
+
+	/**
+	 * List of tests to create
+	 */
+	@Parameter
+	private List<Test> tests;
+
+	/**
+	 * List all the dependencies which are needed by the project (for compilation,
+	 * tests, and execution).
+	 */
+	@Override
+	protected ScopeFilter getArtifactScopeFilter() {
+		return new ScopeFilter(Artifact.SCOPE_TEST, null);
+	}
+
+	@Override
+	public void narExecute() throws MojoFailureException, MojoExecutionException {
+		final List<AttachedNarArtifact> attachedNarArtifacts = getAttachedNarArtifacts(libraries);
+		attachedNarArtifacts.addAll(getAttachedNarArtifacts(tests));
+		downloadAttachedNars(attachedNarArtifacts);
+	}
 }

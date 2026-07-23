@@ -20,8 +20,8 @@
 package com.github.maven_nar.cpptasks;
 
 import java.io.File;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.Project;
@@ -36,7 +36,7 @@ import com.github.maven_nar.cpptasks.types.ConditionalFileSet;
  * @author Curt Arnold
  */
 public final class PrecompileDef extends DataType {
-  private final Vector exceptSets = new Vector();
+  private final List<ConditionalFileSet> exceptSets = new ArrayList<>();
   private String ifCond;
   /**
    * Directory of prototype file
@@ -57,7 +57,7 @@ public final class PrecompileDef extends DataType {
    */
   public void appendExceptFileSet(final ConditionalFileSet exceptSet) {
     exceptSet.setProject(getProject());
-    this.exceptSets.addElement(exceptSet);
+    this.exceptSets.add(exceptSet);
   }
 
   /**
@@ -83,9 +83,7 @@ public final class PrecompileDef extends DataType {
     }
     final Project p = getProject();
     String[] exceptFiles = null;
-    final Enumeration setEnum = this.exceptSets.elements();
-    while (setEnum.hasMoreElements()) {
-      final ConditionalFileSet exceptSet = (ConditionalFileSet) setEnum.nextElement();
+    for (final ConditionalFileSet exceptSet : this.exceptSets) {
       if (exceptSet.isActive()) {
         final DirectoryScanner scanner = exceptSet.getDirectoryScanner(p);
         final String[] scannerFiles = scanner.getIncludedFiles();

@@ -19,6 +19,10 @@
  */
 package com.github.maven_nar.cpptasks.compiler;
 
+import java.util.ArrayList;
+
+import java.util.List;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -72,28 +76,28 @@ public abstract class CommandLineLinker extends AbstractLinker {
     this.libtoolLinker = libtoolLinker;
   }
 
-  protected void addBase(final CCTask task, final long base, final Vector<String> args) {
+  protected void addBase(final CCTask task, final long base, final List<String> args) {
     // NB: Do nothing by default.
   }
 
-  protected void addEntry(final CCTask task, final String entry, final Vector<String> args) {
+  protected void addEntry(final CCTask task, final String entry, final List<String> args) {
     // NB: Do nothing by default.
   }
 
-  protected void addFixed(final CCTask task, final Boolean fixed, final Vector<String> args) {
+  protected void addFixed(final CCTask task, final Boolean fixed, final List<String> args) {
     // NB: Do nothing by default.
   }
 
   protected void addImpliedArgs(final CCTask task, final boolean debug, final LinkType linkType,
-      final Vector<String> args) {
+      final List<String> args) {
     // NB: Do nothing by default.
   }
 
-  protected void addIncremental(final CCTask task, final boolean incremental, final Vector<String> args) {
+  protected void addIncremental(final CCTask task, final boolean incremental, final List<String> args) {
     // NB: Do nothing by default.
   }
 
-  protected void addLibraryDirectory(final File libraryDirectory, final Vector<String> preargs) {
+  protected void addLibraryDirectory(final File libraryDirectory, final List<String> preargs) {
     try {
       if (libraryDirectory != null && libraryDirectory.exists()) {
         final File currentDir = new File(".").getParentFile();
@@ -109,22 +113,22 @@ public abstract class CommandLineLinker extends AbstractLinker {
     }
   }
 
-  protected void addLibraryPath(final Vector<String> preargs, final String path) {
+  protected void addLibraryPath(final List<String> preargs, final String path) {
   }
 
   //
   // Windows processors handle these through file list
   //
-  protected String[] addLibrarySets(final CCTask task, final LibrarySet[] libsets, final Vector<String> preargs,
-      final Vector<String> midargs, final Vector<String> endargs) {
+  protected String[] addLibrarySets(final CCTask task, final LibrarySet[] libsets, final List<String> preargs,
+      final List<String> midargs, final List<String> endargs) {
     return null;
   }
 
-  protected void addMap(final CCTask task, final boolean map, final Vector<String> args) {
+  protected void addMap(final CCTask task, final boolean map, final List<String> args) {
     // NB: Do nothing by default.
   }
 
-  protected void addStack(final CCTask task, final int stack, final Vector<String> args) {
+  protected void addStack(final CCTask task, final int stack, final List<String> args) {
     // NB: Do nothing by default.
   }
 
@@ -133,10 +137,10 @@ public abstract class CommandLineLinker extends AbstractLinker {
       final ProcessorDef[] baseDefs, final LinkerDef specificDef, final TargetDef targetPlatform,
       final VersionInfo versionInfo) {
 
-    final Vector<String> preargs = new Vector<>();
-    final Vector<String> midargs = new Vector<>();
-    final Vector<String> endargs = new Vector<>();
-    final Vector<String>[] args = new Vector[] {
+    final List<String> preargs = new ArrayList<>();
+    final List<String> midargs = new ArrayList<>();
+    final List<String> endargs = new ArrayList<>();
+    final List<String>[] args = new List[] {
         preargs, midargs, endargs
     };
 
@@ -156,7 +160,7 @@ public abstract class CommandLineLinker extends AbstractLinker {
       final LinkerDef linkerDef = defaultProviders[i];
       commandArgs = linkerDef.getActiveProcessorArgs();
       for (final CommandLineArgument commandArg : commandArgs) {
-        args[commandArg.getLocation()].addElement(commandArg.getValue());
+        args[commandArg.getLocation()].add(commandArg.getValue());
       }
     }
 
@@ -170,7 +174,7 @@ public abstract class CommandLineLinker extends AbstractLinker {
       }
     }
 
-    final Vector<ProcessorParam> params = new Vector<>();
+    final List<ProcessorParam> params = new ArrayList<>();
     //
     // add command line arguments inherited from <cc> element
     // any "extends" and finally the specific CompilerDef
@@ -201,12 +205,11 @@ public abstract class CommandLineLinker extends AbstractLinker {
     libnames = addLibrarySets(task, libsets, preargs, midargs, endargs);
     // }
 
-    final StringBuffer buf = new StringBuffer(getIdentifier());
+    final StringBuilder buf = new StringBuilder(getIdentifier());
     for (int i = 0; i < 3; i++) {
-      final Enumeration<String> argenum = args[i].elements();
-      while (argenum.hasMoreElements()) {
+      for (final String arg : args[i]) {
         buf.append(' ');
-        buf.append(argenum.nextElement());
+        buf.append(arg);
       }
     }
     final String configId = buf.toString();
@@ -214,12 +217,12 @@ public abstract class CommandLineLinker extends AbstractLinker {
     final String[][] options = new String[][] {
         new String[args[0].size() + args[1].size()], new String[args[2].size()]
     };
-    args[0].copyInto(options[0]);
+    args[0].toArray(options[0]);
     final int offset = args[0].size();
     for (int i = 0; i < args[1].size(); i++) {
-      options[0][i + offset] = args[1].elementAt(i);
+      options[0][i + offset] = args[1].get(i);
     }
-    args[2].copyInto(options[1]);
+    args[2].toArray(options[1]);
 
     // if this linker doesn't have an env, and there is a more generically
     // definition for environment, use it.
@@ -255,7 +258,7 @@ public abstract class CommandLineLinker extends AbstractLinker {
    * @param arg
    *          linker argument
    */
-  protected String decorateLinkerOption(final StringBuffer buf, final String arg) {
+  protected String decorateLinkerOption(final StringBuilder buf, final String arg) {
     return arg;
   }
 
@@ -406,7 +409,7 @@ public abstract class CommandLineLinker extends AbstractLinker {
       allArgs[index++] = "libtool";
     }
     allArgs[index++] = getCommandWithPath(config);
-    final StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
 
     for (final String prearg : preargs) {
       allArgs[index++] = task.isDecorateLinkerOptions() ? decorateLinkerOption(buf, prearg) : prearg;
@@ -429,7 +432,7 @@ public abstract class CommandLineLinker extends AbstractLinker {
    * Processes filename into argument form
    *
    */
-  protected String prepareFilename(final StringBuffer buf, final String outputDir, final String sourceFile) {
+  protected String prepareFilename(final StringBuilder buf, final String outputDir, final String sourceFile) {
     // FREEHEP BEGIN exit if absolute path is too long. Max length on relative
     // paths in windows is even shorter.
     if (isWindows() && sourceFile.length() > this.maxPathLength) {
@@ -478,7 +481,7 @@ public abstract class CommandLineLinker extends AbstractLinker {
     return execArgs;
   }
 
-  protected String quoteFilename(final StringBuffer buf, final String filename) {
+  protected String quoteFilename(final StringBuilder buf, final String filename) {
     if (filename.indexOf(' ') >= 0) {
       buf.setLength(0);
       buf.append('\"');

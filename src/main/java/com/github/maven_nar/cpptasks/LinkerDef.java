@@ -21,11 +21,9 @@ package com.github.maven_nar.cpptasks;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -54,10 +52,10 @@ public class LinkerDef extends ProcessorDef {
   private String entry;
   private Boolean fixed;
   private Boolean incremental;
-  private final Vector librarySets = new Vector();
+  private final List<LibrarySet> librarySets = new ArrayList<>();
   private Boolean map;
   private int stack;
-  private final Vector sysLibrarySets = new Vector();
+  private final List<SystemLibrarySet> sysLibrarySets = new ArrayList<>();
   private String toolPath;
   private String linkerPrefix;
   private Boolean skipDepLink;
@@ -76,21 +74,20 @@ public class LinkerDef extends ProcessorDef {
     this.stack = -1;
   }
 
-  private void addActiveLibrarySet(final Project project, final Vector libsets, final Vector srcSets) {
-    final Enumeration srcenum = srcSets.elements();
-    while (srcenum.hasMoreElements()) {
-      final LibrarySet set = (LibrarySet) srcenum.nextElement();
+  private void addActiveLibrarySet(final Project project, final List<LibrarySet> libsets,
+      final List<? extends LibrarySet> srcSets) {
+    for (final LibrarySet set : srcSets) {
       if (set.isActive(project)) {
-        libsets.addElement(set);
+        libsets.add(set);
       }
     }
   }
 
-  private void addActiveSystemLibrarySets(final Project project, final Vector libsets) {
+  private void addActiveSystemLibrarySets(final Project project, final List<LibrarySet> libsets) {
     addActiveLibrarySet(project, libsets, this.sysLibrarySets);
   }
 
-  private void addActiveUserLibrarySets(final Project project, final Vector libsets) {
+  private void addActiveUserLibrarySets(final Project project, final List<LibrarySet> libsets) {
     addActiveLibrarySet(project, libsets, this.librarySets);
   }
 
@@ -143,7 +140,7 @@ public class LinkerDef extends ProcessorDef {
     if (libset == null) {
       throw new NullPointerException("libset");
     }
-    this.librarySets.addElement(libset);
+    this.librarySets.add(libset);
   }
 
   /**
@@ -156,7 +153,7 @@ public class LinkerDef extends ProcessorDef {
     if (libset == null) {
       throw new NullPointerException("libset");
     }
-    this.sysLibrarySets.addElement(libset);
+    this.sysLibrarySets.add(libset);
   }
 
   public void execute() throws org.apache.tools.ant.BuildException {
@@ -172,7 +169,7 @@ public class LinkerDef extends ProcessorDef {
           .getActiveUserLibrarySets(defaultProviders, index);
     }
     final Project p = getProject();
-    final Vector libsets = new Vector();
+    final List<LibrarySet> libsets = new ArrayList<>();
     for (int i = index; i < defaultProviders.length; i++) {
       defaultProviders[i].addActiveUserLibrarySets(p, libsets);
     }
@@ -182,7 +179,7 @@ public class LinkerDef extends ProcessorDef {
     }
     addActiveSystemLibrarySets(p, libsets);
     final LibrarySet[] sets = new LibrarySet[libsets.size()];
-    libsets.copyInto(sets);
+    libsets.toArray(sets);
     return sets;
   }
 
@@ -195,13 +192,13 @@ public class LinkerDef extends ProcessorDef {
           .getActiveUserLibrarySets(defaultProviders, index);
     }
     final Project p = getProject();
-    final Vector libsets = new Vector();
+    final List<LibrarySet> libsets = new ArrayList<>();
     for (int i = index; i < defaultProviders.length; i++) {
       defaultProviders[i].addActiveSystemLibrarySets(p, libsets);
     }
     addActiveSystemLibrarySets(p, libsets);
     final LibrarySet[] sets = new LibrarySet[libsets.size()];
-    libsets.copyInto(sets);
+    libsets.toArray(sets);
     return sets;
   }
 
@@ -214,13 +211,13 @@ public class LinkerDef extends ProcessorDef {
           .getActiveUserLibrarySets(defaultProviders, index);
     }
     final Project p = getProject();
-    final Vector libsets = new Vector();
+    final List<LibrarySet> libsets = new ArrayList<>();
     for (int i = index; i < defaultProviders.length; i++) {
       defaultProviders[i].addActiveUserLibrarySets(p, libsets);
     }
     addActiveUserLibrarySets(p, libsets);
     final LibrarySet[] sets = new LibrarySet[libsets.size()];
-    libsets.copyInto(sets);
+    libsets.toArray(sets);
     return sets;
   }
 
@@ -537,7 +534,7 @@ public class LinkerDef extends ProcessorDef {
       if (this.sysLibrarySets.size() > 0) {
         final File[] libpath = linker.getLibraryPath();
         for (int i = 0; i < this.sysLibrarySets.size(); i++) {
-          final LibrarySet set = (LibrarySet) this.sysLibrarySets.elementAt(i);
+          final LibrarySet set = (LibrarySet) this.sysLibrarySets.get(i);
           if (set.isActive(p)) {
             set.visitLibraries(p, linker, libpath, libraryVisitor);
           }
@@ -569,7 +566,7 @@ public class LinkerDef extends ProcessorDef {
       if (this.librarySets.size() > 0) {
         final File[] libpath = linker.getLibraryPath();
         for (int i = 0; i < this.librarySets.size(); i++) {
-          final LibrarySet set = (LibrarySet) this.librarySets.elementAt(i);
+          final LibrarySet set = (LibrarySet) this.librarySets.get(i);
           if (set.isActive(p)) {
             set.visitLibraries(p, linker, libpath, libraryVisitor);
           }

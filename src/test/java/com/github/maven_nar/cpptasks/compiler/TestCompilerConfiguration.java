@@ -19,14 +19,13 @@
  */
 package com.github.maven_nar.cpptasks.compiler;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 /**
  */
-public abstract class TestCompilerConfiguration extends TestCase {
-  public TestCompilerConfiguration(final String name) {
-    super(name);
-  }
+public abstract class TestCompilerConfiguration {
 
   protected abstract CompilerConfiguration create();
 
@@ -34,6 +33,7 @@ public abstract class TestCompilerConfiguration extends TestCase {
     return ".o";
   }
 
+  @Test
   public void testBid() {
     final CompilerConfiguration compiler = create();
     int bid = compiler.bid("c:/foo\\bar\\hello.c");
@@ -50,6 +50,7 @@ public abstract class TestCompilerConfiguration extends TestCase {
     assertEquals(0, bid);
   }
 
+  @Test
   public void testGetOutputFileName1() {
     final CompilerConfiguration compiler = create();
     final String input = "c:/foo\\bar\\hello.c";
@@ -62,6 +63,7 @@ public abstract class TestCompilerConfiguration extends TestCase {
     }
   }
 
+  @Test
   public void testGetOutputFileName2() {
     final CompilerConfiguration compiler = create();
 //    String[] output = compiler.getOutputFileNames("c:\\foo\\bar\\hello.c", null);  Windows only, on *nix gets treated as filename not pathed.

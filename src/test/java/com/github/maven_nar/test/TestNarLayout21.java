@@ -19,16 +19,16 @@
  */
 package com.github.maven_nar.test;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+
 import java.io.File;
-
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugin.logging.SystemStreamLog;
-
 import com.github.maven_nar.AbstractNarLayout;
 import com.github.maven_nar.Library;
 import com.github.maven_nar.NarConstants;
@@ -40,7 +40,7 @@ import com.github.maven_nar.NarLayout21;
 /**
  * @author Mark Donszelmann (Mark.Donszelmann@gmail.com)
  */
-public class TestNarLayout21 extends TestCase {
+public class TestNarLayout21 {
   private NarFileLayout fileLayout;
 
   private Log log;
@@ -62,7 +62,7 @@ public class TestNarLayout21 extends TestCase {
    * 
    * @see junit.framework.TestCase#setUp()
    */
-  @Override
+  @BeforeEach
   protected void setUp() throws Exception {
     this.fileLayout = new NarFileLayout10();
     this.artifactId = "artifactId";
@@ -83,8 +83,9 @@ public class TestNarLayout21 extends TestCase {
    * @throws MojoFailureException
    * @throws MojoExecutionException
    */
+  @Test
   public final void testGetBinDirectory() throws MojoExecutionException, MojoFailureException {
-    Assert.assertEquals(new File(this.baseDir, this.artifactId + "-" + this.version + "-" + this.aol + "-"
+    assertEquals(new File(this.baseDir, this.artifactId + "-" + this.version + "-" + this.aol + "-"
         + "executable" + File.separator + this.fileLayout.getBinDirectory(this.aol)),
         this.layout.getBinDirectory(this.baseDir, this.artifactId, this.version, this.aol));
   }
@@ -96,12 +97,14 @@ public class TestNarLayout21 extends TestCase {
    * @throws MojoFailureException
    * @throws MojoExecutionException
    */
+  @Test
   public final void testGetIncludeDirectory() throws MojoExecutionException, MojoFailureException {
-    Assert.assertEquals(new File(this.baseDir, this.artifactId + "-" + this.version + "-" + NarConstants.NAR_NO_ARCH
+    assertEquals(new File(this.baseDir, this.artifactId + "-" + this.version + "-" + NarConstants.NAR_NO_ARCH
         + File.separator + this.fileLayout.getIncludeDirectory()),
         this.layout.getIncludeDirectory(this.baseDir, this.artifactId, this.version));
   }
 
+  @Test
   public final void testGetLayout() throws MojoExecutionException {
     AbstractNarLayout.getLayout("NarLayout21", this.log);
   }
@@ -114,8 +117,9 @@ public class TestNarLayout21 extends TestCase {
    * @throws MojoFailureException
    * @throws MojoExecutionException
    */
+  @Test
   public final void testGetLibDirectory() throws MojoExecutionException, MojoFailureException {
-    Assert.assertEquals(new File(this.baseDir, this.artifactId + "-" + this.version + "-" + this.aol + "-" + this.type
+    assertEquals(new File(this.baseDir, this.artifactId + "-" + this.version + "-" + this.aol + "-" + this.type
         + File.separator + this.fileLayout.getLibDirectory(this.aol, this.type)),
         this.layout.getLibDirectory(this.baseDir, this.artifactId, this.version, this.aol, this.type));
   }

@@ -35,24 +35,30 @@ import org.codehaus.plexus.archiver.manager.ArchiverManager;
  */
 @Mojo(name = "nar-package", defaultPhase = LifecyclePhase.PACKAGE, requiresProject = true)
 public class NarPackageMojo extends AbstractNarMojo {
-  /**
-   * To look up Archiver/UnArchiver implementations
-   */
-  @Component(role = org.codehaus.plexus.archiver.manager.ArchiverManager.class)
-  private ArchiverManager archiverManager;
 
-  /**
-   * Used for attaching the artifact in the project
-   */
-  @Component
-  private MavenProjectHelper projectHelper;
+	@Override
+	protected String getGoalName() {
+		return "nar-package";
+	}
 
-  // TODO: this is working of what is present rather than what was requested to
-  // be built, POM ~/= artifacts!
-  @Override
-  public final void narExecute() throws MojoExecutionException, MojoFailureException {
-    // let the layout decide which nars to attach
-    getLayout().attachNars(getTargetDirectory(), this.archiverManager, this.projectHelper, getMavenProject());
+	/**
+	 * To look up Archiver/UnArchiver implementations
+	 */
+	@Component(role = org.codehaus.plexus.archiver.manager.ArchiverManager.class)
+	private ArchiverManager archiverManager;
 
-  }
+	/**
+	 * Used for attaching the artifact in the project
+	 */
+	@Component
+	private MavenProjectHelper projectHelper;
+
+	// TODO: this is working of what is present rather than what was requested to
+	// be built, POM ~/= artifacts!
+	@Override
+	public final void narExecute() throws MojoExecutionException, MojoFailureException {
+		// let the layout decide which nars to attach
+		getLayout().attachNars(getTargetDirectory(), this.archiverManager, this.projectHelper, getMavenProject());
+
+	}
 }

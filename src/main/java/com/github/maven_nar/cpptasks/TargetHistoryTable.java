@@ -29,7 +29,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.Vector;
+import java.util.List;
+import java.util.ArrayList;
 
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
@@ -58,7 +59,7 @@ public final class TargetHistoryTable {
     private final Hashtable<String, TargetHistory> history;
     private String output;
     private long outputLastModified;
-    private final Vector<SourceHistory> sources = new Vector<>();
+    private final List<SourceHistory> sources = new ArrayList<>();
 
     /**
      * Constructor
@@ -99,7 +100,7 @@ public final class TargetHistoryTable {
             if (!CUtil.isSignificantlyBefore(existingLastModified, this.outputLastModified)
                 && !CUtil.isSignificantlyAfter(existingLastModified, this.outputLastModified)) {
               final SourceHistory[] sourcesArray = new SourceHistory[this.sources.size()];
-              this.sources.copyInto(sourcesArray);
+              this.sources.toArray(sourcesArray);
               final TargetHistory targetHistory = new TargetHistory(this.config, this.output, this.outputLastModified,
                   sourcesArray);
               this.history.put(this.output, targetHistory);
@@ -107,7 +108,7 @@ public final class TargetHistoryTable {
           }
         }
         this.output = null;
-        this.sources.setSize(0);
+        this.sources.clear();
       } else {
         //
         // reset config so targets not within a processor element
@@ -131,7 +132,7 @@ public final class TargetHistoryTable {
       if (qName.equals("source")) {
         final String sourceFile = atts.getValue("file");
         final long sourceLastModified = Long.parseLong(atts.getValue("lastModified"), 16);
-        this.sources.addElement(new SourceHistory(sourceFile, sourceLastModified));
+        this.sources.add(new SourceHistory(sourceFile, sourceLastModified));
       } else {
         //
         // if <target> element,
@@ -139,7 +140,7 @@ public final class TargetHistoryTable {
         // TargetHistory object will be created in endElement
         //
         if (qName.equals("target")) {
-          this.sources.setSize(0);
+          this.sources.clear();
           this.output = atts.getValue("file");
           this.outputLastModified = Long.parseLong(atts.getValue("lastModified"), 16);
         } else {
@@ -274,7 +275,7 @@ public final class TargetHistoryTable {
       writer.write(encodingName);
       writer.write("'?>\n");
       writer.write("<history>\n");
-      final StringBuffer buf = new StringBuffer(200);
+      final StringBuilder buf = new StringBuilder(200);
       final Enumeration<String> configEnum = configs.elements();
       while (configEnum.hasMoreElements()) {
         final String configId = configEnum.nextElement();

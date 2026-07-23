@@ -20,7 +20,7 @@
 package com.github.maven_nar.cpptasks.gcc;
 
 import java.io.File;
-import java.util.Vector;
+import java.util.List;
 
 import org.apache.tools.ant.types.Environment;
 import org.apache.tools.ant.util.FileUtils;
@@ -54,17 +54,17 @@ public final class WindresResourceCompiler extends CommandLineCompiler {
   }
 
   @Override
-  protected void addImpliedArgs(final Vector<String> args, final boolean debug, final boolean multithreaded,
+  protected void addImpliedArgs(final List<String> args, final boolean debug, final boolean multithreaded,
       final boolean exceptions, final LinkType linkType, final Boolean rtti, final OptimizationEnum optimization) {
     if (debug) {
-      args.addElement("-D_DEBUG");
+      args.add("-D_DEBUG");
     } else {
-      args.addElement("-DNDEBUG");
+      args.add("-DNDEBUG");
     }
   }
 
   @Override
-  protected void addWarningSwitch(final Vector args, final int level) {
+  protected void addWarningSwitch(final List<String> args, final int level) {
   }
 
   @Override
@@ -90,7 +90,7 @@ public final class WindresResourceCompiler extends CommandLineCompiler {
   }
 
   @Override
-  protected void getDefineSwitch(final StringBuffer buffer, final String define, final String value) {
+  protected void getDefineSwitch(final StringBuilder buffer, final String define, final String value) {
     buffer.append("-D");
     buffer.append(define);
     if (value != null && value.length() > 0) {
@@ -149,7 +149,7 @@ public final class WindresResourceCompiler extends CommandLineCompiler {
   }
 
   @Override
-  protected void getUndefineSwitch(final StringBuffer buffer, final String define) {
+  protected void getUndefineSwitch(final StringBuilder buffer, final String define) {
     buffer.append("-U");
     buffer.append(define);
   }

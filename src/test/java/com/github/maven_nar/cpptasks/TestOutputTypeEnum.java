@@ -19,26 +19,26 @@
  */
 package com.github.maven_nar.cpptasks;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * @author CurtA
  */
-public class TestOutputTypeEnum extends TestCase {
+public class TestOutputTypeEnum {
   /**
    * Default constructor
    * 
    * @see junit.framework.TestCase#TestCase(String)
    */
-  public TestOutputTypeEnum(final String name) {
-    super(name);
-  }
 
   /**
    * Test checks that output type enum contains "plugin"
    * 
    * See patch [ 676276 ] Enhanced support for Mac OS X
    */
+  @Test
   public void testContainsValuePlugin() {
     assertTrue(new OutputTypeEnum().containsValue("plugin"));
   }

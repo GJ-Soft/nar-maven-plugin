@@ -21,7 +21,7 @@ package com.github.maven_nar.cpptasks;
 
 import java.io.File;
 import java.util.Map;
-import java.util.Vector;
+import java.util.List;
 
 import org.apache.tools.ant.BuildException;
 
@@ -35,7 +35,7 @@ import com.github.maven_nar.cpptasks.compiler.ProcessorConfiguration;
  */
 public final class TargetMatcher implements FileVisitor {
   private final LinkerConfiguration linker;
-  private final Vector<File> objectFiles;
+  private final List<File> objectFiles;
   private final File outputDir;
   private final ProcessorConfiguration[] processors;
   private final File sourceFiles[] = new File[1];
@@ -44,7 +44,7 @@ public final class TargetMatcher implements FileVisitor {
   private final CCTask task;
 
   public TargetMatcher(final CCTask task, final File outputDir, final ProcessorConfiguration[] processors,
-      final LinkerConfiguration linker, final Vector<File> objectFiles, final Map<String, TargetInfo> targets,
+      final LinkerConfiguration linker, final List<File> objectFiles, final Map<String, TargetInfo> targets,
       final VersionInfo versionInfo) {
     this.task = task;
     this.outputDir = outputDir;
@@ -79,7 +79,7 @@ public final class TargetMatcher implements FileVisitor {
       if (this.linker != null) {
         final int linkerbid = this.linker.bid(filename);
         if (linkerbid > 0) {
-          this.objectFiles.addElement(fullPath);
+          this.objectFiles.add(fullPath);
           if (linkerbid == 1) {
             this.task.log("Unrecognized file type " + fullPath.toString() + " will be passed to linker");
           }

@@ -20,7 +20,7 @@
 package com.github.maven_nar.cpptasks.gcc;
 
 import java.io.File;
-import java.util.Vector;
+import java.util.List;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.Environment;
@@ -140,17 +140,17 @@ public final class GccCCompiler extends GccCompatibleCCompiler {
   }
 
   @Override
-  public void addImpliedArgs(final Vector args, final boolean debug, final boolean multithreaded,
+  public void addImpliedArgs(final List<String> args, final boolean debug, final boolean multithreaded,
       final boolean exceptions, final LinkType linkType, final Boolean rtti, final OptimizationEnum optimization) {
     super.addImpliedArgs(args, debug, multithreaded, exceptions, linkType, rtti, optimization);
     if (this.isPICMeaningful && linkType.isSharedLibrary()) {
-      args.addElement("-fPIC");
+      args.add("-fPIC");
     }
     // BEGINFREEHEP
     // Add -fno_rtti only for g++ and c++
     if (!getCommand().equals("g77") && !getCommand().equals("gcc") && rtti != null && !rtti.booleanValue()) {
       // Darren Sargent: fix RTTI option
-      args.addElement("-fno-rtti");
+      args.add("-fno-rtti");
     }
     // ENDFREEHEP
   }
@@ -260,11 +260,11 @@ public final class GccCCompiler extends GccCompatibleCCompiler {
   @Override
   public String getIdentifier() throws BuildException {
     if (this.identifier == null) {
-      StringBuffer buf;
+      StringBuilder buf;
       if (getLibtool()) {
-        buf = new StringBuffer("libtool ");
+        buf = new StringBuilder("libtool ");
       } else {
-        buf = new StringBuffer(" ");
+        buf = new StringBuilder(" ");
       }
       buf.append(getCommand());
       buf.append(' ');

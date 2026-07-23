@@ -25,7 +25,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.util.Vector;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.tools.ant.taskdefs.Execute;
 import org.apache.tools.ant.taskdefs.ExecuteStreamHandler;
@@ -41,14 +42,14 @@ public class CaptureStreamHandler implements ExecuteStreamHandler {
   static class Copier extends Thread {
     InputStream is;
 
-    Vector<String> lines;
+    List<String> lines;
 
     Copier(final InputStream is) {
       this.is = is;
-      this.lines = new Vector<>(10);
+      this.lines = new ArrayList<>(10);
     }
 
-    public Vector<String> getLines() {
+    public List<String> getLines() {
       return this.lines;
     }
 
@@ -61,7 +62,7 @@ public class CaptureStreamHandler implements ExecuteStreamHandler {
           if (line == null) {
             break;
           }
-          this.lines.addElement(line);
+          this.lines.add(line);
         }
       } catch (final IOException e) {
         // Ignore
@@ -132,9 +133,9 @@ public class CaptureStreamHandler implements ExecuteStreamHandler {
       errorCopier.join();
       outputCopier.join();
       this.stderr = new String[errorCopier.getLines().size()];
-      errorCopier.getLines().copyInto(this.stderr);
+      errorCopier.getLines().toArray(this.stderr);
       this.stdout = new String[outputCopier.getLines().size()];
-      outputCopier.getLines().copyInto(this.stdout);
+      outputCopier.getLines().toArray(this.stdout);
     } catch (final Exception e) {
       this.stderr = this.stdout = new String[0];
     }

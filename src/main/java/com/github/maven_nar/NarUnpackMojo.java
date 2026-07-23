@@ -32,32 +32,35 @@ import org.apache.maven.shared.artifact.filter.collection.ScopeFilter;
 
 /**
  * Unpacks NAR files needed for compilation. Unpacking happens in the project
- * target folder, and also sets flags on
- * binaries and corrects static libraries.
+ * target folder, and also sets flags on binaries and corrects static libraries.
  *
  * @author Mark Donszelmann
  */
-@Mojo(name = "nar-unpack", defaultPhase = LifecyclePhase.GENERATE_SOURCES, requiresProject = true,
-  requiresDependencyResolution = ResolutionScope.COMPILE)
+@Mojo(name = "nar-unpack", defaultPhase = LifecyclePhase.GENERATE_SOURCES, requiresProject = true, requiresDependencyResolution = ResolutionScope.COMPILE)
 public class NarUnpackMojo extends AbstractDependencyMojo {
 
-  /**
-   * List of tests to create
-   */
-  @Parameter
-  private List tests;
-  
-  /**
-   * List the dependencies needed for compilation.
-   */
-  @Override
-  protected ScopeFilter getArtifactScopeFilter() {
-    return new ScopeFilter( Artifact.SCOPE_COMPILE, null );
-  }
+	@Override
+	protected String getGoalName() {
+		return "nar-unpack";
+	}
 
-  @Override
-  public final void narExecute() throws MojoExecutionException, MojoFailureException {
-    final List<AttachedNarArtifact> attachedNarArtifacts = getAttachedNarArtifacts(libraries);
-    unpackAttachedNars(attachedNarArtifacts);
-  }
+	/**
+	 * List of tests to create
+	 */
+	@Parameter
+	private List<Test> tests;
+
+	/**
+	 * List the dependencies needed for compilation.
+	 */
+	@Override
+	protected ScopeFilter getArtifactScopeFilter() {
+		return new ScopeFilter(Artifact.SCOPE_COMPILE, null);
+	}
+
+	@Override
+	public final void narExecute() throws MojoExecutionException, MojoFailureException {
+		final List<AttachedNarArtifact> attachedNarArtifacts = getAttachedNarArtifacts(libraries);
+		unpackAttachedNars(attachedNarArtifacts);
+	}
 }

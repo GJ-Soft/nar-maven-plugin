@@ -58,6 +58,12 @@ import com.github.maven_nar.cpptasks.types.LinkerArgument;
  */
 @Mojo(name = "nar-testCompile", defaultPhase = LifecyclePhase.TEST_COMPILE, requiresDependencyResolution = ResolutionScope.TEST)
 public class NarTestCompileMojo extends AbstractCompileMojo {
+
+	@Override
+	protected String getGoalName() {
+		return "nar-testCompile";
+	}
+
 	/**
 	 * Skip running of NAR integration test plugins.
 	 */
@@ -142,8 +148,6 @@ public class NarTestCompileMojo extends AbstractCompileMojo {
 
 		// add java include paths
 		getJava().addIncludePaths(task, type);
-
-		getMsvc().configureCCTask(task);
 
 		List<NarArtifact> dependencies = getNarArtifacts();
 		List<String> linkPaths = new ArrayList<String>();

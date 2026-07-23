@@ -334,7 +334,7 @@ public class LibrarySet extends DataType {
           // Unix style linkers. Will need to revisit.
           //
           if (matches == 0 ) {
-            final StringBuffer msg = new StringBuffer("No file matching ");
+            final StringBuilder msg = new StringBuilder("No file matching ");
             if (patterns.length == 1) {
               msg.append("pattern (");
               msg.append(patterns[0]);

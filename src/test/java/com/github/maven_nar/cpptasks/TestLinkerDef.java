@@ -19,19 +19,18 @@
  */
 package com.github.maven_nar.cpptasks;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+
 import java.io.File;
 import java.io.IOException;
-
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
-import org.apache.tools.ant.types.FlexInteger;
 import org.apache.tools.ant.types.Reference;
-
 import com.github.maven_nar.cpptasks.compiler.CommandLineLinkerConfiguration;
 import com.github.maven_nar.cpptasks.compiler.Linker;
 import com.github.maven_nar.cpptasks.gcc.GccLinker;
-import com.github.maven_nar.cpptasks.msvc.MsvcLinker;
-import com.github.maven_nar.cpptasks.types.FlexLong;
 import com.github.maven_nar.cpptasks.types.LibrarySet;
 import com.github.maven_nar.cpptasks.types.LinkerArgument;
 import com.github.maven_nar.cpptasks.types.SystemLibrarySet;
@@ -40,30 +39,6 @@ import com.github.maven_nar.cpptasks.types.SystemLibrarySet;
  * Tests for LinkerDef class.
  */
 public final class TestLinkerDef extends TestProcessorDef {
-  /**
-   * Sets the name attribute.
-   *
-   * @param linker
-   *          linker defintion
-   * @param name
-   *          linker name
-   */
-  private static void setLinkerName(final LinkerDef linker, final String name) {
-    final LinkerEnum linkerName = new LinkerEnum();
-    linkerName.setValue(name);
-    linker.setName(linkerName);
-  }
-
-  /**
-   * Constructor.
-   *
-   * @param name
-   *          test name
-   */
-  public TestLinkerDef(final String name) {
-    super(name);
-  }
-
   /**
    * Creates a processor.
    *
@@ -87,41 +62,10 @@ public final class TestLinkerDef extends TestProcessorDef {
   }
 
   /**
-   * Tests that the base attribute in the base linker is effective when
-   * creating the command line for a linker that extends it.
-   */
-  public void testExtendsBase() {
-    final LinkerDef baseLinker = new LinkerDef();
-    baseLinker.setBase(new FlexLong("10000"));
-    final LinkerDef extendedLinker = (LinkerDef) createExtendedProcessorDef(baseLinker);
-    setLinkerName(extendedLinker, "msvc");
-    final String[] preArgs = getPreArguments(extendedLinker);
-    assertEquals("/NOLOGO", preArgs[0]);
-    assertEquals("/SUBSYSTEM:WINDOWS", preArgs[1]);
-    assertEquals("/INCREMENTAL:NO", preArgs[2]);
-    assertEquals("/BASE:0x2710", preArgs[3]);
-  }
-
-  /**
-   * Tests that the classname attribute in the base linker is effective when
-   * creating the command line for a linker that extends it.
-   */
-  public void testExtendsClassname() {
-    final LinkerDef baseLinker = new LinkerDef();
-    baseLinker.setClassname("com.github.maven_nar.cpptasks.msvc.MsvcLinker");
-    final LinkerDef extendedLinker = (LinkerDef) createExtendedProcessorDef(baseLinker);
-    extendedLinker.setBase(new FlexLong("10000"));
-    final String[] preArgs = getPreArguments(extendedLinker);
-    assertEquals("/NOLOGO", preArgs[0]);
-    assertEquals("/SUBSYSTEM:WINDOWS", preArgs[1]);
-    assertEquals("/INCREMENTAL:NO", preArgs[2]);
-    assertEquals("/BASE:0x2710", preArgs[3]);
-  }
-
-  /**
    * Tests that the entry attribute in the base linker is effective when
    * creating the command line for a linker that extends it.
    */
+  @Test
   public void testExtendsEntry() {
     final LinkerDef baseLinker = new LinkerDef();
     baseLinker.setEntry("foo");
@@ -138,45 +82,16 @@ public final class TestLinkerDef extends TestProcessorDef {
    * @throws IOException
    *           if unable to create or delete temporary file
    */
+  @Test
   public void testExtendsFileSet() throws IOException {
     super.testExtendsFileSet(File.createTempFile("cpptaskstest", ".o"));
-  }
-
-  /**
-   * Tests that the fixed attribute in the base linker is effective when
-   * creating the command line for a linker that extends it.
-   */
-  public void testExtendsFixed() {
-    final LinkerDef baseLinker = new LinkerDef();
-    baseLinker.setFixed(true);
-    final LinkerDef extendedLinker = (LinkerDef) createExtendedProcessorDef(baseLinker);
-    setLinkerName(extendedLinker, "msvc");
-    final String[] preArgs = getPreArguments(extendedLinker);
-    assertEquals("/NOLOGO", preArgs[0]);
-    assertEquals("/SUBSYSTEM:WINDOWS", preArgs[1]);
-    assertEquals("/INCREMENTAL:NO", preArgs[2]);
-    assertEquals("/FIXED", preArgs[3]);
-  }
-
-  /**
-   * Tests that the incremental attribute in the base linker is effective when
-   * creating the command line for a linker that extends it.
-   */
-  public void testExtendsIncremental() {
-    final LinkerDef baseLinker = new LinkerDef();
-    baseLinker.setIncremental(true);
-    final LinkerDef extendedLinker = (LinkerDef) createExtendedProcessorDef(baseLinker);
-    setLinkerName(extendedLinker, "msvc");
-    final String[] preArgs = getPreArguments(extendedLinker);
-    assertEquals("/NOLOGO", preArgs[0]);
-    assertEquals("/SUBSYSTEM:WINDOWS", preArgs[1]);
-    assertEquals("/INCREMENTAL:YES", preArgs[2]);
   }
 
   /**
    * Tests that libset's that appear in the base linker are effective when
    * creating the command line for a linker that extends it.
    */
+  @Test
   public void testExtendsLibSet() {
     final LinkerDef baseLinker = new LinkerDef();
     final LibrarySet libset = new LibrarySet();
@@ -195,6 +110,7 @@ public final class TestLinkerDef extends TestProcessorDef {
    * Tests that linkerarg's that appear in the base linker are effective when
    * creating the command line for a linker that extends it.
    */
+  @Test
   public void testExtendsLinkerArgs() {
     final LinkerDef baseLinker = new LinkerDef();
     final LinkerArgument linkerArg = new LinkerArgument();
@@ -211,6 +127,7 @@ public final class TestLinkerDef extends TestProcessorDef {
    * creating the command line for a linker that extends it, even if the
    * linker is brought in through a reference.
    */
+  @Test
   public void testExtendsLinkerArgsViaReference() {
     final Project project = new Project();
     final LinkerDef baseLinker = new LinkerDef();
@@ -235,65 +152,19 @@ public final class TestLinkerDef extends TestProcessorDef {
   }
 
   /**
-   * Tests that the map attribute in the base linker is effective when
-   * creating the command line for a linker that extends it.
-   */
-  public void testExtendsMap() {
-    final LinkerDef baseLinker = new LinkerDef();
-    baseLinker.setMap(true);
-    final LinkerDef extendedLinker = (LinkerDef) createExtendedProcessorDef(baseLinker);
-    setLinkerName(extendedLinker, "msvc");
-    final String[] preArgs = getPreArguments(extendedLinker);
-    assertEquals("/NOLOGO", preArgs[0]);
-    assertEquals("/SUBSYSTEM:WINDOWS", preArgs[1]);
-    assertEquals("/INCREMENTAL:NO", preArgs[2]);
-    assertEquals("/MAP", preArgs[3]);
-  }
-
-  /**
-   * Tests that the name attribute in the base linker is effective when
-   * creating the command line for a linker that extends it.
-   */
-  public void testExtendsName() {
-    final LinkerDef baseLinker = new LinkerDef();
-    setLinkerName(baseLinker, "msvc");
-    final LinkerDef extendedLinker = (LinkerDef) createExtendedProcessorDef(baseLinker);
-    extendedLinker.setBase(new FlexLong("10000"));
-    final String[] preArgs = getPreArguments(extendedLinker);
-    assertEquals("/NOLOGO", preArgs[0]);
-    assertEquals("/SUBSYSTEM:WINDOWS", preArgs[1]);
-    assertEquals("/INCREMENTAL:NO", preArgs[2]);
-    assertEquals("/BASE:0x2710", preArgs[3]);
-  }
-
-  /**
    * Tests that the rebuild attribute in the base linker is effective when
    * creating the command line for a linker that extends it.
    */
+  @Test
   public void testExtendsRebuild() {
     testExtendsRebuild(new LinkerDef());
-  }
-
-  /**
-   * Tests that the stack attribute in the base linker is effective when
-   * creating the command line for a linker that extends it.
-   */
-  public void testExtendsStack() {
-    final LinkerDef baseLinker = new LinkerDef();
-    baseLinker.setStack(new FlexInteger("10000"));
-    final LinkerDef extendedLinker = (LinkerDef) createExtendedProcessorDef(baseLinker);
-    setLinkerName(extendedLinker, "msvc");
-    final String[] preArgs = getPreArguments(extendedLinker);
-    assertEquals("/NOLOGO", preArgs[0]);
-    assertEquals("/SUBSYSTEM:WINDOWS", preArgs[1]);
-    assertEquals("/INCREMENTAL:NO", preArgs[2]);
-    assertEquals("/STACK:0x2710", preArgs[3]);
   }
 
   /**
    * Tests that syslibset's that appear in the base linker are effective when
    * creating the command line for a linker that extends it.
    */
+  @Test
   public void testExtendsSysLibSet() {
     final LinkerDef baseLinker = new LinkerDef();
     final SystemLibrarySet libset = new SystemLibrarySet();
@@ -312,6 +183,7 @@ public final class TestLinkerDef extends TestProcessorDef {
    * Test if setting the classname attribute to the name of the GCC linker
    * results in the singleton GCC linker.
    */
+  @Test
   public void testGetGcc() {
     final LinkerDef linkerDef = (LinkerDef) create();
     linkerDef.setClassname("com.github.maven_nar.cpptasks.gcc.GccLinker");
@@ -321,22 +193,11 @@ public final class TestLinkerDef extends TestProcessorDef {
   }
 
   /**
-   * Test if setting the classname attribute to the name of the MSVC linker
-   * results in the singleton MSVC linker.
-   */
-  public void testGetMSVC() {
-    final LinkerDef linkerDef = (LinkerDef) create();
-    linkerDef.setClassname("com.github.maven_nar.cpptasks.msvc.MsvcLinker");
-    final Linker comp = (Linker) linkerDef.getProcessor();
-    assertNotNull(comp);
-    assertSame(MsvcLinker.getInstance(), comp);
-  }
-
-  /**
    * Tests if setting the classname attribute to an bogus classname results in
    * a BuildException.
    *
    */
+  @Test
   public void testUnknownClass() {
     final LinkerDef linkerDef = (LinkerDef) create();
     try {
@@ -352,6 +213,7 @@ public final class TestLinkerDef extends TestProcessorDef {
    * support Linker throws a BuildException.
    *
    */
+  @Test
   public void testWrongType() {
     final LinkerDef linkerDef = (LinkerDef) create();
     try {

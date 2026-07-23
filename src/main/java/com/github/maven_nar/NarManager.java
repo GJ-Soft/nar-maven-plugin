@@ -21,14 +21,13 @@ package com.github.maven_nar;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.JarFile;
 
+import org.apache.maven.RepositoryUtils;
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.artifact.repository.ArtifactRepository;
-import org.apache.maven.artifact.resolver.ArtifactNotFoundException;
-import org.apache.maven.artifact.resolver.ArtifactResolutionException;
 import org.apache.maven.artifact.resolver.ArtifactResolver;
 import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -36,6 +35,12 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.archiver.manager.ArchiverManager;
+import org.eclipse.aether.RepositorySystem;
+import org.eclipse.aether.RepositorySystemSession;
+import org.eclipse.aether.repository.LocalRepository;
+import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.resolution.ArtifactRequest;
+import org.eclipse.aether.resolution.ArtifactResult;
 
 /**
  * @author Mark Donszelmann (Mark.Donszelmann@gmail.com)
@@ -46,27 +51,33 @@ public class NarManager {
 
 	private final MavenProject project;
 
-	private final ArtifactRepository repository;
+	private final LocalRepository repository;
 
 	private final AOL defaultAOL;
 
 	private final String linkerName;
 
+	private RepositorySystem repoSystem;
+
+	private RepositorySystemSession repoSession;
+
 	private final String[] narTypes = { NarConstants.NAR_NO_ARCH, Library.STATIC, Library.SHARED, Library.JNI,
 			Library.PLUGIN };
 
-	public NarManager(final Log log, final ArtifactRepository repository, final MavenProject project,
-			final String architecture, final String os, final Linker linker)
-			throws MojoFailureException, MojoExecutionException {
+	public NarManager(final Log log, final LocalRepository repository, final MavenProject project,
+			final String architecture, final String os, final Linker linker, final RepositorySystem repoSystem,
+			final RepositorySystemSession repoSession) throws MojoFailureException, MojoExecutionException {
 		this.log = log;
 		this.repository = repository;
 		this.project = project;
 		this.defaultAOL = NarUtil.getAOL(project, architecture, os, linker, null, log);
 		this.linkerName = NarUtil.getLinkerName(project, architecture, os, linker, log);
+		this.repoSession = repoSession;
+		this.repoSystem = repoSystem;
 	}
 
 	public final void downloadAttachedNars(final List<Artifact> narArtifacts,
-			final List<ArtifactRepository> remoteRepositories, final ArtifactResolver resolver, final String classifier)
+			final List<RemoteRepository> remoteRepositories, final ArtifactResolver resolver, final String classifier)
 			throws MojoExecutionException, MojoFailureException {
 		// FIXME this may not be the right way to do this.... -U ignored and
 		// also SNAPSHOT not used
@@ -82,11 +93,15 @@ public class NarManager {
 			final Artifact dependency = (Artifact) dependency1;
 			try {
 				this.log.debug("Resolving " + dependency);
-				resolver.resolve(dependency, remoteRepositories, this.repository);
-			} catch (final ArtifactNotFoundException e) {
-				final String message = "nar not found " + dependency.getId();
-				throw new MojoExecutionException(message, e);
-			} catch (final ArtifactResolutionException e) {
+				ArtifactRequest request = new ArtifactRequest(RepositoryUtils.toArtifact(dependency),
+						remoteRepositories, null);
+				ArtifactResult result = repoSystem.resolveArtifact(repoSession, request);
+				this.log.debug("Result=" + result.isResolved());
+				if (!result.isResolved()) {
+					final String message = "nar missing artifact " + dependency.getId();
+					throw new MojoExecutionException(message);
+				}
+			} catch (final org.eclipse.aether.resolution.ArtifactResolutionException e) {
 				final String message = "nar cannot resolve " + dependency.getId();
 				throw new MojoExecutionException(message, e);
 			}
@@ -186,7 +201,7 @@ public class NarManager {
 		return artifactList;
 	}
 
-	public final List<AttachedNarArtifact> getAttachedNarDependencies(final List<Artifact> narArtifacts,
+	public final List<AttachedNarArtifact> getAttachedNarDependencies(final List<? extends Artifact> narArtifacts,
 			final String classifier) throws MojoExecutionException, MojoFailureException {
 		AOL aol = null;
 		String type = null;
@@ -223,8 +238,11 @@ public class NarManager {
 		// FIXME reported to maven developer list, isSnapshot changes behaviour
 		// of getBaseVersion, called in pathOf.
 		dependency.isSnapshot();
-		return new File(this.repository.getBasedir(),
-				NarUtil.replace("${aol}", this.defaultAOL.toString(), this.repository.pathOf(dependency)));
+		Path path = repoSession.getLocalRepositoryManager()
+				.getAbsolutePathForLocalArtifact(RepositoryUtils.toArtifact(dependency));
+		final File file = new File(
+				NarUtil.replace("${aol}", this.defaultAOL.toString(), path.toFile().getAbsolutePath()));
+		return file;
 	}
 
 	public final NarInfo getNarInfo(final Artifact dependency) throws MojoExecutionException {
@@ -232,7 +250,9 @@ public class NarManager {
 		// of getBaseVersion, called in pathOf.
 		dependency.isSnapshot();
 
-		final File file = new File(this.repository.getBasedir(), this.repository.pathOf(dependency));
+		Path path = repoSession.getLocalRepositoryManager()
+				.getAbsolutePathForLocalArtifact(RepositoryUtils.toArtifact(dependency));
+		final File file = new File(path.toFile().getAbsolutePath());
 		if (!file.exists()) {
 			return null;
 		}

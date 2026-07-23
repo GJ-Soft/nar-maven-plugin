@@ -38,172 +38,175 @@ import org.codehaus.plexus.util.FileUtils;
 @Mojo(name = "nar-gnu-configure", requiresProject = true, defaultPhase = LifecyclePhase.PROCESS_SOURCES)
 public class NarGnuConfigureMojo extends AbstractGnuMojo {
 
-  private static final String AUTOGEN = "autogen.sh";
+	private static final String AUTOGEN = "autogen.sh";
 
-  private static final String BUILDCONF = "buildconf";
+	private static final String BUILDCONF = "buildconf";
 
-  private static final String CONFIGURE = "configure";
+	private static final String CONFIGURE = "configure";
 
-  // JDK 1.4 compatibility
-  private static String arraysToString(final Object[] a) {
-    if (a == null) {
-      return "null";
-    }
-    final int iMax = a.length - 1;
-    if (iMax == -1) {
-      return "[]";
-    }
+	@Override
+	protected String getGoalName() {
+		return "nar-gnu-configure";
+	}
 
-    final StringBuilder b = new StringBuilder();
-    b.append('[');
-    for (int i = 0;; i++) {
-      b.append(String.valueOf(a[i]));
-      if (i == iMax) {
-        return b.append(']').toString();
-      }
-      b.append(", ");
-    }
-  }
+	// JDK 1.4 compatibility
+	private static String arraysToString(final Object[] a) {
+		if (a == null) {
+			return "null";
+		}
+		final int iMax = a.length - 1;
+		if (iMax == -1) {
+			return "[]";
+		}
 
-  /**
-   * If true, we run <code>./configure</code> in the source directory instead of
-   * copying the
-   * source code to the <code>target/</code> directory first (this saves disk
-   * space but
-   * violates Maven's paradigm of keeping generated files inside the
-   * <code>target/</code> directory structure.
-   */
-  @Parameter(property = "nar.gnu.configure.in-place")
-  private boolean gnuConfigureInPlace;
+		final StringBuilder b = new StringBuilder();
+		b.append('[');
+		for (int i = 0;; i++) {
+			b.append(String.valueOf(a[i]));
+			if (i == iMax) {
+				return b.append(']').toString();
+			}
+			b.append(", ");
+		}
+	}
 
-  /**
-   * Skip running of autogen.sh (aka buildconf).
-   */
-  @Parameter(property = "nar.gnu.autogen.skip")
-  private boolean gnuAutogenSkip;
+	/**
+	 * If true, we run <code>./configure</code> in the source directory instead of
+	 * copying the source code to the <code>target/</code> directory first (this
+	 * saves disk space but violates Maven's paradigm of keeping generated files
+	 * inside the <code>target/</code> directory structure.
+	 */
+	@Parameter(property = "nar.gnu.configure.in-place")
+	private boolean gnuConfigureInPlace;
 
-  /**
-   * Skip running of configure and therefore also autogen.sh
-   */
-  @Parameter(property = "nar.gnu.configure.skip")
-  private boolean gnuConfigureSkip;
+	/**
+	 * Skip running of autogen.sh (aka buildconf).
+	 */
+	@Parameter(property = "nar.gnu.autogen.skip")
+	private boolean gnuAutogenSkip;
 
-  /**
-   * Arguments to pass to GNU configure.
-   */
-  @Parameter(property = "nar.gnu.configure.args", defaultValue = "")
-  private String gnuConfigureArgs;
+	/**
+	 * Skip running of configure and therefore also autogen.sh
+	 */
+	@Parameter(property = "nar.gnu.configure.skip")
+	private boolean gnuConfigureSkip;
 
-  /**
-   * Arguments to pass to GNU buildconf.
-   */
-  @Parameter(property = "nar.gnu.buildconf.args", defaultValue = "")
-  private String gnuBuildconfArgs;
+	/**
+	 * Arguments to pass to GNU configure.
+	 */
+	@Parameter(property = "nar.gnu.configure.args", defaultValue = "")
+	private String gnuConfigureArgs;
 
-  public NarGnuConfigureMojo() {
-  }
+	/**
+	 * Arguments to pass to GNU buildconf.
+	 */
+	@Parameter(property = "nar.gnu.buildconf.args", defaultValue = "")
+	private String gnuBuildconfArgs;
 
-  @Override
-  public final void narExecute() throws MojoExecutionException, MojoFailureException {
+	public NarGnuConfigureMojo() {
+	}
 
-    if (!useGnu()) {
-      return;
-    }
+	@Override
+	public final void narExecute() throws MojoExecutionException, MojoFailureException {
 
-    final File sourceDir = getGnuSourceDirectory();
-    if (sourceDir.exists()) {
-      File targetDir;
+		if (!useGnu()) {
+			return;
+		}
 
-      if (!this.gnuConfigureInPlace) {
-        targetDir = getGnuAOLSourceDirectory();
+		final File sourceDir = getGnuSourceDirectory();
+		if (sourceDir.exists()) {
+			File targetDir;
 
-        getLog().info("Copying GNU sources");
+			if (!this.gnuConfigureInPlace) {
+				targetDir = getGnuAOLSourceDirectory();
 
-        try {
-          FileUtils.mkdir(targetDir.getPath());
-          NarUtil.copyDirectoryStructure(sourceDir, targetDir, null, null);
-        } catch (final IOException e) {
-          throw new MojoExecutionException("Failed to copy GNU sources", e);
-        }
+				getLog().info("Copying GNU sources");
 
-        if (!this.gnuConfigureSkip && !this.gnuAutogenSkip) {
-          final File autogen = new File(targetDir, AUTOGEN);
-          final File buildconf = new File(targetDir, BUILDCONF);
-          if (autogen.exists()) {
-            getLog().info("Running GNU " + AUTOGEN);
-            runAutogen(autogen, targetDir, null);
-          } else if (buildconf.exists()) {
-            getLog().info("Running GNU " + BUILDCONF);
-            String gnuBuildconfArgsArray[] = null;
-            if (this.gnuBuildconfArgs != null) {
-              gnuBuildconfArgsArray = this.gnuBuildconfArgs.split("\\s");
-            }
-            runAutogen(buildconf, targetDir, gnuBuildconfArgsArray);
-          }
-        }
-      } else {
-        targetDir = sourceDir;
-      }
+				try {
+					FileUtils.mkdir(targetDir.getPath());
+					NarUtil.copyDirectoryStructure(sourceDir, targetDir, null, null);
+				} catch (final IOException e) {
+					throw new MojoExecutionException("Failed to copy GNU sources", e);
+				}
 
-      final File configure = new File(targetDir, CONFIGURE);
-      if (!this.gnuConfigureSkip && configure.exists()) {
-        getLog().info("Running GNU " + CONFIGURE);
+				if (!this.gnuConfigureSkip && !this.gnuAutogenSkip) {
+					final File autogen = new File(targetDir, AUTOGEN);
+					final File buildconf = new File(targetDir, BUILDCONF);
+					if (autogen.exists()) {
+						getLog().info("Running GNU " + AUTOGEN);
+						runAutogen(autogen, targetDir, null);
+					} else if (buildconf.exists()) {
+						getLog().info("Running GNU " + BUILDCONF);
+						String gnuBuildconfArgsArray[] = null;
+						if (this.gnuBuildconfArgs != null) {
+							gnuBuildconfArgsArray = this.gnuBuildconfArgs.split("\\s");
+						}
+						runAutogen(buildconf, targetDir, gnuBuildconfArgsArray);
+					}
+				}
+			} else {
+				targetDir = sourceDir;
+			}
 
-        NarUtil.makeExecutable(configure, getLog());
-        String[] args = null;
+			final File configure = new File(targetDir, CONFIGURE);
+			if (!this.gnuConfigureSkip && configure.exists()) {
+				getLog().info("Running GNU " + CONFIGURE);
 
-        // create the array to hold constant and additional args
-        if (this.gnuConfigureArgs != null) {
-          final String[] a = this.gnuConfigureArgs.split(" ");
-          args = new String[a.length + 2];
+				NarUtil.makeExecutable(configure, getLog());
+				String[] args = null;
 
-          System.arraycopy(a, 0, args, 2, a.length);
-        } else {
-          args = new String[2];
-        }
+				// create the array to hold constant and additional args
+				if (this.gnuConfigureArgs != null) {
+					final String[] a = this.gnuConfigureArgs.split(" ");
+					args = new String[a.length + 2];
 
-        // first 2 args are constant
-        args[0] = configure.getAbsolutePath();
-        args[1] = "--prefix=" + getGnuAOLTargetDirectory().getAbsolutePath();
+					System.arraycopy(a, 0, args, 2, a.length);
+				} else {
+					args = new String[2];
+				}
 
-        final File buildDir = getGnuAOLSourceDirectory();
-        FileUtils.mkdir(buildDir.getPath());
+				// first 2 args are constant
+				args[0] = configure.getAbsolutePath();
+				args[1] = "--prefix=" + getGnuAOLTargetDirectory().getAbsolutePath();
 
-        getLog().info("args: " + arraysToString(args));
-        final int result = NarUtil.runCommand("sh", args, buildDir, null, getLog());
-        if (result != 0) {
-          throw new MojoExecutionException("'" + CONFIGURE + "' errorcode: " + result);
-        }
-      }
-    }
-  }
+				final File buildDir = getGnuAOLSourceDirectory();
+				FileUtils.mkdir(buildDir.getPath());
 
-  private void runAutogen(final File autogen, final File targetDir, final String args[])
-      throws MojoExecutionException, MojoFailureException {
-    // fix missing config directory
-    final File configDir = new File(targetDir, "config");
-    if (!configDir.exists()) {
-      configDir.mkdirs();
-    }
+				getLog().info("args: " + arraysToString(args));
+				final int result = NarUtil.runCommand("sh", args, buildDir, null, getLog());
+				if (result != 0) {
+					throw new MojoExecutionException("'" + CONFIGURE + "' errorcode: " + result);
+				}
+			}
+		}
+	}
 
-    NarUtil.makeExecutable(autogen, getLog());
-    getLog().debug("running sh ./" + autogen.getName());
+	private void runAutogen(final File autogen, final File targetDir, final String args[])
+			throws MojoExecutionException, MojoFailureException {
+		// fix missing config directory
+		final File configDir = new File(targetDir, "config");
+		if (!configDir.exists()) {
+			configDir.mkdirs();
+		}
 
-    String arguments[] = null;
-    if (args != null) {
-      arguments = new String[1 + args.length];
-      System.arraycopy(args, 0, arguments, 1, args.length);
-    } else {
-      arguments = new String[1];
-    }
-    arguments[0] = "./" + autogen.getName();
+		NarUtil.makeExecutable(autogen, getLog());
+		getLog().debug("running sh ./" + autogen.getName());
 
-    getLog().info("args: " + arraysToString(arguments));
+		String arguments[] = null;
+		if (args != null) {
+			arguments = new String[1 + args.length];
+			System.arraycopy(args, 0, arguments, 1, args.length);
+		} else {
+			arguments = new String[1];
+		}
+		arguments[0] = "./" + autogen.getName();
 
-    final int result = NarUtil.runCommand("sh", arguments, targetDir, null, getLog());
-    if (result != 0) {
-      throw new MojoExecutionException("'" + autogen.getName() + "' errorcode: " + result);
-    }
-  }
+		getLog().info("args: " + arraysToString(arguments));
+
+		final int result = NarUtil.runCommand("sh", arguments, targetDir, null, getLog());
+		if (result != 0) {
+			throw new MojoExecutionException("'" + autogen.getName() + "' errorcode: " + result);
+		}
+	}
 
 }

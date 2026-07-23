@@ -53,7 +53,6 @@ import com.github.maven_nar.cpptasks.LinkerDef;
 import com.github.maven_nar.cpptasks.OutputTypeEnum;
 import com.github.maven_nar.cpptasks.RuntimeType;
 import com.github.maven_nar.cpptasks.SubsystemEnum;
-import com.github.maven_nar.cpptasks.VersionInfo;
 import com.github.maven_nar.cpptasks.types.LibrarySet;
 import com.github.maven_nar.cpptasks.types.LinkerArgument;
 
@@ -65,6 +64,12 @@ import com.github.maven_nar.cpptasks.types.LinkerArgument;
  */
 @Mojo(name = "nar-compile", defaultPhase = LifecyclePhase.COMPILE, requiresProject = true, requiresDependencyResolution = ResolutionScope.COMPILE)
 public class NarCompileMojo extends AbstractCompileMojo {
+
+	@Override
+	protected String getGoalName() {
+		return "nar-compile";
+	}
+
 	/**
 	 * Specify that the final manifest should be embedded in the output (default
 	 * true) or false for side by side.
@@ -237,26 +242,8 @@ public class NarCompileMojo extends AbstractCompileMojo {
 			}
 		}
 
-		// Add VersionInfo for the Windows binaries
-		if (getOS().equals(OS.WINDOWS) && getLinker().getName(null, null).equals("msvc")) {
-			NARVersionInfo narVersioninfo = getNARVersionInfo();
-			if (narVersioninfo != null) {
-
-				VersionInfo versionInfo = narVersioninfo.getVersionInfo(getAntProject());
-
-				if (versionInfo != null) {
-					task.addConfiguredVersioninfo(versionInfo);
-
-				}
-			}
-		}
-
-		// end Darren
-
 		// add java include paths
 		getJava().addIncludePaths(task, type);
-
-		getMsvc().configureCCTask(task);
 
 		final List<NarArtifact> dependencies = getNarArtifacts();
 		List<String> linkPaths = new ArrayList<String>();
@@ -445,56 +432,6 @@ public class NarCompileMojo extends AbstractCompileMojo {
 			throw new MojoExecutionException("NAR: Compile failed", e);
 		}
 
-		// FIXME, this should be done in CPPTasks at some point
-		// getRuntime(getAOL()).equals("dynamic") &&
-		if ((isEmbedManifest() || getLinker().isGenerateManifest()) && getOS().equals(OS.WINDOWS)
-				&& getLinker().getName().equals("msvc") && !getLinker().getVersion(this).startsWith("6.")) {
-			final String[] env = new String[] { "PATH=" + getMsvc().getPathVariable().getValue() };
-			final String libType = library.getType();
-			if (Library.JNI.equals(libType) || Library.SHARED.equals(libType) || Library.EXECUTABLE.equals(libType)) {
-				Vector<String> commandlineArgs = new Vector<>();
-				commandlineArgs.add("/manifest");
-				getManifests(outFile.getPath(), commandlineArgs);
-				if (commandlineArgs.size() == 1) {
-					if (isEmbedManifest())
-						getLog().warn("Embed manifest requested, no source manifests to embed, no manifest generated");
-				} else {
-					if (Library.JNI.equals(libType) || Library.SHARED.equals(libType)) {
-						String dll = outFile.getPath() + ".dll";
-						if (isEmbedManifest()) {
-							commandlineArgs.add("/outputresource:" + dll + ";#2");
-						} else {
-							commandlineArgs.add("/out:" + dll + ".manifest");
-						}
-					} else // if (Library.EXECUTABLE.equals( libType ))
-					{
-						String exe = outFile.getPath() + ".exe";
-						if (isEmbedManifest()) {
-							commandlineArgs.add("/outputresource:" + exe + ";#1");
-						} else {
-							commandlineArgs.add("/out:" + exe + ".manifest");
-						}
-					}
-					String[] commandlineArgsArray = commandlineArgs.toArray(new String[0]);
-					String mtexe = "mt.exe";
-					if (getMsvc().compareVersion(getMsvc().getWindowsSdkVersion(), "7.0") < 0
-							&& getLinker().getVersion(this).startsWith("8.")) { // VS2005 VC8 only one that includes
-																				// mt.exe
-						File mtexeFile = new File(getMsvc().getToolPath(), mtexe);
-						if (mtexeFile.exists())
-							mtexe = mtexeFile.getAbsolutePath();
-					} else {
-						File mtexeFile = new File(getMsvc().getSDKToolPath(), mtexe);
-						if (mtexeFile.exists())
-							mtexe = mtexeFile.getAbsolutePath();
-					}
-					int result = NarUtil.runCommand(mtexe, commandlineArgsArray, null, null, getLog());
-					if (result != 0) {
-						throw new MojoFailureException("MT.EXE failed with exit code: " + result);
-					}
-				}
-			}
-		}
 		if (getOS().equals(OS.WINDOWS) && Library.STATIC.equals(library.getType())) { // option? should debug symbols
 																						// always be provided.
 			getLog().debug("Copy static pdbs from intermediat dir to " + task.getOutfile().getParentFile());

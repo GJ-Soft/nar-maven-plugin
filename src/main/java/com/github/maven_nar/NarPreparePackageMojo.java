@@ -27,7 +27,6 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.List;
-import java.util.Scanner;
 import java.util.Set;
 
 import org.apache.maven.artifact.Artifact;
@@ -43,118 +42,125 @@ import org.apache.maven.shared.artifact.filter.collection.ScopeFilter;
  * 
  * @author GDomjan
  */
-@Mojo(name = "nar-prepare-package", defaultPhase = LifecyclePhase.PREPARE_PACKAGE, 
-  requiresProject = true, requiresDependencyResolution = ResolutionScope.COMPILE)
+@Mojo(name = "nar-prepare-package", defaultPhase = LifecyclePhase.PREPARE_PACKAGE, requiresProject = true, requiresDependencyResolution = ResolutionScope.COMPILE)
 public class NarPreparePackageMojo extends AbstractCompileMojo {
 
-  // TODO: this is working of what is present rather than what was requested to
-  // be built, POM ~/= artifacts!
-  @Override
-  public final void narExecute() throws MojoExecutionException, MojoFailureException {
-    // let the layout decide which (additional) nars to attach
-    getLayout().prepareNarInfo(getTargetDirectory(), getMavenProject(), getNarInfo(), this);
-    getNarInfo().writeToDirectory(this.classesDirectory);
+	@Override
+	protected String getGoalName() {
+		return "nar-prepare-package";
+	}
 
-    final String artifactIdVersion = getMavenProject().getArtifactId() + "-" + getMavenProject().getVersion();
+	// TODO: this is working of what is present rather than what was requested to
+	// be built, POM ~/= artifacts!
+	@Override
+	public final void narExecute() throws MojoExecutionException, MojoFailureException {
+		// let the layout decide which (additional) nars to attach
+		getLayout().prepareNarInfo(getTargetDirectory(), getMavenProject(), getNarInfo(), this);
+		getNarInfo().writeToDirectory(this.classesDirectory);
 
-    // Scan target directory to identify project classifier directories, skipping noarch
-    File[] files = getTargetDirectory().listFiles(new FileFilter() {
-      @Override
-      public boolean accept(File file) {
-        return file.getName().startsWith(artifactIdVersion) && (!file.getName().endsWith(NarConstants.NAR_NO_ARCH));
-      }
-    });
-    
-    // Write nar info to project classifier directories
-    getNarInfo().writeToDirectory(files);
-    
-    // process the replay files here
-    if (replay != null && replay.getScripts() != null && !replay.getScripts().isEmpty()) {
+		final String artifactIdVersion = getMavenProject().getArtifactId() + "-" + getMavenProject().getVersion();
 
-      File compileCommandsInFile = new File(replay.getOutputDirectory(), NarConstants.REPLAY_COMPILE_NAME);
-      File linkCommandsInputInFile = new File(replay.getOutputDirectory(), NarConstants.REPLAY_LINK_NAME);
-      File testCompileCommandsInFile = new File(replay.getOutputDirectory(), NarConstants.REPLAY_TEST_COMPILE_NAME);
-      File testLinkCommandsInFile = new File(replay.getOutputDirectory(), NarConstants.REPLAY_TEST_LINK_NAME);
-      try {
-        List<String> compileCommands = Files.readAllLines(compileCommandsInFile.toPath());
-        List<String> linkCommands = Files.readAllLines(linkCommandsInputInFile.toPath());
-        
-        List<String> testCompileCommands = null;
-        List<String> testLinkCommands = null;
-        if (!this.skipTests) {
-          testCompileCommands = Files.readAllLines(testCompileCommandsInFile.toPath());
-          testLinkCommands = Files.readAllLines(testLinkCommandsInFile.toPath());
-        }
-        
-        for (Script script : replay.getScripts()) {
+		// Scan target directory to identify project classifier directories, skipping
+		// noarch
+		File[] files = getTargetDirectory().listFiles(new FileFilter() {
+			@Override
+			public boolean accept(File file) {
+				return file.getName().startsWith(artifactIdVersion)
+						&& (!file.getName().endsWith(NarConstants.NAR_NO_ARCH));
+			}
+		});
 
-          File scriptFile = new File(replay.getScriptDirectory(), script.getId() + "." + script.getExtension());
+		// Write nar info to project classifier directories
+		getNarInfo().writeToDirectory(files);
 
-          try (PrintWriter writer = new PrintWriter(new FileWriter(scriptFile))) {
-            
-            for (String header : script.getHeaders()) {
-              writer.println(header);
-            }
-            
-            if (script.isCompile()) {
-              writer.println();
-              processReplayFile(compileCommands, script, writer);
-              getLog().info("Wrote compile commands to file: " + scriptFile);
-            }
-            
-            if (script.isLink()) {
-              writer.println();
-              processReplayFile(linkCommands, script, writer);
-              getLog().info("Wrote link commands to file: " + scriptFile);
-            }
-            
-            if (script.testCompile && !this.skipTests) {
-              writer.println();
-              processReplayFile(testCompileCommands, script, writer);
-              getLog().info("Wrote test compile commands to file: " + scriptFile);
-            }
-            
-            if (script.isTestLink() && !this.skipTests) {
-              writer.println();
-              processReplayFile(testLinkCommands, script, writer);
-              getLog().info("Wrote test link commands to file: " + scriptFile);
-            }
-            
-            for (String footer : script.getFooters()) {
-              writer.println(footer);
-            }
+		// process the replay files here
+		if (replay != null && replay.getScripts() != null && !replay.getScripts().isEmpty()) {
 
-            Set<PosixFilePermission> perms = NarUtil.parseOctalPermission(script.getMode());
-            Files.setPosixFilePermissions(scriptFile.toPath(), perms);
-          }
-          catch (IOException e) {
-          throw new MojoExecutionException("Unable to write replay script to " + scriptFile, e);
-        }
-        }
-      } catch (IOException e) {
-        throw new MojoExecutionException("Unable to read command history", e);
-      }
-    }
-  }
+			File compileCommandsInFile = new File(replay.getOutputDirectory(), NarConstants.REPLAY_COMPILE_NAME);
+			File linkCommandsInputInFile = new File(replay.getOutputDirectory(), NarConstants.REPLAY_LINK_NAME);
+			File testCompileCommandsInFile = new File(replay.getOutputDirectory(),
+					NarConstants.REPLAY_TEST_COMPILE_NAME);
+			File testLinkCommandsInFile = new File(replay.getOutputDirectory(), NarConstants.REPLAY_TEST_LINK_NAME);
+			try {
+				List<String> compileCommands = Files.readAllLines(compileCommandsInFile.toPath());
+				List<String> linkCommands = Files.readAllLines(linkCommandsInputInFile.toPath());
 
-  public void processReplayFile(List<String> lines, Script script, PrintWriter writer) throws MojoExecutionException {
-    for (String line : lines) {
-      String processed = line;
-      if (script.getSubstitutions() != null) {
-        for (Substitution sub : script.getSubstitutions()) {
-          processed = sub.substitute(processed);
-        }
-      }
-      if (script.isEchoLines()) {
-        writer.print("echo " );
-        writer.println(processed);
-      }
-      writer.println(processed);
-    }
-  }
+				List<String> testCompileCommands = null;
+				List<String> testLinkCommands = null;
+				if (!this.skipTests) {
+					testCompileCommands = Files.readAllLines(testCompileCommandsInFile.toPath());
+					testLinkCommands = Files.readAllLines(testLinkCommandsInFile.toPath());
+				}
 
-  @Override
-  protected ScopeFilter getArtifactScopeFilter() {
-    return new ScopeFilter(Artifact.SCOPE_COMPILE, null);
-  }
+				for (Script script : replay.getScripts()) {
+
+					File scriptFile = new File(replay.getScriptDirectory(),
+							script.getId() + "." + script.getExtension());
+
+					try (PrintWriter writer = new PrintWriter(new FileWriter(scriptFile))) {
+
+						for (String header : script.getHeaders()) {
+							writer.println(header);
+						}
+
+						if (script.isCompile()) {
+							writer.println();
+							processReplayFile(compileCommands, script, writer);
+							getLog().info("Wrote compile commands to file: " + scriptFile);
+						}
+
+						if (script.isLink()) {
+							writer.println();
+							processReplayFile(linkCommands, script, writer);
+							getLog().info("Wrote link commands to file: " + scriptFile);
+						}
+
+						if (script.testCompile && !this.skipTests) {
+							writer.println();
+							processReplayFile(testCompileCommands, script, writer);
+							getLog().info("Wrote test compile commands to file: " + scriptFile);
+						}
+
+						if (script.isTestLink() && !this.skipTests) {
+							writer.println();
+							processReplayFile(testLinkCommands, script, writer);
+							getLog().info("Wrote test link commands to file: " + scriptFile);
+						}
+
+						for (String footer : script.getFooters()) {
+							writer.println(footer);
+						}
+
+						Set<PosixFilePermission> perms = NarUtil.parseOctalPermission(script.getMode());
+						Files.setPosixFilePermissions(scriptFile.toPath(), perms);
+					} catch (IOException e) {
+						throw new MojoExecutionException("Unable to write replay script to " + scriptFile, e);
+					}
+				}
+			} catch (IOException e) {
+				throw new MojoExecutionException("Unable to read command history", e);
+			}
+		}
+	}
+
+	public void processReplayFile(List<String> lines, Script script, PrintWriter writer) throws MojoExecutionException {
+		for (String line : lines) {
+			String processed = line;
+			if (script.getSubstitutions() != null) {
+				for (Substitution sub : script.getSubstitutions()) {
+					processed = sub.substitute(processed);
+				}
+			}
+			if (script.isEchoLines()) {
+				writer.print("echo ");
+				writer.println(processed);
+			}
+			writer.println(processed);
+		}
+	}
+
+	@Override
+	protected ScopeFilter getArtifactScopeFilter() {
+		return new ScopeFilter(Artifact.SCOPE_COMPILE, null);
+	}
 }

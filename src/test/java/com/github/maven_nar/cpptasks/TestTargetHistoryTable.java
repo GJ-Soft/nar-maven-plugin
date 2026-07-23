@@ -19,10 +19,13 @@
  */
 package com.github.maven_nar.cpptasks;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
 import com.github.maven_nar.cpptasks.compiler.ProcessorConfiguration;
 
 /**
@@ -70,15 +73,13 @@ public class TestTargetHistoryTable extends TestXMLConsumer {
    *          test case name
    * @see junit.framework.TestCase#TestCase(String)
    */
-  public TestTargetHistoryTable(final String name) {
-    super(name);
-  }
 
   /**
    * Tests loading a stock history file
    * 
    * @throws IOException
    */
+  @Test
   public void testLoadOpenshore() throws IOException {
     try {
       copyResourceToTmpDir("openshore/history.xml", "history.xml");
@@ -95,6 +96,7 @@ public class TestTargetHistoryTable extends TestXMLConsumer {
    * 
    * @throws IOException
    */
+  @Test
   public void testLoadXerces() throws IOException {
     try {
       copyResourceToTmpDir("xerces-c/history.xml", "history.xml");
@@ -111,6 +113,7 @@ public class TestTargetHistoryTable extends TestXMLConsumer {
    * 
    * @throws IOException
    */
+  @Test
   public void testUpdateTimeResolution() throws IOException {
     File compiledFile = null;
 
@@ -149,8 +152,8 @@ public class TestTargetHistoryTable extends TestXMLConsumer {
       //
       table.commit();
       historyFile = table.getHistoryFile();
-      assertTrue("History file was not created", historyFile.exists());
-      assertTrue("History file was empty", historyFile.length() > 10);
+      assertTrue(historyFile.exists(), "History file was not created");
+      assertTrue(historyFile.length() > 10, "History file was empty");
     } finally {
       if (compiledFile != null && compiledFile.exists()) {
         compiledFile.delete();

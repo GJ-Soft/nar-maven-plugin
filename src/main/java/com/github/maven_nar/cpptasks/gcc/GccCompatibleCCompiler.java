@@ -20,7 +20,7 @@
 package com.github.maven_nar.cpptasks.gcc;
 
 import java.io.File;
-import java.util.Vector;
+import java.util.List;
 
 import org.apache.tools.ant.types.Environment;
 
@@ -67,28 +67,28 @@ public abstract class GccCompatibleCCompiler extends CommandLineCCompiler {
   }
 
   @Override
-  public void addImpliedArgs(final Vector<String> args, final boolean debug, final boolean multithreaded,
+  public void addImpliedArgs(final List<String> args, final boolean debug, final boolean multithreaded,
       final boolean exceptions, final LinkType linkType, final Boolean rtti, final OptimizationEnum optimization) {
     //
     // -fPIC is too much trouble
     // users have to manually add it for
     // operating systems that make sense
     //
-    args.addElement("-c");
+    args.add("-c");
     if (debug) {
-      args.addElement("-g");
+      args.add("-g");
     } else {
       if (optimization != null) {
         if (optimization.isSize()) {
-          args.addElement("-Os");
+          args.add("-Os");
         } else if (optimization.isSpeed()) {
           if ("full".equals(optimization.getValue())) {
-            args.addElement("-O2");
+            args.add("-O2");
           } else {
             if ("speed".equals(optimization.getValue())) {
-              args.addElement("-O1");
+              args.add("-O1");
             } else {
-              args.addElement("-O3");
+              args.add("-O3");
             }
           }
         }
@@ -96,20 +96,20 @@ public abstract class GccCompatibleCCompiler extends CommandLineCCompiler {
     }
     if (getIdentifier().contains("mingw")) {
       if (linkType.isSubsystemConsole()) {
-        args.addElement("-mconsole");
+        args.add("-mconsole");
       }
       if (linkType.isSubsystemGUI()) {
-        args.addElement("-mwindows");
+        args.add("-mwindows");
       }
     }
     // BEGINFREEHEP, tests have been modified
     if (!exceptions) {
-      args.addElement("-fno-exceptions");
+      args.add("-fno-exceptions");
     }
     // ENDFREEHEP
     // BEGINFREEHEP moved to GccCCompiler
     // if (rtti != null && !rtti.booleanValue()) {
-    // args.addElement("-fno-rtti");
+    // args.add("-fno-rtti");
     // }
     // ENDFREEHEP
   }
@@ -117,24 +117,24 @@ public abstract class GccCompatibleCCompiler extends CommandLineCCompiler {
   /**
    * Adds an include path to the command.
    */
-  public void addIncludePath(final String path, final Vector<String> cmd) {
-    cmd.addElement("-I" + path);
+  public void addIncludePath(final String path, final List<String> cmd) {
+    cmd.add("-I" + path);
   }
 
   @Override
-  public void addWarningSwitch(final Vector<String> args, final int level) {
+  public void addWarningSwitch(final List<String> args, final int level) {
     switch (level) {
       case 0:
-        args.addElement("-w");
+        args.add("-w");
         break;
       case 5:
-        args.addElement("-Werror");
+        args.add("-Werror");
         /* nobreak */
       case 4:
-        args.addElement("-W");
+        args.add("-W");
         /* nobreak */
       case 3:
-        args.addElement("-Wall");
+        args.add("-Wall");
         break;
     }
   }
@@ -172,7 +172,7 @@ public abstract class GccCompatibleCCompiler extends CommandLineCCompiler {
   }
 
   @Override
-  public void getDefineSwitch(final StringBuffer buffer, final String define, final String value) {
+  public void getDefineSwitch(final StringBuilder buffer, final String define, final String value) {
     buffer.append("-D");
     buffer.append(define);
     if (value != null && value.length() > 0) {
@@ -202,7 +202,7 @@ public abstract class GccCompatibleCCompiler extends CommandLineCCompiler {
   }
 
   @Override
-  public void getUndefineSwitch(final StringBuffer buffer, final String define) {
+  public void getUndefineSwitch(final StringBuilder buffer, final String define) {
     buffer.append("-U");
     buffer.append(define);
   }

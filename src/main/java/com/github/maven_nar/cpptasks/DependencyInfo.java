@@ -19,7 +19,7 @@
  */
 package com.github.maven_nar.cpptasks;
 
-import java.util.Vector;
+import java.util.List;
 
 /**
  * @author Curt Arnold
@@ -42,7 +42,7 @@ public final class DependencyInfo {
   private Object tag = null;
 
   public DependencyInfo(final String includePathIdentifier, final String source, final long sourceLastModified,
-      final Vector includes, final Vector sysIncludes) {
+      final List<String> includes, final List<String> sysIncludes) {
     if (source == null) {
       throw new NullPointerException("source");
     }
@@ -57,14 +57,14 @@ public final class DependencyInfo {
     // if (includes.size() == 0) {
     // compositeLastModified = sourceLastModified;
     // } else {
-    // includes.copyInto(this.includes);
+    // includes.toArray(this.includes);
     // compositeLastModified = Long.MIN_VALUE;
     // }
     // ENDFREEHEP
     this.sysIncludes = new String[sysIncludes.size()];
     // FREEHEP
-    includes.copyInto(this.includes);
-    sysIncludes.copyInto(this.sysIncludes);
+    includes.toArray(this.includes);
+    sysIncludes.toArray(this.sysIncludes);
   }
 
   // ENDFREEHEP

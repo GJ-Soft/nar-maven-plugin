@@ -27,16 +27,17 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.maven.model.Model;
-import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.gjs.java.maven.common.GjsAbstractMojo;
 
 /**
  * @author Mark Donszelmann
  */
-public abstract class AbstractNarMojo extends AbstractMojo implements NarConstants {
+public abstract class AbstractNarMojo extends GjsAbstractMojo implements NarConstants {
 
 	/**
 	 * Skip running of NAR plugins (any) altogether.
@@ -48,20 +49,20 @@ public abstract class AbstractNarMojo extends AbstractMojo implements NarConstan
 	 * Skip the tests. Listens to Maven's general 'maven.skip.test'.
 	 */
 	@Parameter(property = "maven.test.skip")
-	boolean skipTests;
+	protected boolean skipTests;
 
 	/**
 	 * Ignore errors and failures.
 	 */
 	@Parameter(property = "nar.ignore", defaultValue = "false")
-	private boolean ignore;
+	protected boolean ignore;
 
 	/**
 	 * The Architecture for the nar, Some choices are: "x86", "i386", "amd64",
 	 * "ppc", "sparc", ... Defaults to a derived value from ${os.arch}
 	 */
 	@Parameter(property = "nar.arch")
-	private String architecture;
+	protected String architecture;
 
 	/**
 	 * The Operating System for the nar. Some choices are: "Windows", "Linux",
@@ -69,24 +70,21 @@ public abstract class AbstractNarMojo extends AbstractMojo implements NarConstan
 	 * table missing
 	 */
 	@Parameter(property = "nar.os")
-	private String os;
+	protected String os;
 
 	/**
 	 * Architecture-OS-Linker name. Defaults to: arch-os-linker.
 	 */
 	@Parameter(defaultValue = "")
-	private String aol;
+	protected String aol;
 
 	/**
 	 * Linker
 	 */
 	@Parameter
-	private Linker linker;
+	protected Linker linker;
 
 	// these could be obtained from an injected project model.
-
-	@Parameter(property = "project.build.directory", readonly = true)
-	private File outputDirectory;
 
 	@Parameter(property = "project.build.outputDirectory", readonly = true)
 	protected File classesDirectory;
@@ -100,43 +98,40 @@ public abstract class AbstractNarMojo extends AbstractMojo implements NarConstan
 	 * 
 	 */
 	@Parameter
-	private String output;
-
-	@Parameter(property = "project.basedir", readonly = true)
-	private File baseDir;
+	protected String output;
 
 	/**
 	 * Target directory for Nar file construction. Defaults to
 	 * "${project.build.directory}/nar" for "nar-compile" goal
 	 */
 	@Parameter
-	private File targetDirectory;
+	protected File targetDirectory;
 
 	/**
 	 * Target directory for Nar test construction. Defaults to
 	 * "${project.build.directory}/test-nar" for "nar-testCompile" goal
 	 */
 	@Parameter
-	private File testTargetDirectory;
+	protected File testTargetDirectory;
 
 	/**
 	 * Target directory for Nar file unpacking. Defaults to "${targetDirectory}"
 	 */
 	@Parameter
-	private File unpackDirectory;
+	protected File unpackDirectory;
 
 	/**
 	 * Target directory for Nar test unpacking. Defaults to "${testTargetDirectory}"
 	 */
 	@Parameter
-	private File testUnpackDirectory;
+	protected File testUnpackDirectory;
 
 	/**
 	 * NARVersionInfo for Windows binaries
 	 *
 	 */
 	@Parameter
-	private NARVersionInfo versionInfo;
+	protected NARVersionInfo versionInfo;
 
 	/**
 	 * List of classifiers which you want download/unpack/assemble Example
@@ -182,64 +177,39 @@ public abstract class AbstractNarMojo extends AbstractMojo implements NarConstan
 	 * Layout to be used for building and unpacking artifacts
 	 */
 	@Parameter(property = "nar.layout", defaultValue = "com.github.maven_nar.NarLayout21", required = true)
-	private String layout;
+	protected String layout;
 
-	private NarLayout narLayout;
+	protected NarLayout narLayout;
 
 	@Parameter(defaultValue = "${project}", readonly = true)
-	private MavenProject mavenProject;
+	protected MavenProject mavenProject;
 
-	private AOL aolId;
+	protected AOL aolId;
 
-	private NarInfo narInfo;
+	protected NarInfo narInfo;
 
 	/**
 	 * The home of the Java system. Defaults to a derived value from ${java.home}
 	 * which is OS specific.
 	 */
 	@Parameter(readonly = true)
-	private File javaHome;
-
-	@Parameter
-	private Msvc msvc = new Msvc();
-
-	/**
-	 * The version of MSVC to use
-	 */
-	@Parameter(property = "nar.windows.msvc.version")
-	private String windowsMsvcVersion = null;
-
-	/**
-	 * Provide specific path for VisualStudio (VC/CommonTools), default when not set
-	 * is to search by version. Version will also determine where to find the
-	 * specific tools.
-	 */
-	@Parameter(property = "nar.windows.msvc.dir")
-	private String windowsMsvcDir = null;
+	protected File javaHome;
 
 	/**
 	 * The version of Windows Platform SDK to use
 	 */
 	@Parameter(property = "nar.windows.sdk.version")
-	private String windowsSdkVersion = null;
+	protected String windowsSdkVersion = null;
 
 	/**
 	 * Provide specific path for Windows Platform SDK, default when not set is to
 	 * search by version.
 	 */
 	@Parameter(property = "nar.windows.sdk.dir")
-	private String windowsSdkDir = null;
+	protected String windowsSdkDir = null;
 
 	@Parameter
 	protected Replay replay;
-
-	public String getWindowsMsvcVersion() {
-		return this.windowsMsvcVersion;
-	}
-
-	public String getWindowsMsvcDir() {
-		return this.windowsMsvcDir;
-	}
 
 	public String getWindowsSdkVersion() {
 		return this.windowsSdkVersion;
@@ -250,22 +220,19 @@ public abstract class AbstractNarMojo extends AbstractMojo implements NarConstan
 	}
 
 	@Override
-	public final void execute() throws MojoExecutionException, MojoFailureException {
-		if (this.skip) {
-			getLog().info(getClass().getName() + " skipped");
-			return;
-		}
+	protected boolean getSkip() {
+		return skip;
+	}
 
-		try {
-			validate();
-			narExecute();
-		} catch (final MojoFailureException | MojoExecutionException mfe) {
-			if (this.ignore) {
-				getLog().warn("IGNORED: " + mfe.getMessage());
-			} else {
-				throw mfe;
-			}
-		}
+	@Override
+	protected boolean getFail() {
+		return !ignore;
+	}
+
+	@Override
+	protected void goalExecution(Log log, List<String> errorMessages) throws Throwable {
+		validate();
+		narExecute();
 	}
 
 	protected final AOL getAOL() throws MojoFailureException, MojoExecutionException {
@@ -277,12 +244,12 @@ public abstract class AbstractNarMojo extends AbstractMojo implements NarConstan
 	}
 
 	protected final File getBasedir() {
-		return this.baseDir;
+		return this.baseDirectory;
 	}
 
 	protected final File getJavaHome(final AOL aol) throws MojoExecutionException {
 		// FIXME should be easier by specifying default...
-		return getNarInfo().getProperty(aol, "javaHome", NarUtil.getJavaHome(this.javaHome, getOS()));
+		return getNarInfo().getProperty(aol, "javaHome", NarUtil.getJavaHome(this.javaHome));
 	}
 
 	protected final NarLayout getLayout() throws MojoExecutionException {
@@ -309,11 +276,6 @@ public abstract class AbstractNarMojo extends AbstractMojo implements NarConstan
 
 	protected final MavenProject getMavenProject() {
 		return this.mavenProject;
-	}
-
-	public Msvc getMsvc() throws MojoFailureException, MojoExecutionException {
-		this.msvc.init(this);
-		return this.msvc;
 	}
 
 	protected NarInfo getNarInfo() throws MojoExecutionException {

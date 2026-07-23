@@ -26,12 +26,12 @@ package com.github.maven_nar;
  * @version $Id$
  */
 public class StringTextStream implements TextStream {
-  private final StringBuffer sb;
+  private final StringBuilder sb;
 
   private final String lineSeparator;
 
   public StringTextStream() {
-    this.sb = new StringBuffer();
+    this.sb = new StringBuilder();
     this.lineSeparator = System.getProperty("line.separator", "\n");
   }
 

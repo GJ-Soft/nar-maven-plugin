@@ -33,21 +33,27 @@ import org.apache.maven.plugins.annotations.Mojo;
  */
 @Mojo(name = "nar-gnu-resources", defaultPhase = LifecyclePhase.PROCESS_RESOURCES, requiresProject = true)
 public class NarGnuResources extends AbstractGnuMojo {
-  @Override
-  public final void narExecute() throws MojoExecutionException, MojoFailureException {
-    if (getGnuSourceDirectory().exists()) {
-      int copied = 0;
 
-      try {
-        copied += copyIncludes(getGnuSourceDirectory());
-      } catch (final IOException e) {
-        throw new MojoFailureException("NAR: Gnu could not copy resources", e);
-      }
+	@Override
+	protected String getGoalName() {
+		return "nar-gnu-resources";
+	}
 
-      if (copied > 0) {
-        getLog().info("Copied " + copied + " GNU resources");
-      }
+	@Override
+	public final void narExecute() throws MojoExecutionException, MojoFailureException {
+		if (getGnuSourceDirectory().exists()) {
+			int copied = 0;
 
-    }
-  }
+			try {
+				copied += copyIncludes(getGnuSourceDirectory());
+			} catch (final IOException e) {
+				throw new MojoFailureException("NAR: Gnu could not copy resources", e);
+			}
+
+			if (copied > 0) {
+				getLog().info("Copied " + copied + " GNU resources");
+			}
+
+		}
+	}
 }

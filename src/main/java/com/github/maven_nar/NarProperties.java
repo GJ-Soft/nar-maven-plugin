@@ -25,7 +25,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -41,7 +40,7 @@ public class NarProperties {
 
 	private final static String AOL_PROPERTIES = "aol.properties";
 	private final static String CUSTOM_AOL_PROPERTY_KEY = "nar.aolProperties";
-	private static Map<MavenProject, NarProperties> instances = new HashMap<MavenProject, NarProperties>();
+	private static final Map<MavenProject, NarProperties> instances = new HashMap<>();
 
 	/**
 	 * Retrieve the NarProperties
@@ -50,7 +49,7 @@ public class NarProperties {
 	 * @return
 	 * @throws MojoFailureException
 	 */
-	public static NarProperties getInstance(final MavenProject project) throws MojoFailureException {
+	public static synchronized NarProperties getInstance(final MavenProject project) throws MojoFailureException {
 		NarProperties instance = instances.get(project);
 		if (instance == null) {
 			if (project == null) {
@@ -109,43 +108,28 @@ public class NarProperties {
 		}
 
 		this.properties = new Properties(defaults);
-		FileInputStream fis = null;
-		try {
-			if (project != null) {
-				fis = new FileInputStream(narFile);
+		if (project != null) {
+			try (FileInputStream fis = new FileInputStream(narFile)) {
 				this.properties.load(fis);
-			}
-		} catch (final FileNotFoundException e) {
-			if (customPropertyLocation != null) {
-				// We tried loading from a custom location - so throw the exception
-				throw new MojoFailureException(
-						"NAR: Could not load custom properties file: '" + customPropertyLocation + "'.");
-			}
-		} catch (final IOException e) {
-			// ignore (FIXME)
-		} finally {
-			try {
-				if (fis != null) {
-					fis.close();
+			} catch (final FileNotFoundException e) {
+				if (customPropertyLocation != null) {
+					// We tried loading from a custom location - so throw the exception
+					throw new MojoFailureException(
+							"NAR: Could not load custom properties file: '" + customPropertyLocation + "'.");
 				}
 			} catch (final IOException e) {
-				// ignore
+				// ignore (FIXME)
 			}
 		}
-
 	}
 
 	public Collection<String> getKnownAOLs() {
 		final Collection<String> result = new LinkedHashSet<>();
 		final Pattern pattern = Pattern.compile("([^.]+)\\.([^.]+)\\.([^.]+).*");
-		final Enumeration<?> e = this.properties.propertyNames();
-		while (e.hasMoreElements()) {
-			final Object key = e.nextElement();
-			if (key instanceof String) {
-				final Matcher matcher = pattern.matcher((String) key);
-				if (matcher.matches()) {
-					result.add(matcher.group(1) + "-" + matcher.group(2) + "-" + matcher.group(3));
-				}
+		for (final String key : this.properties.stringPropertyNames()) {
+			final Matcher matcher = pattern.matcher(key);
+			if (matcher.matches()) {
+				result.add(matcher.group(1) + "-" + matcher.group(2) + "-" + matcher.group(3));
 			}
 		}
 		return result;

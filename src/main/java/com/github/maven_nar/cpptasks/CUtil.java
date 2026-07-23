@@ -22,8 +22,6 @@ package com.github.maven_nar.cpptasks;
 import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Objects;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -32,7 +30,6 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Execute;
 import org.apache.tools.ant.types.Commandline;
 import org.apache.tools.ant.types.Environment;
-import org.apache.tools.ant.util.StringUtils;
 
 /**
  * Some utilities used by the CC and Link tasks.
@@ -57,10 +54,10 @@ public class CUtil {
 				if (val.length() == 0) {
 					continue;
 				}
-				vallist.addElement(val);
+				vallist.add(val);
 			}
 			this._value = new String[vallist.size()];
-			vallist.copyInto(this._value);
+			vallist.toArray(this._value);
 		}
 
 		public String[] getValue() {
@@ -69,18 +66,6 @@ public class CUtil {
 	}
 
 	public final static int FILETIME_EPSILON = 500;
-
-	/**
-	 * Adds the elements of the array to the given vector
-	 */
-	public static void addAll(final Vector<Object> dest, final Object[] src) {
-		if (src == null) {
-			return;
-		}
-		for (final Object element : src) {
-			dest.addElement(element);
-		}
-	}
 
 	/**
 	 * Checks a array of names for non existent or non directory entries and nulls
@@ -139,17 +124,6 @@ public class CUtil {
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Extracts the parent of a file
-	 */
-	public static String getParentPath(final String path) {
-		final int pos = path.lastIndexOf(File.separator);
-		if (pos <= 0) {
-			return null;
-		}
-		return path.substring(0, pos);
 	}
 
 	/**
@@ -260,7 +234,7 @@ public class CUtil {
 					break;
 				}
 			}
-			final StringBuffer relativePath = new StringBuffer(50);
+			final StringBuilder relativePath = new StringBuilder(50);
 			//
 			// walk from the first difference to the end of the base
 			// adding "../" for each separator encountered
@@ -337,21 +311,6 @@ public class CUtil {
 	}
 
 	/**
-	 * Determines if source file has a system path, that is part of the compiler or
-	 * platform.
-	 * 
-	 * @param source source, may not be null.
-	 * @return true is source file appears to be system library and its path should
-	 *         be discarded.
-	 */
-	public static boolean isSystemPath(final File source) {
-		final String lcPath = source.getAbsolutePath().toLowerCase(java.util.Locale.US);
-		return lcPath.contains("platformsdk") || lcPath.contains("windows kits") || lcPath.contains("microsoft")
-				|| Objects.equals(lcPath, "/usr/include") || Objects.equals(lcPath, "/usr/lib")
-				|| Objects.equals(lcPath, "/usr/local/include") || Objects.equals(lcPath, "/usr/local/lib");
-	}
-
-	/**
 	 * Parse a string containing directories into an File[]
 	 *
 	 * @param path  path string, for example ".;c:\something\include"
@@ -372,12 +331,12 @@ public class CUtil {
 				final String dirName = path.substring(startPos, delimPos);
 				final File dir = new File(dirName);
 				if (dir.exists() && dir.isDirectory()) {
-					libpaths.addElement(dir);
+					libpaths.add(dir);
 				}
 			}
 		}
 		final File[] paths = new File[libpaths.size()];
-		libpaths.copyInto(paths);
+		libpaths.toArray(paths);
 		return paths;
 	}
 
@@ -407,91 +366,12 @@ public class CUtil {
 		}
 	}
 
-	/**
-	 * Compares the contents of 2 arrays for equaliy.
-	 */
-	public static boolean sameList(final Object[] a, final Object[] b) {
-		if (a == null || b == null || a.length != b.length) {
-			return false;
-		}
-		for (int i = 0; i < a.length; i++) {
-			if (!a[i].equals(b[i])) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Compares the contents of an array and a Vector for equality.
-	 */
-	public static boolean sameList(final Vector<?> v, final Object[] a) {
-		if (v == null || a == null || v.size() != a.length) {
-			return false;
-		}
-		for (int i = 0; i < a.length; i++) {
-			final Object o = a[i];
-			if (!o.equals(v.elementAt(i))) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * Compares the contents of an array and a Vector for set equality. Assumes
-	 * input array and vector are sets (i.e. no duplicate entries)
-	 */
-	public static boolean sameSet(final Object[] a, final Vector<?> b) {
-		if (a == null || b == null || a.length != b.size()) {
-			return false;
-		}
-		if (a.length == 0) {
-			return true;
-		}
-		// Convert the array into a set
-		final Hashtable<Object, Object> t = new Hashtable<>();
-		for (final Object element : a) {
-			t.put(element, element);
-		}
-		for (int i = 0; i < b.size(); i++) {
-			final Object o = b.elementAt(i);
-			if (t.remove(o) == null) {
-				return false;
-			}
-		}
-		return t.size() == 0;
-	}
-
 	private static boolean substringMatch(final String src, final int beginIndex, final int endIndex,
 			final String target) {
 		if (src.length() < endIndex) {
 			return false;
 		}
 		return src.substring(beginIndex, endIndex).equals(target);
-	}
-
-	/**
-	 * Converts a vector to a string array.
-	 */
-	public static String[] toArray(final Vector<?> src) {
-		final String[] retval = new String[src.size()];
-		src.copyInto(retval);
-		return retval;
-	}
-
-	public static String toUnixPath(final String path) {
-		if (File.separatorChar != '/' && path.indexOf(File.separatorChar) != -1) {
-			return StringUtils.replace(path, File.separator, "/");
-		}
-		return path;
-	}
-
-	public static String toWindowsPath(final String path) {
-		if (File.separatorChar != '\\' && path.indexOf(File.separatorChar) != -1) {
-			return StringUtils.replace(path, File.separator, "\\");
-		}
-		return path;
 	}
 
 	/**
@@ -503,7 +383,7 @@ public class CUtil {
 	 *
 	 */
 	public static String xmlAttribEncode(final String attrValue) {
-		final StringBuffer buf = new StringBuffer(attrValue);
+		final StringBuilder buf = new StringBuilder(attrValue);
 		int quotePos;
 
 		for (quotePos = -1; (quotePos = buf.indexOf("\"", quotePos + 1)) >= 0;) {

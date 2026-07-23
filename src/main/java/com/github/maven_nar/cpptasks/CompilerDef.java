@@ -22,7 +22,7 @@ package com.github.maven_nar.cpptasks;
 import java.io.File;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -47,14 +47,14 @@ import com.github.maven_nar.cpptasks.types.UndefineArgument;
  */
 public final class CompilerDef extends ProcessorDef {
 	/** The source file sets. */
-	private final Vector<DefineSet> defineSets = new Vector<>();
+	private final List<DefineSet> defineSets = new ArrayList<>();
 	private Boolean ccache = false;
 	private Boolean exceptions;
 	private Boolean rtti;
-	private final Vector<ConditionalPath> includePaths = new Vector<>();
+	private final List<ConditionalPath> includePaths = new ArrayList<>();
 	private Boolean multithreaded;
-	private final Vector<PrecompileDef> precompileDefs = new Vector<>();
-	private final Vector<ConditionalPath> sysIncludePaths = new Vector<>();
+	private final List<PrecompileDef> precompileDefs = new ArrayList<>();
+	private final List<ConditionalPath> sysIncludePaths = new ArrayList<>();
 	private OptimizationEnum optimization;
 	private int warnings = -1;
 	private List<String> order;
@@ -101,7 +101,7 @@ public final class CompilerDef extends ProcessorDef {
 		if (isReference()) {
 			throw noChildrenAllowed();
 		}
-		this.defineSets.addElement(defs);
+		this.defineSets.add(defs);
 	}
 
 	/**
@@ -116,7 +116,7 @@ public final class CompilerDef extends ProcessorDef {
 			throw noChildrenAllowed();
 		}
 		final IncludePath path = new IncludePath(p);
-		this.includePaths.addElement(path);
+		this.includePaths.add(path);
 		return path;
 	}
 
@@ -131,7 +131,7 @@ public final class CompilerDef extends ProcessorDef {
 		}
 		final PrecompileDef precomp = new PrecompileDef();
 		precomp.setProject(p);
-		this.precompileDefs.addElement(precomp);
+		this.precompileDefs.add(precomp);
 		return precomp;
 	}
 
@@ -153,7 +153,7 @@ public final class CompilerDef extends ProcessorDef {
 			throw noChildrenAllowed();
 		}
 		final SystemIncludePath path = new SystemIncludePath(p);
-		this.sysIncludePaths.addElement(path);
+		this.sysIncludePaths.add(path);
 		return path;
 	}
 
@@ -170,18 +170,18 @@ public final class CompilerDef extends ProcessorDef {
 		if (isReference()) {
 			return ((CompilerDef) getCheckedRef(CompilerDef.class, "CompilerDef")).getActiveDefines();
 		}
-		final Vector<UndefineArgument> actives = new Vector<>();
+		final List<UndefineArgument> actives = new ArrayList<>();
 		for (int i = 0; i < this.defineSets.size(); i++) {
-			final DefineSet currentSet = this.defineSets.elementAt(i);
+			final DefineSet currentSet = this.defineSets.get(i);
 			final UndefineArgument[] defines = currentSet.getDefines();
 			for (final UndefineArgument define : defines) {
 				if (define.isActive(p)) {
-					actives.addElement(define);
+					actives.add(define);
 				}
 			}
 		}
 		final UndefineArgument[] retval = new UndefineArgument[actives.size()];
-		actives.copyInto(retval);
+		actives.toArray(retval);
 		return retval;
 	}
 
@@ -195,23 +195,23 @@ public final class CompilerDef extends ProcessorDef {
 		return getActivePaths(this.includePaths);
 	}
 
-	private String[] getActivePaths(final Vector<ConditionalPath> paths) {
+	private String[] getActivePaths(final List<ConditionalPath> paths) {
 		final Project p = getProject();
 		if (p == null) {
 			throw new java.lang.IllegalStateException("project not set");
 		}
-		final Vector<String> activePaths = new Vector<>(paths.size());
+		final List<String> activePaths = new ArrayList<>(paths.size());
 		for (int i = 0; i < paths.size(); i++) {
-			final ConditionalPath path = paths.elementAt(i);
+			final ConditionalPath path = paths.get(i);
 			if (path.isActive(p)) {
 				final String[] pathEntries = path.list();
 				for (final String pathEntrie : pathEntries) {
-					activePaths.addElement(pathEntrie);
+					activePaths.add(pathEntrie);
 				}
 			}
 		}
 		final String[] pathNames = new String[activePaths.size()];
-		activePaths.copyInto(pathNames);
+		activePaths.toArray(pathNames);
 		return pathNames;
 	}
 
@@ -220,11 +220,9 @@ public final class CompilerDef extends ProcessorDef {
 			return ((CompilerDef) getCheckedRef(CompilerDef.class, "CompilerDef")).getActivePrecompile(ccElement);
 		}
 		PrecompileDef current = null;
-		final Enumeration<PrecompileDef> iter = this.precompileDefs.elements();
-		while (iter.hasMoreElements()) {
-			current = iter.nextElement();
-			if (current.isActive()) {
-				return current;
+		for (final PrecompileDef candidate : this.precompileDefs) {
+			if (candidate.isActive()) {
+				return candidate;
 			}
 		}
 		final CompilerDef extendedDef = (CompilerDef) getExtends();

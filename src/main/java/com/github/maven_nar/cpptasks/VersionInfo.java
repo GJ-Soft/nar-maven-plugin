@@ -19,7 +19,8 @@
  */
 package com.github.maven_nar.cpptasks;
 
-import java.util.Vector;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.DataType;
@@ -151,10 +152,10 @@ public final class VersionInfo extends DataType {
    * @param stack
    *          list of version infos with most significant first.
    */
-  private VersionInfo(final Vector<VersionInfo> stack) {
+  private VersionInfo(final List<VersionInfo> stack) {
     VersionInfo source = null;
     for (int i = stack.size() - 1; i >= 0; i--) {
-      source = stack.elementAt(i);
+      source = stack.get(i);
       if (source.getIf() != null) {
         this.ifCond = source.getIf();
       }
@@ -418,8 +419,8 @@ public final class VersionInfo extends DataType {
     if (currentRef == null) {
       return this;
     }
-    final Vector<VersionInfo> stack = new Vector<>(5);
-    stack.addElement(this);
+    final List<VersionInfo> stack = new ArrayList<>(5);
+    stack.add(this);
     while (currentRef != null) {
       final Object obj = currentRef.getReferencedObject(getProject());
       if (obj instanceof VersionInfo) {
@@ -430,7 +431,7 @@ public final class VersionInfo extends DataType {
         if (stack.contains(current)) {
           throw this.circularReference();
         }
-        stack.addElement(current);
+        stack.add(current);
         currentRef = current.getExtends();
       } else {
         throw new BuildException("Referenced element " + currentRef.getRefId() + " is not a versioninfo.");

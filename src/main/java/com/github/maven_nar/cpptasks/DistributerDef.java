@@ -19,7 +19,8 @@
  */
 package com.github.maven_nar.cpptasks;
 
-import java.util.Vector;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.tools.ant.types.DataType;
 import org.apache.tools.ant.types.Reference;
@@ -64,7 +65,7 @@ public final class DistributerDef extends DataType {
   /**
    * local to remote file name maps.
    */
-  private final Vector maps = new Vector();
+  private final List<DistributerMap> maps = new ArrayList<>();
 
   /**
    * Constructor.
@@ -81,7 +82,7 @@ public final class DistributerDef extends DataType {
   public DistributerMap createMap() {
     final DistributerMap map = new DistributerMap();
     map.setProject(getProject());
-    this.maps.addElement(map);
+    this.maps.add(map);
     return map;
   }
 

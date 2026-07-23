@@ -20,7 +20,7 @@
 package com.github.maven_nar.cpptasks.gcc;
 
 import java.io.File;
-import java.util.Vector;
+import java.util.List;
 
 import com.github.maven_nar.cpptasks.CCTask;
 import com.github.maven_nar.cpptasks.CUtil;
@@ -80,14 +80,14 @@ public class GccLinker extends AbstractLdLinker {
 
   @Override
   protected void addImpliedArgs(final CCTask task, final boolean debug, final LinkType linkType,
-      final Vector<String> args) {
+      final List<String> args) {
     super.addImpliedArgs(task, debug, linkType, args);
     if (getIdentifier().contains("mingw")) {
       if (linkType.isSubsystemConsole()) {
-        args.addElement("-mconsole");
+        args.add("-mconsole");
       }
       if (linkType.isSubsystemGUI()) {
-        args.addElement("-mwindows");
+        args.add("-mwindows");
       }
     }
   }
@@ -103,7 +103,7 @@ public class GccLinker extends AbstractLdLinker {
    *          linker argument
    */
   @Override
-  public String decorateLinkerOption(final StringBuffer buf, final String arg) {
+  public String decorateLinkerOption(final StringBuilder buf, final String arg) {
     String decoratedArg = arg;
     if (arg.length() > 1 && arg.charAt(0) == '-') {
       switch (arg.charAt(1)) {
@@ -152,7 +152,7 @@ public class GccLinker extends AbstractLdLinker {
       //
       // construct gcc lib path from machine and version
       //
-      final StringBuffer buf = new StringBuffer("/lib/gcc-lib/");
+      final StringBuilder buf = new StringBuilder("/lib/gcc-lib/");
       buf.append(GccProcessor.getMachine());
       buf.append('/');
       buf.append(GccProcessor.getVersion());

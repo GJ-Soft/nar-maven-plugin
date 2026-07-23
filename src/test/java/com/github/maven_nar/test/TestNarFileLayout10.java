@@ -19,11 +19,12 @@
  */
 package com.github.maven_nar.test;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
+
 import java.io.File;
-
-import junit.framework.Assert;
-import junit.framework.TestCase;
-
 import com.github.maven_nar.Library;
 import com.github.maven_nar.NarFileLayout;
 import com.github.maven_nar.NarFileLayout10;
@@ -32,7 +33,7 @@ import com.github.maven_nar.NarFileLayout10;
  * @author Mark Donszelmann (Mark.Donszelmann@gmail.com)
  * @version $Id$
  */
-public class TestNarFileLayout10 extends TestCase {
+public class TestNarFileLayout10 {
   protected NarFileLayout fileLayout;
 
   protected String artifactId;
@@ -48,7 +49,7 @@ public class TestNarFileLayout10 extends TestCase {
    * 
    * @see junit.framework.TestCase#setUp()
    */
-  @Override
+  @BeforeEach
   protected void setUp() throws Exception {
     this.fileLayout = new NarFileLayout10();
     this.artifactId = "artifactId";
@@ -57,16 +58,19 @@ public class TestNarFileLayout10 extends TestCase {
     this.type = Library.SHARED;
   }
 
+  @Test
   public final void testGetBinDirectory() {
-    Assert.assertEquals("bin" + File.separator + this.aol, this.fileLayout.getBinDirectory(this.aol));
+    assertEquals("bin" + File.separator + this.aol, this.fileLayout.getBinDirectory(this.aol));
   }
 
+  @Test
   public final void testGetIncludeDirectory() {
-    Assert.assertEquals("include", this.fileLayout.getIncludeDirectory());
+    assertEquals("include", this.fileLayout.getIncludeDirectory());
   }
 
+  @Test
   public final void testGetLibDirectory() {
-    Assert.assertEquals("lib" + File.separator + this.aol + File.separator + this.type,
+    assertEquals("lib" + File.separator + this.aol + File.separator + this.type,
         this.fileLayout.getLibDirectory(this.aol, this.type));
   }
 }

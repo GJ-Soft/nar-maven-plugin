@@ -19,19 +19,19 @@
  */
 package com.github.maven_nar.cpptasks;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+
 import java.io.File;
-
-import junit.framework.TestCase;
-
 import org.apache.tools.ant.BuildException;
-
 import com.github.maven_nar.cpptasks.compiler.CompilerConfiguration;
 import com.github.maven_nar.cpptasks.compiler.ProgressMonitor;
 
 /**
  * A description of a file built or to be built
  */
-public class TestTargetInfo extends TestCase {
+public class TestTargetInfo {
   private class DummyConfiguration implements CompilerConfiguration {
     @Override
     public int bid(final String filename) {
@@ -97,10 +97,7 @@ public class TestTargetInfo extends TestCase {
     }
   }
 
-  public TestTargetInfo(final String name) {
-    super(name);
-  }
-
+  @Test
   public void testConstructorNullConfig() {
     try {
       new TargetInfo(null, new File[] {
@@ -111,6 +108,7 @@ public class TestTargetInfo extends TestCase {
     }
   }
 
+  @Test
   public void testConstructorNullOutput() {
     final CompilerConfiguration config = new DummyConfiguration();
     try {
@@ -122,6 +120,7 @@ public class TestTargetInfo extends TestCase {
     }
   }
 
+  @Test
   public void testConstructorNullSource() {
     final CompilerConfiguration config = new DummyConfiguration();
     try {
@@ -131,6 +130,7 @@ public class TestTargetInfo extends TestCase {
     }
   }
 
+  @Test
   public void testGetRebuild() {
     final CompilerConfiguration config = new DummyConfiguration();
     TargetInfo targetInfo = new TargetInfo(config, new File[] {
@@ -143,6 +143,7 @@ public class TestTargetInfo extends TestCase {
     assertEquals(true, targetInfo.getRebuild());
   }
 
+  @Test
   public void testGetSource() {
     final CompilerConfiguration config = new DummyConfiguration();
     final TargetInfo targetInfo = new TargetInfo(config, new File[] {
@@ -152,6 +153,7 @@ public class TestTargetInfo extends TestCase {
     assertEquals(source, "FoO.BaR");
   }
 
+  @Test
   public void testHasSameSource() {
     final CompilerConfiguration config = new DummyConfiguration();
     final TargetInfo targetInfo = new TargetInfo(config, new File[] {
@@ -163,6 +165,7 @@ public class TestTargetInfo extends TestCase {
     assertEquals(hasSame, false);
   }
 
+  @Test
   public void testMustRebuild() {
     final CompilerConfiguration config = new DummyConfiguration();
     final TargetInfo targetInfo = new TargetInfo(config, new File[] {

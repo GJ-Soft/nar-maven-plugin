@@ -27,7 +27,8 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
 import java.util.Hashtable;
-import java.util.Vector;
+import java.util.List;
+import java.util.ArrayList;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -53,10 +54,10 @@ public final class DependencyTable {
     private final File baseDir;
     private final DependencyTable dependencyTable;
     private String includePath;
-    private final Vector includes;
+    private final List<String> includes;
     private String source;
     private long sourceLastModified;
-    private final Vector sysIncludes;
+    private final List<String> sysIncludes;
 
     /**
      * Constructor
@@ -69,8 +70,8 @@ public final class DependencyTable {
     private DependencyTableHandler(final DependencyTable dependencyTable, final File baseDir) {
       this.dependencyTable = dependencyTable;
       this.baseDir = baseDir;
-      this.includes = new Vector();
-      this.sysIncludes = new Vector();
+      this.includes = new ArrayList<>();
+      this.sysIncludes = new ArrayList<>();
       this.source = null;
     }
 
@@ -103,7 +104,7 @@ public final class DependencyTable {
             }
           }
           this.source = null;
-          this.includes.setSize(0);
+          this.includes.clear();
         }
       } else {
         //
@@ -123,24 +124,24 @@ public final class DependencyTable {
     public void startElement(final String namespaceURI, final String localName, final String qName,
         final Attributes atts) throws SAXException {
       //
-      // if includes, then add relative file name to vector
+      // if includes, then add relative file name to list
       //
       if (qName.equals("include")) {
-        this.includes.addElement(atts.getValue("file"));
+        this.includes.add(atts.getValue("file"));
       } else {
         if (qName.equals("sysinclude")) {
-          this.sysIncludes.addElement(atts.getValue("file"));
+          this.sysIncludes.add(atts.getValue("file"));
         } else {
           //
           // if source then
           // capture source file name,
-          // modification time and reset includes vector
+          // modification time and reset includes list
           //
           if (qName.equals("source")) {
             this.source = atts.getValue("file");
             this.sourceLastModified = Long.parseLong(atts.getValue("lastModified"), 16);
-            this.includes.setSize(0);
-            this.sysIncludes.setSize(0);
+            this.includes.clear();
+            this.sysIncludes.clear();
           } else {
             if (qName.equals("includePath")) {
               this.includePath = atts.getValue("signature");
@@ -258,7 +259,7 @@ public final class DependencyTable {
   /**
    * a hashtable of DependencyInfo[] keyed by output file name
    */
-  private final Hashtable dependencies = new Hashtable();
+  private final Hashtable<String, DependencyInfo[]> dependencies = new Hashtable<>();
   /** The file the cache was loaded from. */
   private final/* final */File dependenciesFile;
   /** Flag indicating whether the cache should be written back to file. */
@@ -293,10 +294,10 @@ public final class DependencyTable {
     //
     if (this.dirty) {
       //
-      // walk through dependencies to get vector of include paths
+      // walk through dependencies to get list of include paths
       // identifiers
       //
-      final Vector includePaths = getIncludePaths();
+      final List<String> includePaths = getIncludePaths();
       //
       //
       // write dependency file
@@ -321,10 +322,9 @@ public final class DependencyTable {
         writer.write(encodingName);
         writer.write("'?>\n");
         writer.write("<dependencies>\n");
-        final StringBuffer buf = new StringBuffer();
-        final Enumeration includePathEnum = includePaths.elements();
-        while (includePathEnum.hasMoreElements()) {
-          writeIncludePathDependencies((String) includePathEnum.nextElement(), writer, buf);
+        final StringBuilder buf = new StringBuilder();
+        for (final String includePath : includePaths) {
+          writeIncludePathDependencies(includePath, writer, buf);
         }
         writer.write("</dependencies>\n");
         writer.close();
@@ -361,24 +361,13 @@ public final class DependencyTable {
     return null;
   }
 
-  private Vector getIncludePaths() {
-    final Vector includePaths = new Vector();
-    DependencyInfo[] dependInfos;
-    final Enumeration dependenciesEnum = this.dependencies.elements();
-    while (dependenciesEnum.hasMoreElements()) {
-      dependInfos = (DependencyInfo[]) dependenciesEnum.nextElement();
+  private List<String> getIncludePaths() {
+    final List<String> includePaths = new ArrayList<>();
+    for (final DependencyInfo[] dependInfos : this.dependencies.values()) {
       for (final DependencyInfo dependInfo : dependInfos) {
-        boolean matchesExisting = false;
         final String dependIncludePath = dependInfo.getIncludePathIdentifier();
-        final Enumeration includePathEnum = includePaths.elements();
-        while (includePathEnum.hasMoreElements()) {
-          if (dependIncludePath.equals(includePathEnum.nextElement())) {
-            matchesExisting = true;
-            break;
-          }
-        }
-        if (!matchesExisting) {
-          includePaths.addElement(dependIncludePath);
+        if (!includePaths.contains(dependIncludePath)) {
+          includePaths.add(dependIncludePath);
         }
       }
     }
@@ -578,7 +567,7 @@ public final class DependencyTable {
   }
 
   private void
-      writeDependencyInfo(final BufferedWriter writer, final StringBuffer buf, final DependencyInfo dependInfo)
+      writeDependencyInfo(final BufferedWriter writer, final StringBuilder buf, final DependencyInfo dependInfo)
           throws IOException {
     final String[] includes = dependInfo.getIncludes();
     final String[] sysIncludes = dependInfo.getSysIncludes();
@@ -613,7 +602,7 @@ public final class DependencyTable {
   }
 
   private void writeIncludePathDependencies(final String includePathIdentifier, final BufferedWriter writer,
-      final StringBuffer buf) throws IOException {
+      final StringBuilder buf) throws IOException {
     //
     // include path element
     //

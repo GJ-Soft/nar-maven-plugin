@@ -19,7 +19,9 @@
  */
 package com.github.maven_nar.cpptasks;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 /**
  *
@@ -27,20 +29,18 @@ import junit.framework.TestCase;
  *
  * @author CurtA
  */
-public class TestLinkerEnum extends TestCase {
+public class TestLinkerEnum {
   /**
    * @param name
    *          test case name
    */
-  public TestLinkerEnum(final String name) {
-    super(name);
-  }
 
   /**
    * Test checks that enumeration contains value g++
    * 
    * See patch [ 676276 ] Enhanced support for Mac OS X
    */
+  @Test
   public void testContainsValueGpp() {
     assertTrue(new LinkerEnum().containsValue("g++"));
   }

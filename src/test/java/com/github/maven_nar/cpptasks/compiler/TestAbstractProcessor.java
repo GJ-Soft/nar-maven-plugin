@@ -19,7 +19,9 @@
  */
 package com.github.maven_nar.cpptasks.compiler;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 import com.github.maven_nar.cpptasks.CCTask;
 import com.github.maven_nar.cpptasks.ProcessorDef;
@@ -30,7 +32,7 @@ import com.github.maven_nar.cpptasks.VersionInfo;
  *
  * Override create to test concrete compiler implementions
  */
-public class TestAbstractProcessor extends TestCase {
+public class TestAbstractProcessor {
   private class DummyAbstractProcessor extends AbstractProcessor {
     public DummyAbstractProcessor() {
       super(new String[] {
@@ -67,10 +69,6 @@ public class TestAbstractProcessor extends TestCase {
     }
   }
 
-  public TestAbstractProcessor(final String name) {
-    super(name);
-  }
-
   protected AbstractProcessor create() {
     return new DummyAbstractProcessor();
   }
@@ -91,6 +89,7 @@ public class TestAbstractProcessor extends TestCase {
     assertEquals(0, bid);
   }
 
+  @Test
   public void testGetIdentfier() {
     final AbstractProcessor compiler = create();
     final String id = compiler.getIdentifier();

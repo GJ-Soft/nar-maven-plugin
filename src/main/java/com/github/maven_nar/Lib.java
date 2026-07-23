@@ -84,7 +84,7 @@ public class Lib {
 
   private void addMultipleLibSets(final AbstractDependencyMojo mojo, final LinkerDef linker, final Project antProject,
       final String name) throws MojoFailureException, MojoExecutionException {
-    final List dependencies = mojo.getNarArtifacts();
+    final List<NarArtifact> dependencies = mojo.getNarArtifacts();
     for (final Object lib1 : this.libs) {
       final Lib lib = (Lib) lib1;
       final String[] ids = name.split(":", 2);

@@ -33,37 +33,41 @@ import org.apache.maven.shared.artifact.filter.collection.ScopeFilter;
 
 /**
  * Unpacks NAR files needed for tests compilation and execution. Unpacking
- * happens in the project target folder, and
- * also sets flags on binaries and corrects static libraries.
+ * happens in the project target folder, and also sets flags on binaries and
+ * corrects static libraries.
  *
  * @author Mark Donszelmann
  */
-@Mojo(name = "nar-test-unpack", defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES, requiresProject = true,
-  requiresDependencyResolution = ResolutionScope.TEST)
+@Mojo(name = "nar-test-unpack", defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES, requiresProject = true, requiresDependencyResolution = ResolutionScope.TEST)
 public class NarTestUnpackMojo extends AbstractDependencyMojo {
 
-  /**
-   * List of tests to create
-   */
-  @Parameter
-  private List tests;
-  
-  /**
-   * List the dependencies needed for tests compilations and executions.
-   */
-  @Override
-  protected ScopeFilter getArtifactScopeFilter() {
-    return new ScopeFilter( Artifact.SCOPE_TEST, null );
-  }
+	@Override
+	protected String getGoalName() {
+		return "nar-test-unpack";
+	}
 
-  @Override
-  protected File getUnpackDirectory() {
-    return getTestUnpackDirectory() == null ? super.getUnpackDirectory() : getTestUnpackDirectory();
-  }
+	/**
+	 * List of tests to create
+	 */
+	@Parameter
+	private List<Test> tests;
 
-  @Override
-  public final void narExecute() throws MojoExecutionException, MojoFailureException {
-    final List<AttachedNarArtifact> attachedNarArtifacts = getAttachedNarArtifacts(tests);
-    unpackAttachedNars(attachedNarArtifacts);
-  }
+	/**
+	 * List the dependencies needed for tests compilations and executions.
+	 */
+	@Override
+	protected ScopeFilter getArtifactScopeFilter() {
+		return new ScopeFilter(Artifact.SCOPE_TEST, null);
+	}
+
+	@Override
+	protected File getUnpackDirectory() {
+		return getTestUnpackDirectory() == null ? super.getUnpackDirectory() : getTestUnpackDirectory();
+	}
+
+	@Override
+	public final void narExecute() throws MojoExecutionException, MojoFailureException {
+		final List<AttachedNarArtifact> attachedNarArtifacts = getAttachedNarArtifacts(tests);
+		unpackAttachedNars(attachedNarArtifacts);
+	}
 }

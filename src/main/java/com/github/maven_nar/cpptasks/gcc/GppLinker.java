@@ -20,7 +20,8 @@
 package com.github.maven_nar.cpptasks.gcc;
 
 import java.io.File;
-import java.util.Vector;
+import java.util.List;
+import java.util.ArrayList;
 
 import com.github.maven_nar.cpptasks.CCTask;
 import com.github.maven_nar.cpptasks.CUtil;
@@ -86,14 +87,14 @@ public class GppLinker extends AbstractLdLinker {
 
   @Override
   protected void addImpliedArgs(final CCTask task, final boolean debug, final LinkType linkType,
-      final Vector<String> args) {
+      final List<String> args) {
     super.addImpliedArgs(task, debug, linkType, args);
     if (getIdentifier().contains("mingw")) {
       if (linkType.isSubsystemConsole()) {
-        args.addElement("-mconsole");
+        args.add("-mconsole");
       }
       if (linkType.isSubsystemGUI()) {
-        args.addElement("-mwindows");
+        args.add("-mwindows");
       }
     }
     // BEGINFREEHEP link or not with libstdc++
@@ -177,22 +178,22 @@ public class GppLinker extends AbstractLdLinker {
   }
 
   @Override
-  protected String[] addLibrarySets(final CCTask task, final LibrarySet[] libsets, final Vector<String> preargs,
-      final Vector<String> midargs, final Vector<String> endargs) {
+  protected String[] addLibrarySets(final CCTask task, final LibrarySet[] libsets, final List<String> preargs,
+      final List<String> midargs, final List<String> endargs) {
     final String[] rs = super.addLibrarySets(task, libsets, preargs, midargs, endargs);
     // BEGINFREEHEP
     if (this.gfortranLibrary != null) {
-      endargs.addElement(this.gfortranLibrary);
+      endargs.add(this.gfortranLibrary);
     }
     if (this.gfortranMainLibrary != null) {
-      endargs.addElement(this.gfortranMainLibrary);
+      endargs.add(this.gfortranMainLibrary);
     }
     if (this.gccLibrary != null) {
-      endargs.addElement(this.gccLibrary);
+      endargs.add(this.gccLibrary);
     }
     // ENDFREEHEP
     if (this.runtimeLibrary != null) {
-      endargs.addElement(this.runtimeLibrary);
+      endargs.add(this.runtimeLibrary);
     }
     return rs;
   }
@@ -208,7 +209,7 @@ public class GppLinker extends AbstractLdLinker {
    *          linker argument
    */
   @Override
-  public String decorateLinkerOption(final StringBuffer buf, final String arg) {
+  public String decorateLinkerOption(final StringBuilder buf, final String arg) {
     String decoratedArg = arg;
     if (arg.length() > 1 && arg.charAt(0) == '-') {
       switch (arg.charAt(1)) {
@@ -254,7 +255,7 @@ public class GppLinker extends AbstractLdLinker {
   @Override
   public File[] getLibraryPath() {
     if (this.libDirs == null) {
-      final Vector<String> dirs = new Vector<>();
+      final List<String> dirs = new ArrayList<>();
       // Ask GCC where it will look for its libraries.
       final String[] args = new String[] {
           "g++", "-print-search-dirs"
@@ -267,20 +268,20 @@ public class GppLinker extends AbstractLdLinker {
           int s = prefixIndex + libPrefix.length();
           int t = cmdout[i].indexOf(';', s);
           while (t > 0) {
-            dirs.addElement(cmdout[i].substring(s, t));
+            dirs.add(cmdout[i].substring(s, t));
             s = t + 1;
             t = cmdout[i].indexOf(';', s);
           }
-          dirs.addElement(cmdout[i].substring(s));
+          dirs.add(cmdout[i].substring(s));
           ++i;
           for (; i < cmdout.length; ++i) {
-            dirs.addElement(cmdout[i]);
+            dirs.add(cmdout[i]);
           }
         }
       }
       // Eliminate all but actual directories.
       final String[] libpath = new String[dirs.size()];
-      dirs.copyInto(libpath);
+      dirs.toArray(libpath);
       final int count = CUtil.checkDirectoryArray(libpath);
       // Build return array.
       this.libDirs = new File[count];

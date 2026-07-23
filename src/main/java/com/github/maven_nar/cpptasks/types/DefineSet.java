@@ -19,7 +19,8 @@
  */
 package com.github.maven_nar.cpptasks.types;
 
-import java.util.Vector;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.DataType;
@@ -37,7 +38,7 @@ import com.github.maven_nar.cpptasks.CUtil;
  * @author Adam Murdoch
  */
 public class DefineSet extends DataType {
-  private final Vector<UndefineArgument> defineList = new Vector<>();
+  private final List<UndefineArgument> defineList = new ArrayList<>();
   private String ifCond = null;
   private String unlessCond = null;
 
@@ -52,7 +53,7 @@ public class DefineSet extends DataType {
     if (isReference()) {
       throw noChildrenAllowed();
     }
-    this.defineList.addElement(arg);
+    this.defineList.add(arg);
   }
 
   /** Adds defines/undefines. */
@@ -65,7 +66,7 @@ public class DefineSet extends DataType {
         def = new UndefineArgument();
       }
       def.setName(def2);
-      this.defineList.addElement(def);
+      this.defineList.add(def);
     }
   }
 
@@ -80,7 +81,7 @@ public class DefineSet extends DataType {
     if (isReference()) {
       throw noChildrenAllowed();
     }
-    this.defineList.addElement(arg);
+    this.defineList.add(arg);
   }
 
   public void execute() throws org.apache.tools.ant.BuildException {
@@ -95,7 +96,7 @@ public class DefineSet extends DataType {
     } else {
       if (isActive()) {
         final UndefineArgument[] defs = new UndefineArgument[this.defineList.size()];
-        this.defineList.copyInto(defs);
+        this.defineList.toArray(defs);
         return defs;
       } else {
         return new UndefineArgument[0];

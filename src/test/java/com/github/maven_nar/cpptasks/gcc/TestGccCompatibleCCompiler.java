@@ -19,25 +19,24 @@
  */
 package com.github.maven_nar.cpptasks.gcc;
 
-import java.util.Vector;
+import static org.junit.jupiter.api.Assertions.*;
 
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
+
+import java.util.Vector;
 
 /**
  * Tests for gcc compatible compilers
  *
  * @author CurtA
  */
-public abstract class TestGccCompatibleCCompiler extends TestCase {
+public abstract class TestGccCompatibleCCompiler {
   /**
    * Constructor
    * 
    * @param name
    *          test case name
    */
-  public TestGccCompatibleCCompiler(final String name) {
-    super(name);
-  }
 
   /**
    * Compiler creation method
@@ -51,6 +50,7 @@ public abstract class TestGccCompatibleCCompiler extends TestCase {
   /**
    * Tests command lines switches for warning = 0
    */
+  @Test
   public void testWarningLevel0() {
     final GccCompatibleCCompiler compiler = create();
     final Vector args = new Vector();
@@ -62,6 +62,7 @@ public abstract class TestGccCompatibleCCompiler extends TestCase {
   /**
    * Tests command lines switches for warning = 1
    */
+  @Test
   public void testWarningLevel1() {
     final GccCompatibleCCompiler compiler = create();
     final Vector args = new Vector();
@@ -72,6 +73,7 @@ public abstract class TestGccCompatibleCCompiler extends TestCase {
   /**
    * Tests command lines switches for warning = 2
    */
+  @Test
   public void testWarningLevel2() {
     final GccCompatibleCCompiler compiler = create();
     final Vector args = new Vector();
@@ -82,6 +84,7 @@ public abstract class TestGccCompatibleCCompiler extends TestCase {
   /**
    * Tests command lines switches for warning = 3
    */
+  @Test
   public void testWarningLevel3() {
     final GccCompatibleCCompiler compiler = create();
     final Vector args = new Vector();
@@ -93,6 +96,7 @@ public abstract class TestGccCompatibleCCompiler extends TestCase {
   /**
    * Tests command lines switches for warning = 4
    */
+  @Test
   public void testWarningLevel4() {
     final GccCompatibleCCompiler compiler = create();
     final Vector args = new Vector();
@@ -105,6 +109,7 @@ public abstract class TestGccCompatibleCCompiler extends TestCase {
   /**
    * Tests command lines switches for warning = 5
    */
+  @Test
   public void testWarningLevel5() {
     final GccCompatibleCCompiler compiler = create();
     final Vector args = new Vector();

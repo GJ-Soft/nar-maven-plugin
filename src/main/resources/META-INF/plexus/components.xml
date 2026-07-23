@@ -85,7 +85,7 @@
 					</package>
 					<pre-integration-test></pre-integration-test>
 					<integration-test>
-						com.github.maven-nar:nar-maven-plugin:nar-integration-test
+						org.apache.maven.plugins:maven-failsafe-plugin:jar
 					</integration-test>
 					<post-integration-test></post-integration-test>
 					<verify></verify>

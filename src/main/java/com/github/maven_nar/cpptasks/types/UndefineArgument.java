@@ -19,7 +19,8 @@
  */
 package com.github.maven_nar.cpptasks.types;
 
-import java.util.Vector;
+import java.util.List;
+import java.util.ArrayList;
 
 import org.apache.tools.ant.BuildException;
 
@@ -51,7 +52,7 @@ public class UndefineArgument {
       final UndefineArgument[] baseClone = base.clone();
       return baseClone;
     }
-    final Vector<UndefineArgument> unduplicated = new Vector<>(base.length);
+    final List<UndefineArgument> unduplicated = new ArrayList<>(base.length);
     for (final UndefineArgument current : base) {
       final String currentName = current.getName();
       boolean match = false;
@@ -67,11 +68,11 @@ public class UndefineArgument {
         }
       }
       if (!match) {
-        unduplicated.addElement(current);
+        unduplicated.add(current);
       }
     }
     final UndefineArgument[] combined = new UndefineArgument[unduplicated.size() + override.length];
-    unduplicated.copyInto(combined);
+    unduplicated.toArray(combined);
     final int offset = unduplicated.size();
     System.arraycopy(override, 0, combined, offset + 0, override.length);
     return combined;

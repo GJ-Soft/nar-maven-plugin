@@ -19,15 +19,16 @@
  */
 package com.github.maven_nar.cpptasks;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Vector;
-
-import junit.framework.TestCase;
-
 import com.github.maven_nar.cpptasks.compiler.CommandLineCompilerConfiguration;
 import com.github.maven_nar.cpptasks.compiler.CompilerConfiguration;
 import com.github.maven_nar.cpptasks.gcc.GccCCompiler;
@@ -36,7 +37,7 @@ import com.github.maven_nar.cpptasks.gcc.GccCCompiler;
  * Tests for CCTask.
  *
  */
-public final class TestCCTask extends TestCase {
+public final class TestCCTask {
   /**
    * Constructor.
    * 
@@ -44,9 +45,6 @@ public final class TestCCTask extends TestCase {
    *          test name
    *
    */
-  public TestCCTask(final String name) {
-    super(name);
-  }
 
   /**
    * Test checks for the presence of antlib.xml.
@@ -55,18 +53,20 @@ public final class TestCCTask extends TestCase {
    *           if stream can't be closed.
    *
    */
+  @Test
   public void testAntlibXmlPresent() throws IOException {
     final InputStream stream = TestCCTask.class.getClassLoader().getResourceAsStream(
         "com/github/maven_nar/cpptasks/antlib.xml");
     if (stream != null) {
       stream.close();
     }
-    assertNotNull("antlib.xml missing", stream);
+    assertNotNull(stream, "antlib.xml missing");
   }
 
   /**
    * Tests that the default value of failonerror is true.
    */
+  @Test
   public void testGetFailOnError() {
     final CCTask task = new CCTask();
     final boolean failOnError = task.getFailonerror();
@@ -77,19 +77,21 @@ public final class TestCCTask extends TestCase {
    * Test that a target with no existing object file is
    * returned by getTargetsToBuildByConfiguration.
    */
+  @Test
   public void testGetTargetsToBuildByConfiguration1() {
     final CompilerConfiguration config1 = new CommandLineCompilerConfiguration(GccCCompiler.getInstance(), "dummy",
         new File[0], new File[0], new File[0], "", new String[0], new ProcessorParam[0], true, new String[0]);
     final TargetInfo target1 = new TargetInfo(config1, new File[] {
       new File("src/foo.bar")
     }, null, new File("foo.obj"), true);
-    final Map targets = new HashMap();
+    final Map<File, TargetInfo> targets = new HashMap<>();
     targets.put(target1.getOutput(), target1);
-    final Map targetsByConfig = CCTask.getTargetsToBuildByConfiguration(targets);
-    final Vector targetsForConfig1 = (Vector) targetsByConfig.get(config1);
+    final Map<CompilerConfiguration, List<TargetInfo>> targetsByConfig = CCTask
+        .getTargetsToBuildByConfiguration(targets);
+    final List<TargetInfo> targetsForConfig1 = targetsByConfig.get(config1);
     assertNotNull(targetsForConfig1);
     assertEquals(1, targetsForConfig1.size());
-    final TargetInfo targetx = (TargetInfo) targetsForConfig1.elementAt(0);
+    final TargetInfo targetx = targetsForConfig1.get(0);
     assertSame(target1, targetx);
   }
 
@@ -98,6 +100,7 @@ public final class TestCCTask extends TestCase {
    * getTargetsToBuildByConfiguration.
    *
    */
+  @Test
   public void testGetTargetsToBuildByConfiguration2() {
     final CompilerConfiguration config1 = new CommandLineCompilerConfiguration(GccCCompiler.getInstance(), "dummy",
         new File[0], new File[0], new File[0], "", new String[0], new ProcessorParam[0], false, new String[0]);
@@ -107,18 +110,20 @@ public final class TestCCTask extends TestCase {
     final TargetInfo target1 = new TargetInfo(config1, new File[] {
       new File("src/foo.bar")
     }, null, new File("foo.obj"), false);
-    final Map targets = new HashMap();
+    final Map<File, TargetInfo> targets = new HashMap<>();
     targets.put(target1.getOutput(), target1);
     //
     // no targets need to be built, return a zero-length hashtable
     //
-    final Map targetsByConfig = CCTask.getTargetsToBuildByConfiguration(targets);
+    final Map<CompilerConfiguration, List<TargetInfo>> targetsByConfig = CCTask
+        .getTargetsToBuildByConfiguration(targets);
     assertEquals(0, targetsByConfig.size());
   }
 
   /**
    * Tests that setting failonerror is effective.
    */
+  @Test
   public void testSetFailOnError() {
     final CCTask task = new CCTask();
     task.setFailonerror(false);

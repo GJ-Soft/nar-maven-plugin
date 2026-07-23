@@ -19,10 +19,12 @@
  */
 package com.github.maven_nar.cpptasks.compiler;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
+
 import java.io.File;
-
 import org.apache.tools.ant.BuildException;
-
 import com.github.maven_nar.cpptasks.CCTask;
 import com.github.maven_nar.cpptasks.CompilerDef;
 import com.github.maven_nar.cpptasks.ProcessorDef;
@@ -73,10 +75,6 @@ public class TestAbstractCompiler extends TestAbstractProcessor {
     }
   }
 
-  public TestAbstractCompiler(final String name) {
-    super(name);
-  }
-
   @Override
   protected AbstractProcessor create() {
     return new DummyAbstractCompiler();
@@ -100,6 +98,7 @@ public class TestAbstractCompiler extends TestAbstractProcessor {
     return ".o";
   }
 
+  @Test
   public void testCanParseTlb() {
     final AbstractCompiler compiler = (AbstractCompiler) create();
     assertEquals(false, compiler.canParse(new File("sample.tlb")));

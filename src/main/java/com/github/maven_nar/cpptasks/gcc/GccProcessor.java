@@ -23,7 +23,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Vector;
+import java.util.List;
+import java.util.ArrayList;
 
 import com.github.maven_nar.cpptasks.CUtil;
 import com.github.maven_nar.cpptasks.compiler.CaptureStreamHandler;
@@ -40,7 +41,7 @@ public class GccProcessor {
   // the results from gcc -dumpversion
   private static String version;
 
-  private static int addLibraryPatterns(final String[] libnames, final StringBuffer buf, final String prefix,
+  private static int addLibraryPatterns(final String[] libnames, final StringBuilder buf, final String prefix,
       final String extension, final String[] patterns, final int offset) {
     for (int i = 0; i < libnames.length; i++) {
       buf.setLength(0);
@@ -67,7 +68,7 @@ public class GccProcessor {
     final File gccDir = CUtil.getExecutableLocation("gcc.exe");
     if (gccDir != null) {
       final String prefix = gccDir.getAbsolutePath() + "/..";
-      final StringBuffer buf = new StringBuffer();
+      final StringBuilder buf = new StringBuilder();
       for (int i = 0; i < names.length; i++) {
         final String name = names[i];
         if (name != null && name.length() > 1 && name.charAt(0) == '/') {
@@ -81,7 +82,7 @@ public class GccProcessor {
   }
 
   public static String[] getLibraryPatterns(final String[] libnames) {
-    final StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
     final String[] patterns = new String[libnames.length * 2];
     int offset = addLibraryPatterns(libnames, buf, "lib", ".a", patterns, 0);
     if (isHPUX()) {
@@ -108,7 +109,7 @@ public class GccProcessor {
   }
 
   public static String[] getOutputFileSwitch(final String letter, final String outputFile) {
-    final StringBuffer buf = new StringBuffer();
+    final StringBuilder buf = new StringBuilder();
     if (outputFile.indexOf(' ') >= 0) {
       buf.append('"');
       buf.append(outputFile.replace('\\', '/'));
@@ -156,14 +157,14 @@ public class GccProcessor {
           // read the lines in the file
           //
           final BufferedReader reader = new BufferedReader(new FileReader(specsFile));
-          final Vector lines = new Vector(100);
+          final List<String> lines = new ArrayList<>(100);
           String line = reader.readLine();
           while (line != null) {
-            lines.addElement(line);
+            lines.add(line);
             line = reader.readLine();
           }
           specs = new String[lines.size()];
-          lines.copyInto(specs);
+          lines.toArray(specs);
         } catch (final IOException ex) {
         }
       }
@@ -234,16 +235,17 @@ public class GccProcessor {
       throw new NullPointerException("option");
     }
     final String[][] optionValues = new String[options.length][];
-    final StringBuffer optionValue = new StringBuffer(40);
+    final StringBuilder optionValue = new StringBuilder(40);
     for (int i = 0; i < specsContent.length; i++) {
       String specLine = specsContent[i];
       //
       // if start of section then start paying attention
       //
       if (specLine.startsWith(specSectionStart)) {
-        final Vector[] optionVectors = new Vector[options.length];
+        @SuppressWarnings("unchecked")
+        final List<String>[] optionVectors = new List[options.length];
         for (int j = 0; j < options.length; j++) {
-          optionVectors[j] = new Vector(10);
+          optionVectors[j] = new ArrayList<>(10);
         }
         //
         // go to next line and examine contents
@@ -278,9 +280,9 @@ public class GccProcessor {
               }
               //
               // transition back to whitespace
-              // value is over, add it to vector
+              // value is over, add it to list
               if (hasNonBlank) {
-                optionVectors[j].addElement(optionValue.toString());
+                optionVectors[j].add(optionValue.toString());
               }
               //
               // find next occurance on line
@@ -290,11 +292,11 @@ public class GccProcessor {
           }
         }
         //
-        // copy vectors over to option arrays
+        // copy lists over to option arrays
         //
         for (int j = 0; j < options.length; j++) {
           optionValues[j] = new String[optionVectors[j].size()];
-          optionVectors[j].copyInto(optionValues[j]);
+          optionVectors[j].toArray(optionValues[j]);
         }
       }
     }
