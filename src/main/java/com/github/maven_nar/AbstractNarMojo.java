@@ -195,29 +195,8 @@ public abstract class AbstractNarMojo extends GjsAbstractMojo implements NarCons
 	@Parameter(readonly = true)
 	protected File javaHome;
 
-	/**
-	 * The version of Windows Platform SDK to use
-	 */
-	@Parameter(property = "nar.windows.sdk.version")
-	protected String windowsSdkVersion = null;
-
-	/**
-	 * Provide specific path for Windows Platform SDK, default when not set is to
-	 * search by version.
-	 */
-	@Parameter(property = "nar.windows.sdk.dir")
-	protected String windowsSdkDir = null;
-
 	@Parameter
 	protected Replay replay;
-
-	public String getWindowsSdkVersion() {
-		return this.windowsSdkVersion;
-	}
-
-	public String getWindowsSdkDir() {
-		return this.windowsSdkDir;
-	}
 
 	@Override
 	protected boolean getSkip() {
