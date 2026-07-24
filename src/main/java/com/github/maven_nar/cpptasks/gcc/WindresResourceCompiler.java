@@ -23,8 +23,8 @@ import java.io.File;
 import java.util.List;
 
 import org.apache.tools.ant.types.Environment;
-import org.apache.tools.ant.util.FileUtils;
 
+import com.github.maven_nar.cpptasks.CUtil;
 import com.github.maven_nar.cpptasks.OptimizationEnum;
 import com.github.maven_nar.cpptasks.compiler.CommandLineCompiler;
 import com.github.maven_nar.cpptasks.compiler.LinkType;
@@ -123,7 +123,7 @@ public final class WindresResourceCompiler extends CommandLineCompiler {
     }
     String relative="";
     try {
-        relative = FileUtils.getRelativePath(workDir, new File(filename));
+        relative = CUtil.getRelativeCompilerPath(workDir, new File(filename));
     } catch (Exception ex) {
     }
     if (relative.isEmpty()) {

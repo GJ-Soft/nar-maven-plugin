@@ -35,11 +35,6 @@ import com.github.maven_nar.NarUtil;
 public class TestLinkerVersion {
   private Linker linker;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see junit.framework.TestCase#setUp()
-   */
   @BeforeEach
   protected void setUp() throws Exception {
     final String architecture = System.getProperty("os.arch");

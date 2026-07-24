@@ -412,7 +412,7 @@ public final class VersionInfo extends DataType {
    */
   public VersionInfo merge() {
     if (isReference()) {
-      final VersionInfo refVersion = (VersionInfo) getCheckedRef(VersionInfo.class, "VersionInfo");
+      final VersionInfo refVersion = getCheckedRef(VersionInfo.class, "VersionInfo");
       return refVersion.merge();
     }
     Reference currentRef = this.getExtends();
@@ -426,7 +426,7 @@ public final class VersionInfo extends DataType {
       if (obj instanceof VersionInfo) {
         VersionInfo current = (VersionInfo) obj;
         if (current.isReference()) {
-          current = (VersionInfo) current.getCheckedRef(VersionInfo.class, "VersionInfo");
+          current = current.getCheckedRef(VersionInfo.class, "VersionInfo");
         }
         if (stack.contains(current)) {
           throw this.circularReference();

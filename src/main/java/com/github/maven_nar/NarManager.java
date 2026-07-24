@@ -21,7 +21,6 @@ package com.github.maven_nar;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.JarFile;
@@ -119,7 +118,7 @@ public class NarManager {
 		if (nars != null) {
 			for (final String nar2 : nars) {
 				this.log.debug("    Checking: " + nar2);
-				if (nar2.equals("")) {
+				if (nar2.isEmpty()) {
 					continue;
 				}
 				final String[] nar = nar2.split(":", 5);
@@ -234,25 +233,35 @@ public class NarManager {
 		return artifactList;
 	}
 
+	// LocalRepositoryManager.getPathForLocalArtifact and LocalRepository.getBasedir
+	// are deprecated in Maven Resolver 1.9.x; their Path-based replacements only
+	// exist in Resolver 2.x / Maven 4, so we keep the 1.9.x API here.
+	@SuppressWarnings("deprecation")
 	public final File getNarFile(final Artifact dependency) throws MojoFailureException {
 		// FIXME reported to maven developer list, isSnapshot changes behaviour
 		// of getBaseVersion, called in pathOf.
 		dependency.isSnapshot();
-		Path path = repoSession.getLocalRepositoryManager()
-				.getAbsolutePathForLocalArtifact(RepositoryUtils.toArtifact(dependency));
+		final org.eclipse.aether.repository.LocalRepositoryManager localRepoManager = repoSession
+				.getLocalRepositoryManager();
+		final String relativePath = localRepoManager
+				.getPathForLocalArtifact(RepositoryUtils.toArtifact(dependency));
+		final File resolvedFile = new File(localRepoManager.getRepository().getBasedir(), relativePath);
 		final File file = new File(
-				NarUtil.replace("${aol}", this.defaultAOL.toString(), path.toFile().getAbsolutePath()));
+				NarUtil.replace("${aol}", this.defaultAOL.toString(), resolvedFile.getAbsolutePath()));
 		return file;
 	}
 
+	@SuppressWarnings("deprecation") // Resolver 1.9.x getPathForLocalArtifact/getBasedir (see getNarFile)
 	public final NarInfo getNarInfo(final Artifact dependency) throws MojoExecutionException {
 		// FIXME reported to maven developer list, isSnapshot changes behaviour
 		// of getBaseVersion, called in pathOf.
 		dependency.isSnapshot();
 
-		Path path = repoSession.getLocalRepositoryManager()
-				.getAbsolutePathForLocalArtifact(RepositoryUtils.toArtifact(dependency));
-		final File file = new File(path.toFile().getAbsolutePath());
+		final org.eclipse.aether.repository.LocalRepositoryManager localRepoManager = repoSession
+				.getLocalRepositoryManager();
+		final String relativePath = localRepoManager
+				.getPathForLocalArtifact(RepositoryUtils.toArtifact(dependency));
+		final File file = new File(localRepoManager.getRepository().getBasedir(), relativePath);
 		if (!file.exists()) {
 			return null;
 		}

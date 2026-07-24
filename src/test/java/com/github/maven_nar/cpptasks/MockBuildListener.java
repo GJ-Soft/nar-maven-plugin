@@ -28,13 +28,13 @@ import org.apache.tools.ant.BuildListener;
  * 
  */
 public class MockBuildListener implements BuildListener {
-  private final Vector buildFinishedEvents = new Vector();
-  private final Vector buildStartedEvents = new Vector();
-  private final Vector messageLoggedEvents = new Vector();
-  private final Vector targetFinishedEvents = new Vector();
-  private final Vector targetStartedEvents = new Vector();
-  private final Vector taskFinishedEvents = new Vector();
-  private final Vector taskStartedEvents = new Vector();
+  private final Vector<BuildEvent> buildFinishedEvents = new Vector<>();
+  private final Vector<BuildEvent> buildStartedEvents = new Vector<>();
+  private final Vector<BuildEvent> messageLoggedEvents = new Vector<>();
+  private final Vector<BuildEvent> targetFinishedEvents = new Vector<>();
+  private final Vector<BuildEvent> targetStartedEvents = new Vector<>();
+  private final Vector<BuildEvent> taskFinishedEvents = new Vector<>();
+  private final Vector<BuildEvent> taskStartedEvents = new Vector<>();
 
   /**
    * Signals that the last target has finished. This event will still be
@@ -64,8 +64,8 @@ public class MockBuildListener implements BuildListener {
     this.buildStartedEvents.addElement(event);
   }
 
-  public Vector getBuildFinishedEvents() {
-    return new Vector(this.buildFinishedEvents);
+  public Vector<BuildEvent> getBuildFinishedEvents() {
+    return new Vector<>(this.buildFinishedEvents);
   }
 
   /**
@@ -73,8 +73,8 @@ public class MockBuildListener implements BuildListener {
    * 
    * @return list of build started events
    */
-  public Vector getBuildStartedEvents() {
-    return new Vector(this.buildStartedEvents);
+  public Vector<BuildEvent> getBuildStartedEvents() {
+    return new Vector<>(this.buildStartedEvents);
   }
 
   /**
@@ -82,8 +82,8 @@ public class MockBuildListener implements BuildListener {
    * 
    * @return vector of "MessageLogged" events.
    */
-  public Vector getMessageLoggedEvents() {
-    return new Vector(this.messageLoggedEvents);
+  public Vector<BuildEvent> getMessageLoggedEvents() {
+    return new Vector<>(this.messageLoggedEvents);
   }
 
   /**
@@ -91,8 +91,8 @@ public class MockBuildListener implements BuildListener {
    * 
    * @return vector of "TargetFinished" events.
    */
-  public Vector getTargetFinishedEvents() {
-    return new Vector(this.targetFinishedEvents);
+  public Vector<BuildEvent> getTargetFinishedEvents() {
+    return new Vector<>(this.targetFinishedEvents);
   }
 
   /**
@@ -100,8 +100,8 @@ public class MockBuildListener implements BuildListener {
    * 
    * @return vector of "TargetStarted" events.
    */
-  public Vector getTargetStartedEvents() {
-    return new Vector(this.targetStartedEvents);
+  public Vector<BuildEvent> getTargetStartedEvents() {
+    return new Vector<>(this.targetStartedEvents);
   }
 
   /**
@@ -109,8 +109,8 @@ public class MockBuildListener implements BuildListener {
    * 
    * @return vector of "TaskFinished" events.
    */
-  public Vector getTaskFinishedEvents() {
-    return new Vector(this.taskFinishedEvents);
+  public Vector<BuildEvent> getTaskFinishedEvents() {
+    return new Vector<>(this.taskFinishedEvents);
   }
 
   /**
@@ -118,8 +118,8 @@ public class MockBuildListener implements BuildListener {
    * 
    * @return vector of "TaskStarted" events.
    */
-  public Vector getTaskStartedEvents() {
-    return new Vector(this.taskStartedEvents);
+  public Vector<BuildEvent> getTaskStartedEvents() {
+    return new Vector<>(this.taskStartedEvents);
   }
 
   /**

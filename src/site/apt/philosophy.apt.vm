@@ -106,7 +106,7 @@ specific parts of the native library, such as include headers.
 	[<<<artifactId-version-aol-type.nar>>>] contains the architecture
 specific parts of the native library, such as the library and object files.
 The <aol> is an Architecture-OS-Linker qualifier, for example: 
-ppc-MacOSX-g++. The <type> specifies what binding the library is, for
+amd64-Linux-g++. The <type> specifies what binding the library is, for
 example: shared, static or jni.
 
 	[]
@@ -234,14 +234,14 @@ remoterepo/
                                    nmath-4.5.1.jar.sha1
                                    nmath-4.5.1-noarch.nar
                                    nmath-4.5.1-noarch.nar.sha1
-                                   nmath-4.5.1-MacOSX-g++-static.nar
-                                   nmath-4.5.1-MacOSX-g++-static.nar.sha1
-                                   nmath-4.5.1-MacOSX-g++-shared.nar
-                                   nmath-4.5.1-MacOSX-g++-shared.nar.sha1
+                                   nmath-4.5.1-Linux-g++-static.nar
+                                   nmath-4.5.1-Linux-g++-static.nar.sha1
                                    nmath-4.5.1-Linux-g++-shared.nar
                                    nmath-4.5.1-Linux-g++-shared.nar.sha1
-                                   nmath-4.5.1-Windows-msvc-shared.nar
-                                   nmath-4.5.1-Windows-msvc-shared.nar.sha1
+                                   nmath-4.5.1-Linux-g++-shared.nar
+                                   nmath-4.5.1-Linux-g++-shared.nar.sha1
+                                   nmath-4.5.1-Windows-gcc-shared.nar
+                                   nmath-4.5.1-Windows-gcc-shared.nar.sha1
                                    ...
 +--
 

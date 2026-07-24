@@ -141,7 +141,8 @@ public class NarCompileMojo extends AbstractCompileMojo {
 
 		// If we are building a shared library on AIX and the user has specified a
 		// sharedObjectName, use it.
-		if (getOS().equals(OS.AIX) && type.equals(Library.SHARED) && sharedObjectName != "") {
+		if (getOS().equals(OS.AIX) && type.equals(Library.SHARED) && sharedObjectName != null
+				&& !sharedObjectName.isEmpty()) {
 			task.setSharedObjectName(sharedObjectName);
 		}
 
@@ -391,7 +392,7 @@ public class NarCompileMojo extends AbstractCompileMojo {
 
 						// FIXME, no way to override
 						final String libs = aolNarInfo.getLibs(getAOL());
-						if (libs != null && !libs.equals("")) {
+						if (libs != null && !libs.isEmpty()) {
 							getLog().debug("Using LIBS = " + libs);
 							libSet.setLibs(new CUtil.StringArrayBuilder(libs));
 							libSet.setDir(dir);
@@ -404,7 +405,7 @@ public class NarCompileMojo extends AbstractCompileMojo {
 					// FIXME, look again at this, for multiple dependencies we may need to
 					// remove duplicates
 					final String options = dependency.getNarInfo().getOptions(getAOL());
-					if (options != null && !options.equals("")) {
+					if (options != null && !options.isEmpty()) {
 						getLog().debug("Using OPTIONS = " + options);
 						final LinkerArgument arg = new LinkerArgument();
 						arg.setValue(options);

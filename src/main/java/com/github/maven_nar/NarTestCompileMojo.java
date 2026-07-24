@@ -357,7 +357,7 @@ public class NarTestCompileMojo extends AbstractCompileMojo {
 
 					// FIXME, no way to override
 					final String libs = aolNarInfo.getLibs(getAOL());
-					if (libs != null && !libs.equals("")) {
+					if (libs != null && !libs.isEmpty()) {
 						getLog().debug("Using LIBS = " + libs);
 						libSet.setLibs(new CUtil.StringArrayBuilder(libs));
 						libSet.setDir(dir);
@@ -370,7 +370,7 @@ public class NarTestCompileMojo extends AbstractCompileMojo {
 				// FIXME, look again at this, for multiple dependencies we may need to
 				// remove duplicates
 				final String options = dependency.getNarInfo().getOptions(getAOL());
-				if (options != null && !options.equals("")) {
+				if (options != null && !options.isEmpty()) {
 					getLog().debug("Using OPTIONS = " + options);
 					final LinkerArgument arg = new LinkerArgument();
 					arg.setValue(options);

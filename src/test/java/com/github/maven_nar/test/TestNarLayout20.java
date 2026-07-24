@@ -52,11 +52,6 @@ public class TestNarLayout20 {
 
   private String type;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see junit.framework.TestCase#setUp()
-   */
   @BeforeEach
   protected void setUp() throws Exception {
     this.log = new SystemStreamLog();

@@ -122,7 +122,7 @@ public final class PrecompileDef extends DataType {
 
   private PrecompileDef getRef() {
     if (isReference()) {
-      return (PrecompileDef) getCheckedRef(PrecompileDef.class, "PrecompileDef");
+      return getCheckedRef(PrecompileDef.class, "PrecompileDef");
     }
     return null;
   }

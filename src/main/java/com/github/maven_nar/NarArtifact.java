@@ -29,6 +29,7 @@ public class NarArtifact extends DefaultArtifact {
 
   private final NarInfo narInfo;
 
+  @SuppressWarnings("this-escape") // setFile is called on a fully usable DefaultArtifact super
   public NarArtifact(final Artifact dependency, final NarInfo narInfo) {
     super(dependency.getGroupId(), dependency.getArtifactId(), dependency.getVersionRange(), dependency.getScope(),
         dependency.getType(), dependency.getClassifier(), dependency.getArtifactHandler(), dependency.isOptional());

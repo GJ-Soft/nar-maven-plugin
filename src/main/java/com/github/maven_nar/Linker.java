@@ -518,6 +518,10 @@ public class Linker {
 		return version;
 	}
 
+	public List<Lib> getLibs() {
+		return libs;
+	}
+
 	public List<SysLib> getSysLibs() {
 		return sysLibs;
 	}

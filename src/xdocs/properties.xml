@@ -73,7 +73,7 @@
                 
                     <tr>
                         <td>maven.nar.os</td>
-                        <td>Operating System [<i>os</i>] (ex: Linux, win32, MacOSX, SunOs, ...)</td>
+                        <td>Operating System [<i>os</i>] (ex: Linux, Windows, ...)</td>
                         <td>
                             <code>${os.name}</code> (Note: no spaces)
                         </td>
@@ -82,7 +82,7 @@
                     <tr>
                         <td>[<i>arch.</i>[<i>os.</i>]]maven.nar.linker</td>
                         <td><a href="http://ant-contrib.sourceforge.net/linker.html">Linker</a> [<i>linker</i>] 
-                            (ex: msvc, g++, CC, ...), but you may use any name here and override it in
+                            (ex: g++, gcc, gfortran), but you may use any name here and override it in
                             the property <i>arch.os.linker.</i>maven.nar.linker to the real linker name.</td>
                         <td>Architecture-OS specific, see <a href="#Architecture-OS">below</a>.</td>
                     </tr>
@@ -160,30 +160,12 @@
                     </tr>
         
                     <tr>
-                        <td>maven.nar.compile.withjava</td>
-                        <td>Adds the Java Virtual Machine include files for compilation</td>
-                        <td>false (automatic if the nar:jni goal is run and headers are generated)</td>
-                    </tr>
-                                
-                    <tr>
                         <td>maven.nar.test.compile.includepath</td>
                         <td><a href="http://ant-contrib.sourceforge.net/includepath.html">
                             Include path for compilation of tests</a></td>
                         <td><code>src/test/include</code></td>
                     </tr>
         
-                    <tr>
-                        <td>maven.nar.link.withjava</td>
-                        <td>Enables the linking with the Java Virtual Machine</td>
-                        <td><code>${maven.nar.compile.withjava}</code></td>
-                    </tr>
-
-                    <tr>
-                        <td>maven.nar.jni.classpath</td>
-                        <td>Classpath to add for nar:jni goal</td>
-                        <td></td>
-                    </tr>
-
                     <tr>
                         <td>maven.nar.tests</td>
                         <td>List of test (executables) to be generated</td>
@@ -550,203 +532,78 @@
 
 
 
-        <section name="Default values for Architecture and Operating System specific properties">
+        <section name="Default values for the GNU toolchains">
             <p>
-                Below are the defaults for the architecture and os specific properties. Each of the property names
-                is prefixed with the <code>arch.os</code> name as given in the different columns.
+                This fork targets the GNU toolchains only (<code>gcc</code>, <code>g++</code>,
+                <code>gfortran</code>). The table below lists the most relevant architecture-os
+                defaults for the supported platforms. The complete, authoritative set of per-AOL
+                defaults lives in
+                <code>src/main/resources/com/github/maven_nar/aol.properties</code>.
+            </p>
+            <p>
+                On Windows the GNU toolchain is used through Cygwin/MinGW; the resulting AOL then
+                looks like <code>x86_64-pc-cygwin-Windows-gcc</code>.
             </p>
             <table>
                 <tr>
                     <th>Property</th>
-                    <th>x86.win32</th>
-                    <th>i386.Linux</th>
-                    <th>amd64.Linux</th>
-                    <th>ppc.MacOSX</th>
-                    <th>sparc.SunOS</th>
+                    <th>*.Linux (gcc/g++)</th>
+                    <th>*.Windows (Cygwin, gcc/g++)</th>
                 </tr>
-                
+
                 <tr>
                     <td>maven.nar.linker</td>
-                    <td>msvc</td>
                     <td>g++</td>
                     <td>g++</td>
-                    <td>g++</td>
-                    <td>CC</td>                
-                </tr>
-    
-                <tr>
-                    <td>maven.nar.java.home</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td><code>${java.home}</code></td>
-                    <td></td>                
-                </tr>
-    
-                <tr>
-                    <td>maven.nar.java.include.os prefixed with <code>maven.nar.java.home</code></td>
-                    <td>include/win32</td>
-                    <td>include/linux</td>
-                    <td>include/linux</td>
-                    <td></td>
-                    <td>include/solaris</td>                
-                </tr>
-    
-                <tr>
-                    <td>maven.nar.java.vm prefixed with <code>maven.nar.java.home</code></td>
-                    <td><code>lib</code></td>
-                    <td><code>jre/lib/i386/client</code></td>
-                    <td><code>jre/lib/amd64/server</code></td>
-                    <td>IGNORED, uses "-framework JavaVM"</td>
-                    <td><code>jre/lib/sparc/server</code></td>
                 </tr>
 
                 <tr>
-                    <td>maven.nar.multithreaded</td>
-                    <td>true</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>                
-                </tr>
-    
-                <tr>
                     <td>maven.nar.cpp.compiler</td>
-                    <td>msvc</td>
                     <td>g++</td>
                     <td>g++</td>
-                    <td>g++</td>
-                    <td>CC</td>                
                 </tr>
-    
+
                 <tr>
                     <td>maven.nar.c.compiler</td>
-                    <td>msvc</td>
                     <td>gcc</td>
                     <td>gcc</td>
-                    <td>gcc</td>
-                    <td>suncc</td>                
                 </tr>
-    
+
                 <tr>
                     <td>maven.nar.fortran.compiler</td>
-                    <td>df</td>
-                    <td>g77</td>
-                    <td>g77</td>
-                    <td>g77</td>
-                    <td>sunf77</td>                
+                    <td>gfortran</td>
+                    <td>gfortran</td>
                 </tr>
-    
-                <tr>
-                    <td>maven.nar.compiler.arg.start</td>
-                    <td>-DWIN32</td>
-                    <td>-DLinux</td>
-                    <td>-DLinux</td>
-                    <td>-DDarwin</td>
-                    <td>-lpthread -DSOLARIS2</td>                
-                </tr>
-    
-                <tr>
-                    <td>maven.nar.linker.arg.start</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td>-lpthread</td>                
-                </tr>
-                    
-                <tr>
-                    <td>maven.nar.arch.includes</td>
-                    <td>lib/**/*.lib lib/**/*.dll</td>
-                    <td>lib/**/*.a lib/**/*.so</td>
-                    <td>lib/**/*.a lib/**/*.so</td>
-                    <td>lib/**/*.a lib/**/*.so lib/**/*.dylib lib/**/*.jnilib</td>
-                    <td>lib/**/*.a lib/**/*.so</td>                
-                </tr>
-    
+
                 <tr>
                     <td>maven.nar.lib.prefix</td>
-                    <td></td>
                     <td>lib</td>
                     <td>lib</td>
-                    <td>lib</td>
-                    <td>lib</td>                
                 </tr>
-    
+
                 <tr>
                     <td>maven.nar.static.extension</td>
-                    <td>.lib</td>
                     <td>.a</td>
                     <td>.a</td>
-                    <td>.a</td>
-                    <td>.a</td>                
                 </tr>
-    
+
                 <tr>
                     <td>maven.nar.shared.extension</td>
+                    <td>.so</td>
                     <td>.dll</td>
-                    <td>.so</td>
-                    <td>.so</td>
-                    <td>.dylib</td>
-                    <td>.so</td>                
                 </tr>
-    
+
                 <tr>
                     <td>maven.nar.plugin.extension</td>
+                    <td>.so</td>
                     <td>.dll</td>
-                    <td>.so</td>
-                    <td>.so</td>
-                    <td>.bundle</td>
-                    <td>.so</td>                
                 </tr>
-    
+
                 <tr>
                     <td>maven.nar.executable.extension</td>
+                    <td></td>
                     <td>.exe</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>                
                 </tr>
-    
-            </table>
-        </section>
-
-
-        <section name="Default values for Architecture, Operating System and Linker specific properties">
-            <p>
-                Below are the defaults for the architecture, os and linker specific properties. Each of the property names
-                is prefixed with the <code>arch.os.linker</code> name as given in the different columns.
-            </p>
-            <table>
-                <tr>
-                    <th>Property</th>
-                    <th>x86.win32.g++</th>
-                    <th>i386.Linux.icc</th>
-                    <th>i386.Linux.ecc</th>
-                </tr>
-                
-                <tr>
-                    <td>maven.nar.cpp.compiler</td>
-                    <td>g++</td>
-                    <td>icpc</td>
-                    <td>ecpc</td>
-                </tr>
-    
-                <tr>
-                    <td>maven.nar.c.compiler</td>
-                    <td>gcc</td>
-                    <td>icc</td>
-                    <td>ecc</td>
-                </tr>
-    
-                <tr>
-                    <td>maven.nar.fortran.compiler</td>
-                    <td>g77</td>
-                    <td>ifort</td>
-                    <td>ifort (should this be efc?)</td>
-                </tr>
-    
             </table>
         </section>
 

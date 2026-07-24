@@ -251,8 +251,14 @@ All compiler elements share the same schema (`C`, `Cpp`, `Fortran`,
   <map>false</map>
   <skipDepLink>false</skipDepLink>
   <options>...</options>  <testOptions>...</testOptions>  <optionSet>...</optionSet>  <clearDefaultOptions>false</clearDefaultOptions>
-  <libs>                     <!-- List<Lib>: name / type / directory / nested libs -->
-    <lib><name>...</name><type>...</type><directory>...</directory></lib>
+  <libs>                     <!-- List<Lib>: name / type / directory / binDirectory / nested libs -->
+    <lib>
+      <name>...</name>
+      <type>...</type>
+      <directory>...</directory>       <!-- link dir (holds the .lib/.a/.dll.a import lib) -->
+      <binDirectory>...</binDirectory> <!-- optional: runtime dir holding the .dll/.so, added to
+                                            PATH/LD_LIBRARY_PATH when running tests/executables -->
+    </lib>
   </libs>
   <libSet>...</libSet>
   <sysLibs>                  <!-- List<SysLib>: name / type -->

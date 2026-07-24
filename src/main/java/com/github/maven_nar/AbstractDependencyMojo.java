@@ -22,13 +22,15 @@ package com.github.maven_nar;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.ListIterator;
 import java.util.Set;
 import java.util.jar.JarFile;
@@ -74,9 +76,6 @@ import org.eclipse.aether.util.graph.transformer.NoopDependencyGraphTransformer;
  */
 public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 
-	@Parameter(defaultValue = "${localRepository}", required = true, readonly = true)
-	private LocalRepository localRepository;
-
 	/**
 	 * Artifact resolver, needed to download the attached nar files.
 	 */
@@ -86,7 +85,7 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 	/**
 	 * Remote repositories which will be searched for nar attachments.
 	 */
-	@Parameter(defaultValue = "${project.remoteArtifactRepositories}", required = true, readonly = true)
+	@Parameter(defaultValue = "${project.remoteProjectRepositories}", required = true, readonly = true)
 	protected List<RemoteRepository> remoteArtifactRepositories;
 
 	/**
@@ -151,6 +150,14 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 	private RepositorySystemSession repoSession;
 
 	/**
+	 * The current Maven session, used to obtain a
+	 * {@link org.apache.maven.project.ProjectBuildingRequest} for the dependency
+	 * graph builder.
+	 */
+	@Parameter(defaultValue = "${session}", readonly = true, required = true)
+	private org.apache.maven.execution.MavenSession session;
+
+	/**
 	 * The List of repositories queried by the verbose dependency graph collection
 	 * request.
 	 * 
@@ -175,6 +182,9 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 	 *         projects verbose dependency tree.
 	 * @since 3.5.2
 	 */
+	// OptionalDependencySelector/ScopeDependencySelector are deprecated in Maven
+	// Resolver 1.9.x (their replacement only exists in Resolver 2.x / Maven 4).
+	@SuppressWarnings("deprecation")
 	protected org.eclipse.aether.graph.DependencyNode getVerboseDependencyTree() {
 		// Create CollectRequest object that will be submitted to collect the
 		// dependencies
@@ -481,7 +491,7 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 	 * @since 3.5.3
 	 */
 	private String createArtifactString(org.eclipse.aether.artifact.Artifact artifact) {
-		return new String(artifact.getGroupId() + ":" + artifact.getArtifactId());
+		return artifact.getGroupId() + ":" + artifact.getArtifactId();
 	}
 
 	/**
@@ -519,11 +529,12 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 		try {
 			ArtifactFilter artifactFilter = null;
 
-			// works for only maven 3. Use of dependency graph component not handled for
-			// maven 2
-			// as current version of NAR already requires Maven 3.x
-			rootNode = dependencyGraphBuilder.buildDependencyGraph(getMavenProject().getProjectBuildingRequest(),
-					artifactFilter);
+			// Build a ProjectBuildingRequest from the session (the request obtained from
+			// MavenProject is deprecated) and point it at the current project.
+			final org.apache.maven.project.ProjectBuildingRequest buildingRequest = new org.apache.maven.project.DefaultProjectBuildingRequest(
+					session.getProjectBuildingRequest());
+			buildingRequest.setProject(getMavenProject());
+			rootNode = dependencyGraphBuilder.buildDependencyGraph(buildingRequest, artifactFilter);
 
 		} catch (DependencyGraphBuilderException exception) {
 			throw new MojoExecutionException("Cannot build project dependency graph", exception);
@@ -630,7 +641,7 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 		if (nars != null) {
 			for (final String nar2 : nars) {
 				getLog().debug("    Checking: " + nar2);
-				if (nar2.equals("")) {
+				if (nar2.isEmpty()) {
 					continue;
 				}
 				final String[] nar = nar2.split(":", 5);
@@ -718,7 +729,7 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 	// private List remotePluginRepositories;
 
 	protected final LocalRepository getLocalRepository() {
-		return this.localRepository;
+		return this.repoSession.getLocalRepository();
 	}
 
 	/**
@@ -762,10 +773,63 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 				}
 			}
 		}
+		// Order by dependency depth: deeper (more transitive) dependencies first, so
+		// their include directories precede those of shallower dependencies. This
+		// keeps the compiler's include search order deterministic and lets a module's
+		// own headers win when several dependencies ship a header with the same name.
+		//
+		// The depth is taken from the full, unmediated dependency tree, using the
+		// DEEPEST occurrence of each artifact. This way a dependency that is also
+		// declared directly (and would otherwise be mediated to a shallow trail) is
+		// still ordered by its longest path, e.g. base declared both directly and via
+		// base-types is treated as the deeper (transitive) one.
+		final Map<String, Integer> depthByArtifact = getMaxDependencyDepths();
+		narDependencies.sort(Comparator
+				.comparingInt((final NarArtifact a) -> depthByArtifact
+						.getOrDefault(a.getGroupId() + ":" + a.getArtifactId(), 0))
+				.reversed().thenComparing(NarArtifact::getArtifactId));
+
 		getLog().debug("Dependencies contained " + narDependencies.size() + " NAR artifacts.");
 		return narDependencies;
 	}
 
+	/**
+	 * Computes, for each artifact in the project's full (unmediated) dependency
+	 * tree, the maximum depth at which it occurs. The project itself is at depth 0,
+	 * its direct dependencies at depth 1, and so on. When the same artifact is
+	 * reachable through several paths, the longest one wins.
+	 *
+	 * @return map keyed by {@code groupId:artifactId} to its deepest level in the
+	 *         dependency tree; empty if the tree could not be collected.
+	 */
+	private Map<String, Integer> getMaxDependencyDepths() {
+		final Map<String, Integer> depths = new HashMap<>();
+		final org.eclipse.aether.graph.DependencyNode root = getVerboseDependencyTree();
+		if (root != null) {
+			accumulateDepths(root, 0, depths);
+		}
+		return depths;
+	}
+
+	private void accumulateDepths(final org.eclipse.aether.graph.DependencyNode node, final int depth,
+			final Map<String, Integer> depths) {
+		final org.eclipse.aether.artifact.Artifact artifact = node.getArtifact();
+		if (artifact != null) {
+			final String key = artifact.getGroupId() + ":" + artifact.getArtifactId();
+			final Integer previous = depths.get(key);
+			if (previous == null || depth > previous) {
+				depths.put(key, depth);
+			}
+		}
+		for (final org.eclipse.aether.graph.DependencyNode child : node.getChildren()) {
+			accumulateDepths(child, depth + 1, depths);
+		}
+	}
+
+	// LocalRepositoryManager.getPathForLocalArtifact and LocalRepository.getBasedir
+	// are deprecated in Maven Resolver 1.9.x; their Path-based replacements only
+	// exist in Resolver 2.x / Maven 4, so we keep the 1.9.x API here.
+	@SuppressWarnings("deprecation")
 	public final NarInfo getNarInfo(final Artifact dependency) throws MojoExecutionException {
 		// FIXME reported to maven developer list, isSnapshot changes behaviour
 		// of getBaseVersion, called in pathOf.
@@ -778,9 +842,11 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 					getLog(), dependency.getFile());
 		}
 
-		Path path = repoSession.getLocalRepositoryManager()
-				.getAbsolutePathForLocalArtifact(RepositoryUtils.toArtifact(dependency));
-		final File file = new File(path.toFile().getAbsolutePath());
+		final org.eclipse.aether.repository.LocalRepositoryManager localRepoManager = repoSession
+				.getLocalRepositoryManager();
+		final String relativePath = localRepoManager
+				.getPathForLocalArtifact(RepositoryUtils.toArtifact(dependency));
+		final File file = new File(localRepoManager.getRepository().getBasedir(), relativePath);
 		if (!file.exists()) {
 			getLog().debug("Dependency nar file does not exist: " + file);
 			return null;

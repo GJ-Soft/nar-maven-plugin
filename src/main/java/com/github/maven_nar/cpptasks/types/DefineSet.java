@@ -91,7 +91,7 @@ public class DefineSet extends DataType {
   /** Returns the defines and undefines in this set. */
   public UndefineArgument[] getDefines() throws BuildException {
     if (isReference()) {
-      final DefineSet defset = (DefineSet) getCheckedRef(DefineSet.class, "DefineSet");
+      final DefineSet defset = getCheckedRef(DefineSet.class, "DefineSet");
       return defset.getDefines();
     } else {
       if (isActive()) {

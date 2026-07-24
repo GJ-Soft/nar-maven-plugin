@@ -72,7 +72,7 @@ public class LibrarySet extends DataType {
    */
   public String getDataset() {
     if (isReference()) {
-      final LibrarySet master = (LibrarySet) getCheckedRef(LibrarySet.class, "LibrarySet");
+      final LibrarySet master = getCheckedRef(LibrarySet.class, "LibrarySet");
       return master.getDataset();
     }
     return this.dataset;
@@ -80,7 +80,7 @@ public class LibrarySet extends DataType {
 
   public File getDir(final Project project) {
     if (isReference()) {
-      final LibrarySet master = (LibrarySet) getCheckedRef(LibrarySet.class, "LibrarySet");
+      final LibrarySet master = getCheckedRef(LibrarySet.class, "LibrarySet");
       return master.getDir(project);
     }
     return this.set.getDir(project);
@@ -88,7 +88,7 @@ public class LibrarySet extends DataType {
 
   protected FileSet getFileSet() {
     if (isReference()) {
-      final LibrarySet master = (LibrarySet) getCheckedRef(LibrarySet.class, "LibrarySet");
+      final LibrarySet master = getCheckedRef(LibrarySet.class, "LibrarySet");
       return master.getFileSet();
     }
     return this.set;
@@ -96,7 +96,7 @@ public class LibrarySet extends DataType {
 
   public String[] getLibs() {
     if (isReference()) {
-      final LibrarySet master = (LibrarySet) getCheckedRef(LibrarySet.class, "LibrarySet");
+      final LibrarySet master = getCheckedRef(LibrarySet.class, "LibrarySet");
       return master.getLibs();
     }
     final String[] retval = this.libnames.clone();
@@ -110,7 +110,7 @@ public class LibrarySet extends DataType {
    */
   public LibraryTypeEnum getType() {
     if (isReference()) {
-      final LibrarySet master = (LibrarySet) getCheckedRef(LibrarySet.class, "LibrarySet");
+      final LibrarySet master = getCheckedRef(LibrarySet.class, "LibrarySet");
       return master.getType();
     }
     return this.libraryType;
@@ -146,8 +146,8 @@ public class LibrarySet extends DataType {
       }
     }
     if (isReference()) {
-      final LibrarySet master = (LibrarySet) getCheckedRef(LibrarySet.class, "LibrarySet");
-      return master.isActive(this.project);
+      final LibrarySet master = getCheckedRef(LibrarySet.class, "LibrarySet");
+      return master.isActive(getProject());
     }
     if (this.libnames.length == 0) {
       p.log("libnames not specified or empty.", Project.MSG_WARN);
@@ -269,7 +269,7 @@ public class LibrarySet extends DataType {
       visitLibraries(final Project project, final Linker linker, final File[] libpath, final FileVisitor visitor)
           throws BuildException {
     if (isReference()) {
-      final LibrarySet master = (LibrarySet) getCheckedRef(LibrarySet.class, "LibrarySet");
+      final LibrarySet master = getCheckedRef(LibrarySet.class, "LibrarySet");
       master.visitLibraries(project, linker, libpath, visitor);
     }
     //

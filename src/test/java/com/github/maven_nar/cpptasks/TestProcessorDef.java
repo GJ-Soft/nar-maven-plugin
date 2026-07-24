@@ -65,7 +65,7 @@ public abstract class TestProcessorDef {
     project.addReference("base", baseProcessor);
     final ProcessorDef extendedLinker = create();
     extendedLinker.setProject(project);
-    extendedLinker.setExtends(new Reference("base"));
+    extendedLinker.setExtends(new Reference(project, "base"));
     return extendedLinker;
   }
 

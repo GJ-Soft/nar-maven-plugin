@@ -242,7 +242,7 @@ public class GccProcessor {
       // if start of section then start paying attention
       //
       if (specLine.startsWith(specSectionStart)) {
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({ "unchecked", "rawtypes" }) // generic array creation is not allowed in Java
         final List<String>[] optionVectors = new List[options.length];
         for (int j = 0; j < options.length; j++) {
           optionVectors[j] = new ArrayList<>(10);

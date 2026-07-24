@@ -59,7 +59,7 @@ Examples
 	form of a JNI library and a corresponding jar file. The "jni" lib is currently provided for the following
 	platforms:
 	
-	* x86_64-MacOSX-g++
+	* x86_64-Linux-g++
 	
 	[]
 	
@@ -103,7 +103,7 @@ Examples
 	
 	[#link_it( 'it0018-fortran', '' )] A Fortran 90 program, not enabled on Windows. 
 	
-	[#link_it( 'it0019-compiler', '' )] Test to run with the Intel compiler.
+	[#link_it( 'it0019-compiler', '' )] Test to run with an explicitly configured compiler.
 	
 	[]
 

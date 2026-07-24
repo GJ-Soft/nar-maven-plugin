@@ -35,12 +35,12 @@ public final class MockFileCollector implements FileVisitor {
   /**
    * list of fileName parameter values.
    */
-  private final List fileNames = new ArrayList();
+  private final List<String> fileNames = new ArrayList<>();
 
   /**
    * list of baseDir parameter values.
    */
-  private final List baseDirs = new ArrayList();
+  private final List<File> baseDirs = new ArrayList<>();
 
   /**
    * Constructor.
@@ -57,7 +57,7 @@ public final class MockFileCollector implements FileVisitor {
    * @return value of baseDir parameter
    */
   public File getBaseDir(final int index) {
-    return (File) this.baseDirs.get(index);
+    return this.baseDirs.get(index);
   }
 
   /**
@@ -68,7 +68,7 @@ public final class MockFileCollector implements FileVisitor {
    * @return value of failName parameter
    */
   public String getFileName(final int index) {
-    return (String) this.fileNames.get(index);
+    return this.fileNames.get(index);
   }
 
   /**

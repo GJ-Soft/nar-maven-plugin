@@ -54,6 +54,7 @@ public class NarProcessLibraries extends AbstractCompileMojo {
 	@Parameter
 	private List<ProcessLibraryCommand> commands;
 
+	@SuppressWarnings("this-escape")
 	private final Log log = getLog();
 
 	/**
@@ -116,7 +117,9 @@ public class NarProcessLibraries extends AbstractCompileMojo {
 				throw new MojoFailureException("Process exited abnormally");
 			}
 		} catch (final IOException | InterruptedException e) {
-			e.printStackTrace();
+			if (e instanceof InterruptedException) {
+				Thread.currentThread().interrupt();
+			}
 			throw new MojoFailureException("Failed to run the command \"" + p.command() + "\"", e);
 		}
 	}

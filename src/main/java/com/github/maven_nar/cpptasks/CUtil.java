@@ -21,14 +21,12 @@ package com.github.maven_nar.cpptasks;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Enumeration;
+import java.nio.file.Path;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
-import org.apache.tools.ant.taskdefs.Execute;
-import org.apache.tools.ant.types.Commandline;
 import org.apache.tools.ant.types.Environment;
 
 /**
@@ -140,17 +138,9 @@ public class CUtil {
 		if (System.getProperty("os.name").equals("OS/400")) {
 			return new File[] {};
 		}
-		final Vector<?> osEnv = Execute.getProcEnvironment();
-		final String match = envVariable.concat("=");
-		for (final Enumeration<?> e = osEnv.elements(); e.hasMoreElements();) {
-			final String entry = ((String) e.nextElement()).trim();
-			if (entry.length() > match.length()) {
-				final String entryFrag = entry.substring(0, match.length());
-				if (entryFrag.equalsIgnoreCase(match)) {
-					final String path = entry.substring(match.length());
-					return parsePath(path, delim);
-				}
-			}
+		final String path = System.getenv(envVariable);
+		if (path != null) {
+			return parsePath(path, delim);
 		}
 		final File[] noPath = new File[0];
 		return noPath;
@@ -165,6 +155,29 @@ public class CUtil {
 	 *         commonalities between the base and the target
 	 *
 	 */
+	/**
+	 * Returns the path of {@code target} relative to {@code base}, always using
+	 * forward slashes (as required by the compilers on every platform, including
+	 * Windows/Cygwin). When the two paths are on different roots (e.g. different
+	 * Windows drives) the canonical target path is returned instead. This
+	 * reproduces the behaviour previously obtained from Ant's
+	 * {@code FileUtils.getRelativePath}.
+	 *
+	 * @param base   the directory the result is relative to
+	 * @param target the file to locate
+	 * @return the forward-slash relative (or, for different roots, absolute) path
+	 * @throws IOException if the canonical path of either file cannot be resolved
+	 */
+	public static String getRelativeCompilerPath(final File base, final File target) throws IOException {
+		final Path basePath = base.getCanonicalFile().toPath();
+		final Path targetPath = target.getCanonicalFile().toPath();
+		try {
+			return basePath.relativize(targetPath).toString().replace(File.separatorChar, '/');
+		} catch (final IllegalArgumentException differentRoot) {
+			return targetPath.toString().replace(File.separatorChar, '/');
+		}
+	}
+
 	public static String getRelativePath(final String base, final File targetFile) {
 		try {
 			//
@@ -341,13 +354,36 @@ public class CUtil {
 	}
 
 	/**
+	 * Joins a command and its arguments into a single, human-readable line for
+	 * logging. Arguments containing whitespace are wrapped in double quotes so the
+	 * logged command stays copy-pasteable.
+	 *
+	 * @param cmdline the command and its arguments
+	 * @return the command line as a single string
+	 */
+	static String toCommandLine(final String[] cmdline) {
+		final StringBuilder result = new StringBuilder();
+		for (final String arg : cmdline) {
+			if (result.length() > 0) {
+				result.append(' ');
+			}
+			if (arg.indexOf(' ') >= 0 && arg.indexOf('"') < 0) {
+				result.append('"').append(arg).append('"');
+			} else {
+				result.append(arg);
+			}
+		}
+		return result.toString();
+	}
+
+	/**
 	 * This method is exposed so test classes can overload and test the arguments
 	 * without actually spawning the compiler
 	 */
 	public static int runCommand(final CCTask task, final File workingDir, final String[] cmdline,
 			final boolean newEnvironment, final Environment env) throws BuildException {
 		try {
-			task.log(Commandline.toString(cmdline), task.getCommandLogLevel());
+			task.log(toCommandLine(cmdline), task.getCommandLogLevel());
 
 			/*
 			 * final Execute exe = new Execute(new LogStreamHandler(task, Project.MSG_INFO,

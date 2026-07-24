@@ -60,10 +60,41 @@ public class Lib {
   private File directory;
 
   /**
+   * Optional location of the runtime shared library (e.g. the {@code bin}
+   * directory holding the actual {@code .dll}/{@code .so}), used to build the
+   * runtime library path when running tests and executables. Useful for
+   * Cygwin/MinGW layouts where {@link #directory} holds the import library
+   * ({@code .dll.a}) while the runtime {@code .dll} lives elsewhere. When set, it
+   * is used instead of {@link #directory} for the runtime path.
+   */
+  @Parameter
+  private File binDirectory;
+
+  /**
    * Sub libraries for this library
    */
   @Parameter
   private List<Lib> libs;
+
+  public final String getName() {
+    return this.name;
+  }
+
+  public final String getType() {
+    return this.type;
+  }
+
+  public final File getDirectory() {
+    return this.directory;
+  }
+
+  public final File getBinDirectory() {
+    return this.binDirectory;
+  }
+
+  public final List<Lib> getLibs() {
+    return this.libs;
+  }
 
   public final void addLibSet(final AbstractDependencyMojo mojo, final LinkerDef linker, final Project antProject)
       throws MojoFailureException, MojoExecutionException {

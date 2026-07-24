@@ -28,12 +28,6 @@ import org.junit.jupiter.api.Test;
  */
 public class TestOutputTypeEnum {
   /**
-   * Default constructor
-   * 
-   * @see junit.framework.TestCase#TestCase(String)
-   */
-
-  /**
    * Test checks that output type enum contains "plugin"
    * 
    * See patch [ 676276 ] Enhanced support for Mac OS X

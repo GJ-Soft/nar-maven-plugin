@@ -168,7 +168,7 @@ public final class CompilerDef extends ProcessorDef {
 			throw new java.lang.IllegalStateException("project must be set before this call");
 		}
 		if (isReference()) {
-			return ((CompilerDef) getCheckedRef(CompilerDef.class, "CompilerDef")).getActiveDefines();
+			return (getCheckedRef(CompilerDef.class, "CompilerDef")).getActiveDefines();
 		}
 		final List<UndefineArgument> actives = new ArrayList<>();
 		for (int i = 0; i < this.defineSets.size(); i++) {
@@ -190,7 +190,7 @@ public final class CompilerDef extends ProcessorDef {
 	 */
 	public String[] getActiveIncludePaths() {
 		if (isReference()) {
-			return ((CompilerDef) getCheckedRef(CompilerDef.class, "CompilerDef")).getActiveIncludePaths();
+			return (getCheckedRef(CompilerDef.class, "CompilerDef")).getActiveIncludePaths();
 		}
 		return getActivePaths(this.includePaths);
 	}
@@ -217,7 +217,7 @@ public final class CompilerDef extends ProcessorDef {
 
 	public PrecompileDef getActivePrecompile(final CompilerDef ccElement) {
 		if (isReference()) {
-			return ((CompilerDef) getCheckedRef(CompilerDef.class, "CompilerDef")).getActivePrecompile(ccElement);
+			return (getCheckedRef(CompilerDef.class, "CompilerDef")).getActivePrecompile(ccElement);
 		}
 		PrecompileDef current = null;
 		for (final PrecompileDef candidate : this.precompileDefs) {
@@ -240,7 +240,7 @@ public final class CompilerDef extends ProcessorDef {
 
 	public String[] getActiveSysIncludePaths() {
 		if (isReference()) {
-			return ((CompilerDef) getCheckedRef(CompilerDef.class, "CompilerDef")).getActiveSysIncludePaths();
+			return (getCheckedRef(CompilerDef.class, "CompilerDef")).getActiveSysIncludePaths();
 		}
 		return getActivePaths(this.sysIncludePaths);
 	}
@@ -251,7 +251,7 @@ public final class CompilerDef extends ProcessorDef {
 
 	public final boolean getExceptions(final CompilerDef[] defaultProviders, final int index) {
 		if (isReference()) {
-			return ((CompilerDef) getCheckedRef(CompilerDef.class, "CompilerDef")).getExceptions(defaultProviders,
+			return (getCheckedRef(CompilerDef.class, "CompilerDef")).getExceptions(defaultProviders,
 					index);
 		}
 		if (this.exceptions != null) {
@@ -266,7 +266,7 @@ public final class CompilerDef extends ProcessorDef {
 
 	public boolean getMultithreaded(final CompilerDef[] defaultProviders, final int index) {
 		if (isReference()) {
-			return ((CompilerDef) getCheckedRef(CompilerDef.class, "CompilerDef")).getMultithreaded(defaultProviders,
+			return (getCheckedRef(CompilerDef.class, "CompilerDef")).getMultithreaded(defaultProviders,
 					index);
 		}
 		if (this.multithreaded != null) {
@@ -281,7 +281,7 @@ public final class CompilerDef extends ProcessorDef {
 
 	public final OptimizationEnum getOptimization(final CompilerDef[] defaultProviders, final int index) {
 		if (isReference()) {
-			return ((CompilerDef) getCheckedRef(CompilerDef.class, "CompilerDef")).getOptimization(defaultProviders,
+			return (getCheckedRef(CompilerDef.class, "CompilerDef")).getOptimization(defaultProviders,
 					index);
 		}
 		if (this.optimization != null) {
@@ -313,7 +313,7 @@ public final class CompilerDef extends ProcessorDef {
 
 	public final Boolean getRtti(final CompilerDef[] defaultProviders, final int index) {
 		if (isReference()) {
-			return ((CompilerDef) getCheckedRef(CompilerDef.class, "CompilerDef")).getRtti(defaultProviders, index);
+			return (getCheckedRef(CompilerDef.class, "CompilerDef")).getRtti(defaultProviders, index);
 		}
 		if (this.rtti != null) {
 			return this.rtti;
@@ -339,7 +339,7 @@ public final class CompilerDef extends ProcessorDef {
 
 	public int getWarnings(final CompilerDef[] defaultProviders, final int index) {
 		if (isReference()) {
-			return ((CompilerDef) getCheckedRef(CompilerDef.class, "CompilerDef")).getWarnings(defaultProviders, index);
+			return (getCheckedRef(CompilerDef.class, "CompilerDef")).getWarnings(defaultProviders, index);
 		}
 		if (this.warnings == -1 && defaultProviders != null && index < defaultProviders.length) {
 			return defaultProviders[index].getWarnings(defaultProviders, index + 1);

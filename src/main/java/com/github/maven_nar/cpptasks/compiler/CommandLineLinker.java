@@ -140,6 +140,7 @@ public abstract class CommandLineLinker extends AbstractLinker {
     final List<String> preargs = new ArrayList<>();
     final List<String> midargs = new ArrayList<>();
     final List<String> endargs = new ArrayList<>();
+    @SuppressWarnings({ "unchecked", "rawtypes" }) // generic array creation is not allowed in Java
     final List<String>[] args = new List[] {
         preargs, midargs, endargs
     };
@@ -278,7 +279,7 @@ public abstract class CommandLineLinker extends AbstractLinker {
       try {
         return command.getCanonicalPath();
       } catch (final IOException e) {
-        e.printStackTrace();
+        // canonicalization failed; fall back to the absolute path
         return command.getAbsolutePath();
       }
     } else {

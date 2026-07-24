@@ -57,11 +57,6 @@ public class TestNarLayout21 {
 
   private String type;
 
-  /*
-   * (non-Javadoc)
-   * 
-   * @see junit.framework.TestCase#setUp()
-   */
   @BeforeEach
   protected void setUp() throws Exception {
     this.fileLayout = new NarFileLayout10();

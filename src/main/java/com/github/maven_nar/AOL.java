@@ -32,6 +32,9 @@ public class AOL {
   private String linkerName;
 
   // FIXME, need more complicated parsing for numbers as part of os.
+  // The switch below deliberately falls through: a longer AOL sets linker, then
+  // os, then architecture, in cascade.
+  @SuppressWarnings("fallthrough")
   public AOL(final String aol) {
     final int linkerIndex = 2;
     final int osIndex = 1;

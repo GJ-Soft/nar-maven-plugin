@@ -35,6 +35,7 @@ public class OutputTypeEnum extends EnumeratedAttribute {
    * 
    * @see java.lang.Object#Object()
    */
+  @SuppressWarnings("this-escape")
   public OutputTypeEnum() {
     setValue("executable");
   }

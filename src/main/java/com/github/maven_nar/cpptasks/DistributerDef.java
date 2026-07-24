@@ -101,7 +101,7 @@ public final class DistributerDef extends DataType {
    */
   public String getHosts() {
     if (isReference()) {
-      final DistributerDef refDistributer = (DistributerDef) getCheckedRef(DistributerDef.class, "DistributerDef");
+      final DistributerDef refDistributer = getCheckedRef(DistributerDef.class, "DistributerDef");
       return refDistributer.getHosts();
     }
     return this.hosts;
@@ -115,7 +115,7 @@ public final class DistributerDef extends DataType {
    */
   public DistributerProtocolEnum getProtocol() {
     if (isReference()) {
-      final DistributerDef refDistributer = (DistributerDef) getCheckedRef(DistributerDef.class, "DistributerDef");
+      final DistributerDef refDistributer = getCheckedRef(DistributerDef.class, "DistributerDef");
       return refDistributer.getProtocol();
     }
     return this.protocol;
@@ -129,7 +129,7 @@ public final class DistributerDef extends DataType {
    */
   public int getTcpcork() {
     if (isReference()) {
-      final DistributerDef refDistributer = (DistributerDef) getCheckedRef(DistributerDef.class, "DistributerDef");
+      final DistributerDef refDistributer = getCheckedRef(DistributerDef.class, "DistributerDef");
       return refDistributer.getTcpcork();
     }
     return this.tcpCork;

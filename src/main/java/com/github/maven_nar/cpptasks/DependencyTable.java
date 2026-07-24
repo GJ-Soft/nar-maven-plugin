@@ -338,7 +338,7 @@ public final class DependencyTable {
   /**
    * Returns an enumerator of DependencyInfo's
    */
-  public Enumeration elements() {
+  public Enumeration<DependencyInfo[]> elements() {
     return this.dependencies.elements();
   }
 
@@ -349,7 +349,7 @@ public final class DependencyTable {
    */
   public DependencyInfo getDependencyInfo(final String sourceRelativeName, final String includePathIdentifier) {
     DependencyInfo dependInfo = null;
-    final DependencyInfo[] dependInfos = (DependencyInfo[]) this.dependencies.get(sourceRelativeName);
+    final DependencyInfo[] dependInfos = this.dependencies.get(sourceRelativeName);
     if (dependInfos != null) {
       for (final DependencyInfo dependInfo2 : dependInfos) {
         dependInfo = dependInfo2;
@@ -439,7 +439,7 @@ public final class DependencyTable {
     //
     // optimistic, add new value
     //
-    final DependencyInfo[] old = (DependencyInfo[]) this.dependencies.put(key, new DependencyInfo[] {
+    final DependencyInfo[] old = this.dependencies.put(key, new DependencyInfo[] {
       dependInfo
     });
     this.dirty = true;
@@ -611,9 +611,9 @@ public final class DependencyTable {
     buf.append(CUtil.xmlAttribEncode(includePathIdentifier));
     buf.append("\">\n");
     writer.write(buf.toString());
-    final Enumeration dependenciesEnum = this.dependencies.elements();
+    final Enumeration<DependencyInfo[]> dependenciesEnum = this.dependencies.elements();
     while (dependenciesEnum.hasMoreElements()) {
-      final DependencyInfo[] dependInfos = (DependencyInfo[]) dependenciesEnum.nextElement();
+      final DependencyInfo[] dependInfos = dependenciesEnum.nextElement();
       for (final DependencyInfo dependInfo : dependInfos) {
         //
         // if this is for the same include path

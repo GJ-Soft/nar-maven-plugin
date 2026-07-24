@@ -35,6 +35,7 @@ public class LibraryTypeEnum extends EnumeratedAttribute {
    * 
    * @see java.lang.Object#Object()
    */
+  @SuppressWarnings("this-escape")
   public LibraryTypeEnum() {
     setValue("shared");
   }

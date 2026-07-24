@@ -25,7 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
 
 import java.io.File;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 import com.github.maven_nar.cpptasks.CCTask;
 import com.github.maven_nar.cpptasks.CUtil;
 import com.github.maven_nar.cpptasks.OutputTypeEnum;
@@ -63,14 +64,14 @@ public class TestAbstractLdLinker {
   public void testAddImpliedArgsDarwinPlugin() {
     System.setProperty("os.name", "Mac OS X");
     final AbstractLdLinker linker = getLinker();
-    final Vector args = new Vector();
+    final List<String> args = new ArrayList<>();
     final LinkType pluginType = new LinkType();
     final OutputTypeEnum pluginOutType = new OutputTypeEnum();
     pluginOutType.setValue("plugin");
     pluginType.setOutputType(pluginOutType);
     linker.addImpliedArgs(null, false, pluginType, args);
     assertEquals(1, args.size());
-    assertEquals("-bundle", args.elementAt(0));
+    assertEquals("-bundle", args.get(0));
   }
 
   /**
@@ -82,7 +83,7 @@ public class TestAbstractLdLinker {
   public void testAddImpliedArgsDarwinShared() {
     System.setProperty("os.name", "Mac OS X");
     final AbstractLdLinker linker = getLinker();
-    final Vector args = new Vector();
+    final List<String> args = new ArrayList<>();
     final LinkType pluginType = new LinkType();
     final OutputTypeEnum pluginOutType = new OutputTypeEnum();
     pluginOutType.setValue("shared");
@@ -91,7 +92,7 @@ public class TestAbstractLdLinker {
     // FIXME NAR-103
     // BEGINFREEHEP
     assertEquals(1, args.size());
-    assertEquals("-dynamiclib", args.elementAt(0));
+    assertEquals("-dynamiclib", args.get(0));
     // ENDFREEHEP
   }
 
@@ -104,14 +105,14 @@ public class TestAbstractLdLinker {
   public void testAddImpliedArgsNonDarwinPlugin() {
     System.setProperty("os.name", "VAX/VMS");
     final AbstractLdLinker linker = getLinker();
-    final Vector args = new Vector();
+    final List<String> args = new ArrayList<>();
     final LinkType pluginType = new LinkType();
     final OutputTypeEnum pluginOutType = new OutputTypeEnum();
     pluginOutType.setValue("plugin");
     pluginType.setOutputType(pluginOutType);
     linker.addImpliedArgs(null, false, pluginType, args);
     assertEquals(1, args.size());
-    assertEquals("-shared", args.elementAt(0));
+    assertEquals("-shared", args.get(0));
   }
 
   /**
@@ -123,14 +124,14 @@ public class TestAbstractLdLinker {
   public void testAddImpliedArgsNonDarwinShared() {
     System.setProperty("os.name", "VAX/VMS");
     final AbstractLdLinker linker = getLinker();
-    final Vector args = new Vector();
+    final List<String> args = new ArrayList<>();
     final LinkType pluginType = new LinkType();
     final OutputTypeEnum pluginOutType = new OutputTypeEnum();
     pluginOutType.setValue("shared");
     pluginType.setOutputType(pluginOutType);
     linker.addImpliedArgs(null, false, pluginType, args);
     assertEquals(1, args.size());
-    assertEquals("-shared", args.elementAt(0));
+    assertEquals("-shared", args.get(0));
   }
 
   @Test
@@ -144,11 +145,11 @@ public class TestAbstractLdLinker {
     sets[0].setProject(new org.apache.tools.ant.Project());
     sets[0].setDir(new File("/foo"));
     sets[0].setLibs(new CUtil.StringArrayBuilder("bart,cart,dart"));
-    final Vector preargs = new Vector();
-    final Vector midargs = new Vector();
-    final Vector endargs = new Vector();
+    final List<String> preargs = new ArrayList<>();
+    final List<String> midargs = new ArrayList<>();
+    final List<String> endargs = new ArrayList<>();
     final String[] rc = linker.addLibrarySets(task, sets, preargs, midargs, endargs);
-    final String libdirSwitch = (String) endargs.elementAt(0);
+    final String libdirSwitch = endargs.get(0);
     assertEquals(libdirSwitch.substring(0, 2), "-L");
     //
     // can't have space after -L or will break Mac OS X
@@ -172,24 +173,24 @@ public class TestAbstractLdLinker {
     libType.setValue("framework");
     sets[0].setType(libType);
     sets[0].setLibs(new CUtil.StringArrayBuilder("bart,cart,dart"));
-    final Vector preargs = new Vector();
-    final Vector midargs = new Vector();
-    final Vector endargs = new Vector();
+    final List<String> preargs = new ArrayList<>();
+    final List<String> midargs = new ArrayList<>();
+    final List<String> endargs = new ArrayList<>();
     final String[] rc = linker.addLibrarySets(task, sets, preargs, midargs, endargs);
     // FIXME NAR-103
     // BEGINFREEHEP
     /*
-     * assertEquals("-F", ((String) endargs.elementAt(0)).substring(0, 2));
-     * assertEquals("-framework bart", (String) endargs.elementAt(1));
-     * assertEquals("-framework cart", (String) endargs.elementAt(2));
-     * assertEquals("-framework dart", (String) endargs.elementAt(3));
+     * assertEquals("-F", (endargs.get(0)).substring(0, 2));
+     * assertEquals("-framework bart", endargs.get(1));
+     * assertEquals("-framework cart", endargs.get(2));
+     * assertEquals("-framework dart", endargs.get(3));
      * assertEquals(endargs.size(), 4);
      */
-    assertEquals("-F", ((String) endargs.elementAt(0)).substring(0, 2));
-    assertEquals("-framework", (String) endargs.elementAt(1));
-    assertEquals("bart", (String) endargs.elementAt(2));
-    assertEquals("cart", (String) endargs.elementAt(3));
-    assertEquals("dart", (String) endargs.elementAt(4));
+    assertEquals("-F", (endargs.get(0)).substring(0, 2));
+    assertEquals("-framework", endargs.get(1));
+    assertEquals("bart", endargs.get(2));
+    assertEquals("cart", endargs.get(3));
+    assertEquals("dart", endargs.get(4));
     assertEquals(endargs.size(), 5);
     // ENDFREEHEP
   }
@@ -209,17 +210,17 @@ public class TestAbstractLdLinker {
     libType.setValue("framework");
     sets[0].setType(libType);
     sets[0].setLibs(new CUtil.StringArrayBuilder("bart,cart,dart"));
-    final Vector preargs = new Vector();
-    final Vector midargs = new Vector();
-    final Vector endargs = new Vector();
+    final List<String> preargs = new ArrayList<>();
+    final List<String> midargs = new ArrayList<>();
+    final List<String> endargs = new ArrayList<>();
     final String[] rc = linker.addLibrarySets(task, sets, preargs, midargs, endargs);
-    assertEquals("-L", ((String) endargs.elementAt(0)).substring(0, 2));
+    assertEquals("-L", (endargs.get(0)).substring(0, 2));
     // FIXME NAR-103
     // BEGINFREEHEP
-    // assertEquals("-Bdynamic", (String) endargs.elementAt(1));
-    assertEquals("-lbart", (String) endargs.elementAt(1));
-    assertEquals("-lcart", (String) endargs.elementAt(2));
-    assertEquals("-ldart", (String) endargs.elementAt(3));
+    // assertEquals("-Bdynamic", endargs.get(1));
+    assertEquals("-lbart", endargs.get(1));
+    assertEquals("-lcart", endargs.get(2));
+    assertEquals("-ldart", endargs.get(3));
     assertEquals(endargs.size(), 4);
     // ENDFREEHEP
   }
@@ -235,13 +236,13 @@ public class TestAbstractLdLinker {
     sets[0].setProject(new org.apache.tools.ant.Project());
     sets[0].setDir(new File("/foo"));
     sets[0].setLibs(new CUtil.StringArrayBuilder("bart,cart,dart"));
-    final Vector preargs = new Vector();
-    final Vector midargs = new Vector();
-    final Vector endargs = new Vector();
+    final List<String> preargs = new ArrayList<>();
+    final List<String> midargs = new ArrayList<>();
+    final List<String> endargs = new ArrayList<>();
     final String[] rc = linker.addLibrarySets(task, sets, preargs, midargs, endargs);
-    assertEquals("-lbart", (String) endargs.elementAt(1));
-    assertEquals("-lcart", (String) endargs.elementAt(2));
-    assertEquals("-ldart", (String) endargs.elementAt(3));
+    assertEquals("-lbart", endargs.get(1));
+    assertEquals("-lcart", endargs.get(2));
+    assertEquals("-ldart", endargs.get(3));
     assertEquals(endargs.size(), 4);
   }
 
@@ -262,25 +263,25 @@ public class TestAbstractLdLinker {
     sets[1].setType(libType);
     sets[2].setProject(new org.apache.tools.ant.Project());
     sets[2].setLibs(new CUtil.StringArrayBuilder("dart"));
-    final Vector preargs = new Vector();
-    final Vector midargs = new Vector();
-    final Vector endargs = new Vector();
+    final List<String> preargs = new ArrayList<>();
+    final List<String> midargs = new ArrayList<>();
+    final List<String> endargs = new ArrayList<>();
     final String[] rc = linker.addLibrarySets(task, sets, preargs, midargs, endargs);
     // for (int i=0; i<endargs.size(); i++) System.err.println(endargs.get( i
     // ));
     // NAR-103
     // BEGINFREEHEP
     if (System.getProperty("os.name").equals("Mac OS X")) {
-      assertEquals("-lbart", (String) endargs.elementAt(0));
-      assertEquals("-lcart", (String) endargs.elementAt(1));
-      assertEquals("-ldart", (String) endargs.elementAt(2));
+      assertEquals("-lbart", endargs.get(0));
+      assertEquals("-lcart", endargs.get(1));
+      assertEquals("-ldart", endargs.get(2));
       assertEquals(endargs.size(), 3);
     } else {
-      assertEquals("-lbart", (String) endargs.elementAt(0));
-      assertEquals("-Bstatic", (String) endargs.elementAt(1));
-      assertEquals("-lcart", (String) endargs.elementAt(2));
-      assertEquals("-Bdynamic", (String) endargs.elementAt(3));
-      assertEquals("-ldart", (String) endargs.elementAt(4));
+      assertEquals("-lbart", endargs.get(0));
+      assertEquals("-Bstatic", endargs.get(1));
+      assertEquals("-lcart", endargs.get(2));
+      assertEquals("-Bdynamic", endargs.get(3));
+      assertEquals("-ldart", endargs.get(4));
       assertEquals(endargs.size(), 5);
     }
     // ENDFREEHEP
@@ -297,9 +298,9 @@ public class TestAbstractLdLinker {
     sets[0].setProject(new org.apache.tools.ant.Project());
     sets[0].setDir(new File("/foo"));
     sets[0].setLibs(new CUtil.StringArrayBuilder("bart,cart,dart"));
-    final Vector preargs = new Vector();
-    final Vector midargs = new Vector();
-    final Vector endargs = new Vector();
+    final List<String> preargs = new ArrayList<>();
+    final List<String> midargs = new ArrayList<>();
+    final List<String> endargs = new ArrayList<>();
     final String[] rc = linker.addLibrarySets(task, sets, preargs, midargs, endargs);
     assertEquals(3, rc.length);
     assertEquals("bart", rc[0]);

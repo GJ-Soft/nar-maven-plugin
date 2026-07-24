@@ -41,7 +41,6 @@ import com.github.maven_nar.cpptasks.VersionInfo;
 import com.github.maven_nar.cpptasks.types.CommandLineArgument;
 import com.github.maven_nar.cpptasks.types.UndefineArgument;
 import com.google.common.collect.ObjectArrays;
-import org.apache.tools.ant.util.FileUtils;
 
 /**
  * An abstract Compiler implementation which uses an external program to
@@ -218,7 +217,7 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
       if (this.libtool) {
         commandlinePrefix.add("libtool");
       }
-      if((this.fortifyID !=null) && (!this.fortifyID.equals("")))
+      if((this.fortifyID !=null) && (!this.fortifyID.isEmpty()))
       {// If FortifyID attribute was set, run the Fortify framework
 
         commandlinePrefix.add("sourceanalyzer");
@@ -450,7 +449,7 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
       try {
         return command.getCanonicalPath();
       } catch (final IOException e) {
-        e.printStackTrace();
+        // canonicalization failed; fall back to the absolute path
         return command.getAbsolutePath();
       }
     } else {
@@ -503,7 +502,7 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
     String relative="";
     String inputFile;
     try {
-      relative = FileUtils.getRelativePath(workDir, new File(filename));
+      relative = CUtil.getRelativeCompilerPath(workDir, new File(filename));
     } catch (Exception ex) {
     }
     if (relative.isEmpty()) {

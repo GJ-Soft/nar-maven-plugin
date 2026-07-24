@@ -332,7 +332,7 @@ public abstract class AbstractCompileMojo extends AbstractDependencyMojo {
 		final String sysLibs = dependency.getNarInfo().getSysLibs(getAOL());
 		List<SysLib> l = new ArrayList<SysLib>();
 
-		if (sysLibs != null && !sysLibs.equals("")) {
+		if (sysLibs != null && !sysLibs.isEmpty()) {
 			getLog().debug("Using SYSLIBS = " + sysLibs);
 
 			String[] split = sysLibs.split(",");

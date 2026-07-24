@@ -108,6 +108,7 @@ NAR Configuration
         <name/>
         <type/>
         <directory/>
+        <binDirectory/>
       </lib>
     </libs>
     <sysLibs>
@@ -317,7 +318,7 @@ wish to run a GNU configure step but not the full make process.
 
 * {dryRun}
     Execute all phases through compilation and linking, but don't actually invoke the compiler or linker.
-    Will skip goals nar-test and nar-integration-test. This options is typically set to true for generating
+    Will skip the nar-test goal. This option is typically set to true for generating
     replays. Default false.
 
 * {syslibsFromDependencies}
@@ -374,7 +375,7 @@ wish to run a GNU configure step but not the full make process.
 
 ** {linker name}
 
-	The Linker. Some choices are: "msvc", "g++", "CC", "icpc", ...
+	The Linker. Some choices are: "g++", "gcc", "gfortran".
     Default is Architecture OS specific.
 
 ** {linker prefix}
@@ -418,9 +419,16 @@ are lower in the dependency heirarchy appear lower in the list, maximizing symbo
 	[name] Name of the library, or a dependency groupId:artifactId if this library contains sublibraries
     
 	[type] Type of linking for this library. Default is shared.
-    
-	[directory] Location for this library.
-	
+
+	[directory] Location for this library (the link directory holding the import/static
+library, e.g. the <<<.a>>> / <<<.dll.a>>> file used at link time).
+
+	[binDirectory] Optional. Location of the runtime shared library (the directory holding the
+actual <<<.so>>> / <<<.dll>>>). When set, this directory is used instead of <<<directory>>> to
+build the runtime library path (<<<LD_LIBRARY_PATH>>> / <<<PATH>>>) when running tests and
+executables. Useful for Cygwin/MinGW layouts where <<<directory>>> holds the import library
+(<<<.dll.a>>>) while the runtime <<<.dll>>> lives in a separate <<<bin>>> folder.
+
 	[]
   
 ** {linker sysLibs}
@@ -440,7 +448,7 @@ are lower in the dependency heirarchy appear lower in the list, maximizing symbo
 
 ** {cpp name}
 
-	The name of the compiler. Some choices are: "msvc", "g++", "gcc", "CC", "cc", "icc", "icpc", ...
+	The name of the compiler. For C++ this is "g++" (for C: "gcc", for Fortran: "gfortran").
     Default is AOL specific.
     
 ** {cpp prefix}

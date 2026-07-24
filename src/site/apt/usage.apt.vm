@@ -205,8 +205,8 @@ In other cases the classifiers must be adapted accordingly.
         <configuration>
           <descriptors>
 			...
-            <descriptor>src/main/assembly/x86-Windows-msvc.xml</descriptor>
-            <descriptor>src/main/assembly/ppc-MacOSX-g++.xml</descriptor>
+            <descriptor>src/main/assembly/amd64-Windows-gcc.xml</descriptor>
+            <descriptor>src/main/assembly/amd64-Linux-g++.xml</descriptor>
             <descriptor>src/main/assembly/i386-Linux-g++.xml</descriptor>
           </descriptors>
         </configuration>
@@ -218,8 +218,8 @@ In other cases the classifiers must be adapted accordingly.
         <version>${project.version}</version>
         <configuration>
           <classifiers>
-            <classifier>x86-Windows-msvc-jni</classifier>
-            <classifier>ppc-MacOSX-g++-jni</classifier>
+            <classifier>amd64-Windows-gcc-jni</classifier>
+            <classifier>amd64-Linux-g++-jni</classifier>
             <classifier>i386-Linux-g++-jni</classifier>
           </classifiers>
         </configuration>

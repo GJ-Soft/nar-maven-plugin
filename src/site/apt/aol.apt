@@ -26,8 +26,14 @@ Mark Donszelmann
 	
 AOL Properties
 
+	<<Note:>> this fork targets the <<GNU toolchains only>> (<<<gcc>>>, <<<g++>>>, <<<gfortran>>>).
+The AOL properties file below is reproduced verbatim and still lists historical entries for other
+toolchains (msvc, icc, CC, ...); those linkers/compilers are no longer supported and their entries
+are kept only for reference. On Windows the GNU toolchain is used through Cygwin/MinGW, giving an
+AOL such as <<<x86_64-pc-cygwin-Windows-gcc>>>.
+
 	Below a copy of the AOL Properties file which is used by the NAR plugin for AOL dependent default settings:
-	
+
 +--
 #
 # AOL (Architecture-OperatingSystem-Linker) Default Values

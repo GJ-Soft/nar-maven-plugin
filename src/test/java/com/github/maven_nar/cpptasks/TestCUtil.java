@@ -37,6 +37,42 @@ public class TestCUtil {
   }
 
   @Test
+  public void testGetRelativeCompilerPathChild() throws IOException {
+    final String rel = CUtil.getRelativeCompilerPath(new File("/foo/bar"), new File("/foo/bar/baz"));
+    assertEquals("baz", rel);
+  }
+
+  @Test
+  public void testGetRelativeCompilerPathNestedUsesForwardSlash() throws IOException {
+    // Must always use forward slashes, even on Windows (compilers/Cygwin expect them).
+    final String rel = CUtil.getRelativeCompilerPath(new File("/foo/bar"), new File("/foo/bar/sub/f.c"));
+    assertEquals("sub/f.c", rel);
+  }
+
+  @Test
+  public void testGetRelativeCompilerPathSibling() throws IOException {
+    final String rel = CUtil.getRelativeCompilerPath(new File("/foo/bar"), new File("/foo/baz"));
+    assertEquals("../baz", rel);
+  }
+
+  @Test
+  public void testGetRelativeCompilerPathEqual() throws IOException {
+    final String rel = CUtil.getRelativeCompilerPath(new File("/foo/bar"), new File("/foo/bar"));
+    assertEquals("", rel);
+  }
+
+  @Test
+  public void testToCommandLinePlain() {
+    assertEquals("gcc -c foo.c", CUtil.toCommandLine(new String[] { "gcc", "-c", "foo.c" }));
+  }
+
+  @Test
+  public void testToCommandLineQuotesArgumentsWithSpaces() {
+    assertEquals("gcc \"-I/with space/inc\" foo.c",
+        CUtil.toCommandLine(new String[] { "gcc", "-I/with space/inc", "foo.c" }));
+  }
+
+  @Test
   public void testGetRelativePath1() throws IOException {
     final String canonicalBase = new File("/foo/bar/").getCanonicalPath();
     final String rel = CUtil.getRelativePath(canonicalBase, new File("/foo/bar/baz"));

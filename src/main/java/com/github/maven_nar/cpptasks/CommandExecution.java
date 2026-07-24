@@ -28,7 +28,7 @@ class StreamGobbler extends Thread {
                 task.log(type +">"+ line );
 
         } catch (IOException ioe) {
-            ioe.printStackTrace();
+            task.log("Error reading " + this.type + " stream: " + ioe, Project.MSG_ERR);
         }
 
 
@@ -83,8 +83,9 @@ public class CommandExecution {
             return exit_value;
 
         } catch (InterruptedException e) {
-
-            e.printStackTrace();
+            // Restore the interrupt flag and report through the Ant task log.
+            Thread.currentThread().interrupt();
+            task.log("Interrupted while waiting for command: " + e, Project.MSG_ERR);
             return -2;
         }
 

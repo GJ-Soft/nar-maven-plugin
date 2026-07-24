@@ -49,6 +49,7 @@ public class NarInfo {
     this(groupId, artifactId, version, log, null);
   }
 
+  @SuppressWarnings("this-escape") // getNarInfoFileName() is a stable overridable helper
   public NarInfo(final String groupId, final String artifactId, final String version, final Log log, File propertiesFile)
       throws MojoExecutionException {
     this.groupId = groupId;

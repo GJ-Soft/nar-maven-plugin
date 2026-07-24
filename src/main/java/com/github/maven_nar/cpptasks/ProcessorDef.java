@@ -200,7 +200,7 @@ public abstract class ProcessorDef extends DataType {
   public ProcessorConfiguration createConfiguration(final CCTask task, final LinkType linkType,
       final ProcessorDef baseDef, final TargetDef targetPlatform, final VersionInfo versionInfo) {
     if (isReference()) {
-      return ((ProcessorDef) getCheckedRef(ProcessorDef.class, "ProcessorDef")).createConfiguration(task, linkType,
+      return (getCheckedRef(ProcessorDef.class, "ProcessorDef")).createConfiguration(task, linkType,
           baseDef, targetPlatform, versionInfo);
     }
     final ProcessorDef[] defaultProviders = getDefaultProviders(baseDef);
@@ -220,7 +220,7 @@ public abstract class ProcessorDef extends DataType {
       throw new java.lang.IllegalStateException("project must be set");
     }
     if (isReference()) {
-      return ((ProcessorDef) getCheckedRef(ProcessorDef.class, "ProcessorDef")).getActiveProcessorArgs();
+      return (getCheckedRef(ProcessorDef.class, "ProcessorDef")).getActiveProcessorArgs();
     }
     final List<CommandLineArgument> activeArgs = new ArrayList<>(this.processorArgs.size());
     for (final CommandLineArgument arg : this.processorArgs) {
@@ -245,7 +245,7 @@ public abstract class ProcessorDef extends DataType {
       throw new java.lang.IllegalStateException("project must be set");
     }
     if (isReference()) {
-      return ((ProcessorDef) getCheckedRef(ProcessorDef.class, "ProcessorDef")).getActiveProcessorParams();
+      return (getCheckedRef(ProcessorDef.class, "ProcessorDef")).getActiveProcessorParams();
     }
     final List<ProcessorParam> activeParams = new ArrayList<>(this.processorParams.size());
     for (final ProcessorParam param : this.processorParams) {
@@ -269,7 +269,7 @@ public abstract class ProcessorDef extends DataType {
    */
   public boolean getDebug(final ProcessorDef[] defaultProviders, final int index) {
     if (isReference()) {
-      return ((ProcessorDef) getCheckedRef(ProcessorDef.class, "ProcessorDef")).getDebug(defaultProviders, index);
+      return (getCheckedRef(ProcessorDef.class, "ProcessorDef")).getDebug(defaultProviders, index);
     }
     if (this.debug != null) {
       return this.debug.booleanValue();
@@ -352,7 +352,7 @@ public abstract class ProcessorDef extends DataType {
       return this.libtool.booleanValue();
     }
     if (isReference()) {
-      return ((ProcessorDef) getCheckedRef(ProcessorDef.class, "ProcessorDef")).getLibtool();
+      return (getCheckedRef(ProcessorDef.class, "ProcessorDef")).getLibtool();
     }
     final ProcessorDef extendsDef = getExtends();
     if (extendsDef != null) {
@@ -368,7 +368,7 @@ public abstract class ProcessorDef extends DataType {
    */
   protected Processor getProcessor() {
     if (isReference()) {
-      return ((ProcessorDef) getCheckedRef(ProcessorDef.class, "ProcessorDef")).getProcessor();
+      return (getCheckedRef(ProcessorDef.class, "ProcessorDef")).getProcessor();
     }
     //
     // if a processor has not been explicitly set
@@ -405,7 +405,7 @@ public abstract class ProcessorDef extends DataType {
    */
   public boolean getRebuild(final ProcessorDef[] defaultProviders, final int index) {
     if (isReference()) {
-      return ((ProcessorDef) getCheckedRef(ProcessorDef.class, "ProcessorDef")).getRebuild(defaultProviders, index);
+      return (getCheckedRef(ProcessorDef.class, "ProcessorDef")).getRebuild(defaultProviders, index);
     }
     if (this.rebuild != null) {
       return this.rebuild.booleanValue();
@@ -425,7 +425,7 @@ public abstract class ProcessorDef extends DataType {
    */
   public boolean hasFileSets() {
     if (isReference()) {
-      return ((ProcessorDef) getCheckedRef(ProcessorDef.class, "ProcessorDef")).hasFileSets();
+      return (getCheckedRef(ProcessorDef.class, "ProcessorDef")).hasFileSets();
     }
     return this.srcSets.size() > 0;
   }
@@ -449,7 +449,7 @@ public abstract class ProcessorDef extends DataType {
     if (!CUtil.isActive(project, this.ifProp, this.unlessProp)) {
       return false;
     }
-    if (isReference() && !((ProcessorDef) getCheckedRef(ProcessorDef.class, "ProcessorDef")).isActive()) {
+    if (isReference() && !(getCheckedRef(ProcessorDef.class, "ProcessorDef")).isActive()) {
         return false;
     }
     //
@@ -475,12 +475,12 @@ public abstract class ProcessorDef extends DataType {
   public void setClassname(final String className) throws BuildException {
     Object proc = null;
     try {
-      final Class implClass = ProcessorDef.class.getClassLoader().loadClass(className);
+      final Class<?> implClass = ProcessorDef.class.getClassLoader().loadClass(className);
       try {
         final Method getInstance = implClass.getMethod("getInstance");
         proc = getInstance.invoke(null);
       } catch (final Exception ex) {
-        proc = implClass.newInstance();
+        proc = implClass.getDeclaredConstructor().newInstance();
       }
     } catch (final Exception ex) {
       throw new BuildException(ex);
@@ -683,7 +683,7 @@ public abstract class ProcessorDef extends DataType {
       throw new java.lang.IllegalStateException("project must be set before this call");
     }
     if (isReference()) {
-      ((ProcessorDef) getCheckedRef(ProcessorDef.class, "ProcessorDef")).visitFiles(visitor);
+      (getCheckedRef(ProcessorDef.class, "ProcessorDef")).visitFiles(visitor);
     }
     //
     // if this processor extends another,

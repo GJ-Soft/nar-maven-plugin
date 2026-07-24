@@ -33,14 +33,6 @@ import com.github.maven_nar.cpptasks.compiler.TestAbstractLinker;
  */
 public class TestAbstractArLibrarian extends TestAbstractLinker {
   /**
-   * Constructor
-   * 
-   * @param name
-   *          test name
-   * @see junit.framework.TestCase#TestCase(String)
-   */
-
-  /**
    * Creates item under test @returns item under test
    * 
    * @see com.github.maven_nar.cpptasks.compiler.TestAbstractProcessor#create()

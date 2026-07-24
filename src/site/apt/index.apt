@@ -28,9 +28,9 @@ Introduction
  
 	NOTE: <<bold>> print is <<NOT implemented yet>>.
 
-	This plugin for Maven 2 allows you to compile native code (c++, c and fortran) on
-a number of different architectures (Linux, Windows, MacOSX, Solaris, ...) and with
-a number of different compilers/linkers (g++, Microsoft Visual C++, CC, ...)
+	This plugin for Maven allows you to compile native code (c++, c and fortran) on
+a number of different architectures (Linux, Windows via Cygwin/MinGW, ...) with the
+GNU toolchain (g++, gcc and gfortran).
 The output produced is wrapped up in Native ARchive files (.nar) some of which
 are machine independent (-noarch), while others are machine specific and thus depend
 on a combination of machine architecture(A), operating-system(O) and linker(L) identified
@@ -75,12 +75,10 @@ allows you to build a jar file as well as nar files. The list below shows the se
     [[14]] {{{nar-test}nar-test}}
     
     [[15]] {{{nar-package}nar-package}}
-    
-    [[16]] {{{nar-integration-test}nar-integration-test}}
-    
-    [[17]] {{{install}install (standard maven goal)}}
-    
-    [[18]] {{{deploy}deploy (standard maven goal)}}
+
+    [[16]] {{{install}install (standard maven goal)}}
+
+    [[17]] {{{deploy}deploy (standard maven goal)}}
 
 	[]
 	
@@ -172,7 +170,7 @@ and src/main/fortran, but any file under src/main is searched for.
 	The nar plugin will automatically select the correct compiler (c, c++ or fortran) based on the type of
 source, as specified in the patterns in <<<AOL.c.includes>>>, 
 <<<AOL.cpp.includes>>> and <<<AOL.fortran.includes>>>, where AOL is a dotted qualifier of the architecture,
-os and linker (<<<x86.Windows.msvc>>> for example).
+os and linker (<<<amd64.Windows.gcc>>> for example).
 
 	Include paths are added in this order from:
 
@@ -236,7 +234,7 @@ and src/test/fortran, but any file under src/test is searched for.
 	The compiler will automatically select the correct compiler (c, c++ or fortran) based on the type of
 sources, as specified in the patterns in <<<AOL.c.includes>>>, 
 <<<AOL.nar.src.includes>>> and <<<AOL.fortran.includes>>>, where AOL is a dotted qualifier of the architecture,
-os and linker (<<<x86.Windows.msvc>>> for example).
+os and linker (<<<amd64.Windows.gcc>>> for example).
                 
 	<<TBD If you set maven.nar.includefilesonly to true the compile-tests goal will be 
 skipped.>>
@@ -265,18 +263,7 @@ The following jar and nar files are created:
     
     []
 
-* {nar-integration-test}
-               
-    This goal runs tests against the packaged jar and nar files. Currently this is useful only to
-test a jni library. The jni library is added to the java.library.path and the tests are forked to
-pick up this path.
-
-	To use this goal you need to put the test sources in the regular test directories but disable 
-the running of the tests by the maven-surefire-plugin.
-               
-	<<TBD integration tests for other types of libraries than jni>>
-                
-* {install}                
+* {install}
 
 	This goal installs the produced artifacts in your local repository. The unpacking is done in the 
 unpack goal of a dependent artifact upon first usage.

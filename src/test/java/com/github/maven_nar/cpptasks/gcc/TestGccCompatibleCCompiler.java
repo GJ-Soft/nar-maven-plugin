@@ -23,7 +23,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Tests for gcc compatible compilers
@@ -53,10 +54,10 @@ public abstract class TestGccCompatibleCCompiler {
   @Test
   public void testWarningLevel0() {
     final GccCompatibleCCompiler compiler = create();
-    final Vector args = new Vector();
+    final List<String> args = new ArrayList<>();
     compiler.addWarningSwitch(args, 0);
     assertEquals(1, args.size());
-    assertEquals("-w", args.elementAt(0));
+    assertEquals("-w", args.get(0));
   }
 
   /**
@@ -65,7 +66,7 @@ public abstract class TestGccCompatibleCCompiler {
   @Test
   public void testWarningLevel1() {
     final GccCompatibleCCompiler compiler = create();
-    final Vector args = new Vector();
+    final List<String> args = new ArrayList<>();
     compiler.addWarningSwitch(args, 1);
     assertEquals(0, args.size());
   }
@@ -76,7 +77,7 @@ public abstract class TestGccCompatibleCCompiler {
   @Test
   public void testWarningLevel2() {
     final GccCompatibleCCompiler compiler = create();
-    final Vector args = new Vector();
+    final List<String> args = new ArrayList<>();
     compiler.addWarningSwitch(args, 2);
     assertEquals(0, args.size());
   }
@@ -87,10 +88,10 @@ public abstract class TestGccCompatibleCCompiler {
   @Test
   public void testWarningLevel3() {
     final GccCompatibleCCompiler compiler = create();
-    final Vector args = new Vector();
+    final List<String> args = new ArrayList<>();
     compiler.addWarningSwitch(args, 3);
     assertEquals(1, args.size());
-    assertEquals("-Wall", args.elementAt(0));
+    assertEquals("-Wall", args.get(0));
   }
 
   /**
@@ -99,11 +100,11 @@ public abstract class TestGccCompatibleCCompiler {
   @Test
   public void testWarningLevel4() {
     final GccCompatibleCCompiler compiler = create();
-    final Vector args = new Vector();
+    final List<String> args = new ArrayList<>();
     compiler.addWarningSwitch(args, 4);
     assertEquals(2, args.size());
-    assertEquals("-W", args.elementAt(0));
-    assertEquals("-Wall", args.elementAt(1));
+    assertEquals("-W", args.get(0));
+    assertEquals("-Wall", args.get(1));
   }
 
   /**
@@ -112,11 +113,11 @@ public abstract class TestGccCompatibleCCompiler {
   @Test
   public void testWarningLevel5() {
     final GccCompatibleCCompiler compiler = create();
-    final Vector args = new Vector();
+    final List<String> args = new ArrayList<>();
     compiler.addWarningSwitch(args, 5);
     assertEquals(3, args.size());
-    assertEquals("-Werror", args.elementAt(0));
-    assertEquals("-W", args.elementAt(1));
-    assertEquals("-Wall", args.elementAt(2));
+    assertEquals("-Werror", args.get(0));
+    assertEquals("-W", args.get(1));
+    assertEquals("-Wall", args.get(2));
   }
 }

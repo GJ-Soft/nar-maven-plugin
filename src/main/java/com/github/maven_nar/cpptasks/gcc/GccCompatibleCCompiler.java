@@ -28,7 +28,6 @@ import com.github.maven_nar.cpptasks.CUtil;
 import com.github.maven_nar.cpptasks.OptimizationEnum;
 import com.github.maven_nar.cpptasks.compiler.CommandLineCCompiler;
 import com.github.maven_nar.cpptasks.compiler.LinkType;
-import org.apache.tools.ant.util.FileUtils;
 
 /**
  * Abstract base class for compilers that attempt to be command line compatible
@@ -122,6 +121,7 @@ public abstract class GccCompatibleCCompiler extends CommandLineCCompiler {
   }
 
   @Override
+  @SuppressWarnings("fallthrough") // warning levels are cumulative (see /* nobreak */ below)
   public void addWarningSwitch(final List<String> args, final int level) {
     switch (level) {
       case 0:
@@ -159,7 +159,7 @@ public abstract class GccCompatibleCCompiler extends CommandLineCCompiler {
       return filename;
     } else {
       try {
-        relative = FileUtils.getRelativePath(workDir, new File(filename));
+        relative = CUtil.getRelativeCompilerPath(workDir, new File(filename));
       } catch (Exception ex) {
       }
     }

@@ -151,6 +151,7 @@ public class CCTask extends Task {
           }
         }
       } catch (final InterruptedException e) {
+        Thread.currentThread().interrupt();
       }
       System.err.print("\r                                                                    ");
       System.err.print("\r");
@@ -749,6 +750,7 @@ public class CCTask extends Task {
       try {
         progress.join();
       } catch (final InterruptedException ex) {
+        Thread.currentThread().interrupt();
       }
       // ENDFREEHEP
 
@@ -884,6 +886,7 @@ public class CCTask extends Task {
         log("Limited processors to 1 due to ordering of source files");
       }
 
+      @SuppressWarnings({ "unchecked", "rawtypes" }) // generic array creation is not allowed in Java
       final List<String>[] sourceFiles = new List[noOfCores];
       for (int j = 0; j < sourceFiles.length; j++) {
         sourceFiles[j] = new ArrayList<>(noOfFiles / sourceFiles.length);
@@ -939,6 +942,7 @@ public class CCTask extends Task {
           }
         } while (alive);
       } catch (final InterruptedException e) {
+        Thread.currentThread().interrupt();
         break;
       }
 

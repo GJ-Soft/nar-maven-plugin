@@ -113,6 +113,11 @@ public class NarTestMojo extends AbstractCompileMojo {
 			sharedPaths.add(libDirectory);
 		}
 
+		// add directories of additional shared libraries configured on the linker
+		// (e.g. third-party libs such as log4cxx), so the test executable can locate
+		// them at runtime through the library path environment variable
+		addLinkerLibPaths(getLinker().getLibs(), sharedPaths);
+
 		// set environment
 		if (!sharedPaths.isEmpty()) {
 			final StringBuilder sharedPath = new StringBuilder();
@@ -136,6 +141,33 @@ public class NarTestMojo extends AbstractCompileMojo {
 		env.add("CLASSPATH=" + StringUtils.join(this.classpathElements.iterator(), File.pathSeparator));
 
 		return env.toArray(new String[0]);
+	}
+
+	/**
+	 * Recursively collects the directories of shared libraries configured on the
+	 * linker ({@code <libs>}), so they can be added to the runtime library path
+	 * (PATH / LD_LIBRARY_PATH) when running tests and executables. Static and
+	 * framework libraries are ignored as they need no runtime lookup directory.
+	 *
+	 * @param libs        the libraries to inspect (may be {@code null})
+	 * @param sharedPaths the set of directories to contribute to
+	 */
+	private void addLinkerLibPaths(final List<Lib> libs, final Set<File> sharedPaths) {
+		if (libs == null) {
+			return;
+		}
+		for (final Lib lib : libs) {
+			if (Library.SHARED.equals(lib.getType())) {
+				// Prefer the explicit runtime directory (e.g. the bin folder holding the
+				// actual .dll/.so) when provided; otherwise fall back to the link directory.
+				final File runtimeDir = lib.getBinDirectory() != null ? lib.getBinDirectory() : lib.getDirectory();
+				if (runtimeDir != null) {
+					getLog().debug("Adding path to additional shared library: " + runtimeDir);
+					sharedPaths.add(runtimeDir);
+				}
+			}
+			addLinkerLibPaths(lib.getLibs(), sharedPaths);
+		}
 	}
 
 	/**
@@ -197,7 +229,10 @@ public class NarTestMojo extends AbstractCompileMojo {
 		// run if requested
 		if (test.shouldRun()) {
 			// NOTE should we use layout here ?
-			final String name = test.getName() + (getOS().equals(OS.WINDOWS) ? ".exe" : "");
+			String name = test.getName();
+			if (getOS().equals(OS.WINDOWS) && !name.endsWith(".exe")) {
+				name = name + ".exe";
+			}
 			File path = new File(getTestTargetDirectory(), "bin");
 			path = new File(path, getAOL().toString());
 			path = new File(path, name);

@@ -77,12 +77,14 @@ public class AttachedNarArtifact extends DefaultArtifact {
   }
 
   // NOTE: not used
+  @SuppressWarnings("this-escape")
   public AttachedNarArtifact(final Artifact parent, final String type, final String classifier) {
     super(parent.getGroupId(), parent.getArtifactId(), parent.getVersionRange(), parent.getScope(), type, classifier,
         null, parent.isOptional());
     setArtifactHandler(new Handler(classifier));
   }
 
+  @SuppressWarnings("this-escape")
   public AttachedNarArtifact(final String groupId, final String artifactId, final String version, final String scope,
       final String type, final String classifier, final boolean optional, final File file)
       throws InvalidVersionSpecificationException {

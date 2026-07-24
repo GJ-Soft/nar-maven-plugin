@@ -59,7 +59,6 @@
 					<goal>nar-test-unpack</goal>
 					<goal>nar-gnu-configure</goal>
 					<goal>nar-system-generate</goal>
-					<goal>nar-vcproj</goal>
 				</goals>
 			</pluginExecutionFilter>
 			<action>

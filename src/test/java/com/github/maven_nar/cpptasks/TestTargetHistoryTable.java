@@ -67,14 +67,6 @@ public class TestTargetHistoryTable extends TestXMLConsumer {
   }
 
   /**
-   * Constructor
-   * 
-   * @param name
-   *          test case name
-   * @see junit.framework.TestCase#TestCase(String)
-   */
-
-  /**
    * Tests loading a stock history file
    * 
    * @throws IOException

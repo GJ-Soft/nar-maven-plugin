@@ -85,7 +85,8 @@ public abstract class AbstractNarLayout implements NarLayout, NarConstants {
 		}
 		try {
 			final Archiver archiver = archiverManager.getArchiver(NarConstants.NAR_ROLE_HINT);
-			archiver.addDirectory(dir, new String[] { include }, null);
+			archiver.addFileSet(org.codehaus.plexus.archiver.util.DefaultFileSet.fileSet(dir)
+					.include(new String[] { include }));
 			archiver.setDestFile(narFile);
 			archiver.createArchive();
 		} catch (final NoSuchArchiverException e) {

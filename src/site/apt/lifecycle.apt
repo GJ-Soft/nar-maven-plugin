@@ -41,7 +41,7 @@ standard maven goals) attached to them. The order is left to right, top to botto
 *------------------------+---------------------------------------------------------------------+ 
 | process-sources        | <<nar-gnu-configure>>                                               |
 *------------------------+---------------------------------------------------------------------+ 
-| generate-resources     | <<nar-system-generate>>, <<nar-vcproj>>                             |
+| generate-resources     | <<nar-system-generate>>                             |
 *------------------------+---------------------------------------------------------------------+ 
 | process-resources      | resources, <<nar-resources>>, <<nar-gnu-resources>>                 |
 *------------------------+---------------------------------------------------------------------+ 
@@ -69,7 +69,7 @@ standard maven goals) attached to them. The order is left to right, top to botto
 *------------------------+---------------------------------------------------------------------+ 
 | pre-integration-test   |                                                                     |
 *------------------------+---------------------------------------------------------------------+ 
-| integration-test       | <<nar-integration-test>>                                            |
+| integration-test       | integration-test                                                    |
 *------------------------+---------------------------------------------------------------------+ 
 | post-integration-test  |                                                                     |
 *------------------------+---------------------------------------------------------------------+ 
