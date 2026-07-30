@@ -90,6 +90,7 @@ public class GccLinker extends AbstractLdLinker {
         args.add("-mwindows");
       }
     }
+    addThreadFlag(task, args);
   }
 
   /**

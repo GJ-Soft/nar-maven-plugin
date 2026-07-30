@@ -147,11 +147,37 @@ public abstract class Compiler {
 	private String optimize = "none";
 
 	/**
+	 * Language standard. If set, adds "-std=&lt;languageStandard&gt;" to the compile
+	 * command (e.g. c11, c17, c++17, c++20). If omitted, the compiler default is
+	 * used. Note: "-std=" is GCC/Clang syntax; MSVC uses a different flag.
+	 */
+	@Parameter
+	private String languageStandard;
+
+	/**
+	 * Target architecture width in bits. If set, adds "-m&lt;bitsArchitecture&gt;"
+	 * to the compile command (e.g. 32, 64). If omitted, the compiler default is
+	 * used. Note: "-m" is GCC/Clang syntax; MSVC uses a different flag.
+	 */
+	@Parameter
+	private String bitsArchitecture;
+
+	/**
 	 * Enables or disables generation of multi-threaded code. Default value: false,
 	 * except on Windows.
 	 */
 	@Parameter(required = true)
 	private boolean multiThreaded = false;
+
+	/**
+	 * Optional flag used to request multithreaded code when multiThreaded is true.
+	 * If set, this exact flag is added to both compiler and linker (e.g.
+	 * "-pthread"). If omitted, a platform default is used with GCC/Clang: MinGW
+	 * gets "-mthreads", other POSIX targets (e.g. Linux) get "-pthread", and Cygwin
+	 * gets none (set this flag explicitly if one is really wanted there).
+	 */
+	@Parameter
+	private String threadFlag;
 
 	/**
 	 * Defines
@@ -303,11 +329,26 @@ public abstract class Compiler {
 		compilerDef.setExceptions(this.exceptions);
 		compilerDef.setRtti(this.rtti);
 		compilerDef.setMultithreaded(this.mojo.getOS().equals("Windows") || this.multiThreaded);
+		compilerDef.setThreadFlag(this.threadFlag);
 
 		// optimize
 		final OptimizationEnum optimization = new OptimizationEnum();
 		optimization.setValue(this.optimize);
 		compilerDef.setOptimize(optimization);
+
+		// language standard (-std=)
+		if (this.languageStandard != null && !this.languageStandard.trim().isEmpty()) {
+			final CompilerArgument arg = new CompilerArgument();
+			arg.setValue("-std=" + this.languageStandard.trim());
+			compilerDef.addConfiguredCompilerArg(arg);
+		}
+
+		// target architecture bits (-m)
+		if (this.bitsArchitecture != null && !this.bitsArchitecture.trim().isEmpty()) {
+			final CompilerArgument arg = new CompilerArgument();
+			arg.setValue("-m" + this.bitsArchitecture.trim());
+			compilerDef.addConfiguredCompilerArg(arg);
+		}
 
 		// add options
 		if (this.options != null) {

@@ -134,7 +134,10 @@ NAR Configuration
     <exceptions/>
     <rtti/>
     <optimize/>
+    <languageStandard/>
+    <bitsArchitecture/>
     <multiThreaded/>
+    <threadFlag/>
     <ccache/>
     <defines>
       <define/>
@@ -488,11 +491,33 @@ executables. Useful for Cygwin/MinGW layouts where <<<directory>>> holds the imp
 	Sets optimization.
     Possible choices are: "none", "size", "minimal", "speed", "full", "aggressive", "extreme", "unsafe".
     Default is none.
-   
+
+** {cpp languageStandard}
+
+    Optional. If set, adds "-std=<languageStandard>" to the compile command
+    (e.g. c11, c17, c++17, c++20). If omitted, the compiler default is used.
+    Note: "-std=" is GCC/Clang syntax; MSVC uses a different flag.
+
+** {cpp bitsArchitecture}
+
+    Optional. If set, adds "-m<bitsArchitecture>" to the compile command
+    (e.g. 32, 64). If omitted, the compiler default is used.
+    Note: "-m" is GCC/Clang syntax; MSVC uses a different flag.
+
 ** {cpp  multiThreaded}
-   
+
     Enables or disables generation of multithreaded code.
     Default value: false, except on Windows.
+    When enabled, a thread flag is added to both the compile and link steps
+    (see threadFlag below).
+
+** {cpp threadFlag}
+
+    Optional flag used to request multithreaded code when multiThreaded is true.
+    If set, this exact flag is added to both compiler and linker (e.g. "-pthread").
+    If omitted, a platform default is used with GCC/Clang: MinGW gets "-mthreads",
+    other POSIX targets (e.g. Linux) get "-pthread", and Cygwin gets none (set this
+    flag explicitly if one is really wanted there).
 
 ** {cpp ccache}
 

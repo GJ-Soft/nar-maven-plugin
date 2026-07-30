@@ -290,6 +290,10 @@ public class NarLayout21 extends AbstractNarLayout {
           getLog().debug("Added syslib to narInfo: " + b.toString());
           narInfo.setSysLibs(aol, b.toString());
         }
+
+        // record external libraries (<linker><libs>, e.g. log4cxx) so that
+        // consumers of this nar link them too (approach a: absolute directories)
+        narInfo.setExternalLibs(aol, mojo.getLinker().getLibs());
       }
 
       // setting this first stops the per type config because getOutput check

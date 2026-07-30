@@ -53,6 +53,7 @@ public final class CompilerDef extends ProcessorDef {
 	private Boolean rtti;
 	private final List<ConditionalPath> includePaths = new ArrayList<>();
 	private Boolean multithreaded;
+	private String threadFlag;
 	private final List<PrecompileDef> precompileDefs = new ArrayList<>();
 	private final List<ConditionalPath> sysIncludePaths = new ArrayList<>();
 	private OptimizationEnum optimization;
@@ -279,6 +280,51 @@ public final class CompilerDef extends ProcessorDef {
 		return true;
 	}
 
+	/**
+	 * Returns whether the multithreaded attribute was explicitly configured
+	 * (as opposed to relying on the implicit default). Used to decide whether to
+	 * emit a thread flag, so the historical default does not add one.
+	 *
+	 * @param defaultProviders providers consulted when unset.
+	 * @param index            index into the providers array.
+	 * @return true if multithreaded was explicitly set somewhere in the chain.
+	 */
+	public boolean isMultithreadedSet(final CompilerDef[] defaultProviders, final int index) {
+		if (isReference()) {
+			return (getCheckedRef(CompilerDef.class, "CompilerDef")).isMultithreadedSet(defaultProviders, index);
+		}
+		if (this.multithreaded != null) {
+			return true;
+		}
+		if (defaultProviders != null && index < defaultProviders.length) {
+			return defaultProviders[index].isMultithreadedSet(defaultProviders, index + 1);
+		}
+		return false;
+	}
+
+	/**
+	 * Explicit compiler/linker flag to request multithreaded code (e.g.
+	 * "-pthread"). When null the caller falls back to a platform default. Resolved
+	 * like {@link #getMultithreaded}: an explicit setting wins, otherwise the
+	 * default providers are consulted.
+	 *
+	 * @param defaultProviders providers consulted when unset.
+	 * @param index            index into the providers array.
+	 * @return the thread flag, or null if none was configured.
+	 */
+	public String getThreadFlag(final CompilerDef[] defaultProviders, final int index) {
+		if (isReference()) {
+			return (getCheckedRef(CompilerDef.class, "CompilerDef")).getThreadFlag(defaultProviders, index);
+		}
+		if (this.threadFlag != null) {
+			return this.threadFlag;
+		}
+		if (defaultProviders != null && index < defaultProviders.length) {
+			return defaultProviders[index].getThreadFlag(defaultProviders, index + 1);
+		}
+		return null;
+	}
+
 	public final OptimizationEnum getOptimization(final CompilerDef[] defaultProviders, final int index) {
 		if (isReference()) {
 			return (getCheckedRef(CompilerDef.class, "CompilerDef")).getOptimization(defaultProviders,
@@ -401,6 +447,20 @@ public final class CompilerDef extends ProcessorDef {
 			throw tooManyAttributes();
 		}
 		this.multithreaded = booleanValueOf(multithreaded);
+	}
+
+	/**
+	 * Sets an explicit flag to request multithreaded code (e.g. "-pthread"),
+	 * overriding the platform default. A null or blank value clears it so the
+	 * platform default applies.
+	 *
+	 * @param threadFlag the flag to use, or null/blank for the platform default.
+	 */
+	public void setThreadFlag(final String threadFlag) {
+		if (isReference()) {
+			throw tooManyAttributes();
+		}
+		this.threadFlag = (threadFlag == null || threadFlag.trim().isEmpty()) ? null : threadFlag.trim();
 	}
 
 	/**

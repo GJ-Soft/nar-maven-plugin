@@ -443,4 +443,19 @@ public class CUtil {
 		return buf.toString();
 	}
 
+	/**
+	 * Returns whether the file is a linkable object input (a ".o" object or a ".a"
+	 * static archive), as opposed to a library to be resolved via -l.
+	 *
+	 * @param file the file to test.
+	 * @return true if the file is a ".a" or ".o".
+	 */
+	public static boolean isObjectFile(final File file) {
+		if (file == null) {
+			return false;
+		}
+		final String name = file.getName().toLowerCase();
+		return name.endsWith(".a") || name.endsWith(".o");
+	}
+
 }

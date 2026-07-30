@@ -93,6 +93,16 @@ public class NarCompileMojo extends AbstractCompileMojo {
 
 	private void createLibrary(final Project antProject, final Library library)
 			throws MojoExecutionException, MojoFailureException {
+		createLibrary(antProject, library, null);
+	}
+
+	/**
+	 * @param testArchiveDir when not null the library is the archive built for the
+	 *                       tests to link against (see createTestArchive), which is
+	 *                       written there instead of into the NAR layout.
+	 */
+	private void createLibrary(final Project antProject, final Library library, final File testArchiveDir)
+			throws MojoExecutionException, MojoFailureException {
 		getLog().debug("Creating Library " + library);
 		// configure task
 		final CCTask task = new CCTask();
@@ -124,7 +134,9 @@ public class NarCompileMojo extends AbstractCompileMojo {
 
 		// outDir
 		File outDir;
-		if (type.equals(Library.EXECUTABLE)) {
+		if (testArchiveDir != null) {
+			outDir = testArchiveDir;
+		} else if (type.equals(Library.EXECUTABLE)) {
 			outDir = getLayout().getBinDirectory(getTargetDirectory(), getMavenProject().getArtifactId(),
 					getMavenProject().getVersion(), getAOL().toString());
 		} else {
@@ -311,6 +323,7 @@ public class NarCompileMojo extends AbstractCompileMojo {
 		task.addConfiguredLinker(linkerDefinition);
 
 		Set<SysLib> dependencySysLibs = new HashSet<SysLib>();
+		final Set<String> seenExternalLibs = getOwnExternalLibKeys();
 
 		// add dependency libraries
 		// FIXME: what about PLUGIN and STATIC, depending on STATIC, should we
@@ -413,6 +426,9 @@ public class NarCompileMojo extends AbstractCompileMojo {
 					}
 
 					dependencySysLibs.addAll(getDependecySysLib(dependency));
+
+					// external libs (<linker><libs>) declared by the dependency
+					addDependencyExternalLibs(dependency, aol, linkerDefinition, antProject, seenExternalLibs);
 				}
 			}
 		}
@@ -443,6 +459,61 @@ public class NarCompileMojo extends AbstractCompileMojo {
 				getLog().info("Failed to copy pdbs from " + task.getObjdir() + "\nexception" + e.getMessage());
 			}
 		}
+	}
+
+	/**
+	 * Builds the archive that lets the tests of an "executable" project link
+	 * against the objects of the project itself.
+	 *
+	 * An executable is not something a test executable can link against, so
+	 * without this the test would see none of the code it is meant to exercise.
+	 * The objects are offered as an archive rather than as plain object files
+	 * because the linker then takes from it only the members that resolve symbols
+	 * the test actually uses, which is what keeps the object defining main() out of
+	 * the test executable and avoids clashing with the main() of the test itself.
+	 * This does require main() to sit in a translation unit of its own.
+	 *
+	 * Nothing is built when the project already produces a static library, as the
+	 * tests link against that one instead, nor when there are no tests to build.
+	 */
+	private void createTestArchive(final Project antProject) throws MojoExecutionException, MojoFailureException {
+		if (getTests().isEmpty()) {
+			return;
+		}
+
+		Library executable = null;
+		for (final Library library : getLibraries()) {
+			if (Library.STATIC.equals(library.getType())) {
+				return;
+			}
+			if (Library.EXECUTABLE.equals(library.getType())) {
+				executable = library;
+			}
+		}
+		if (executable == null) {
+			return;
+		}
+
+		final File outDir = getTestArchiveDirectory();
+		outDir.mkdirs();
+		getLog().info("Archiving objects for the test link into '" + outDir + "'");
+		createLibrary(antProject, Library.createTestArchive(executable), outDir);
+
+		if (countObjects() == 1) {
+			getLog().warn("This project compiles to a single object file. If it holds main(), the tests will not be "
+					+ "able to link against any of its code: move the code under test to a translation unit of its "
+					+ "own, leaving main() alone in its file.");
+		}
+	}
+
+	/**
+	 * Counts the object files compiled for this project.
+	 */
+	private int countObjects() throws MojoExecutionException, MojoFailureException {
+		File objDir = new File(getTargetDirectory(), "obj");
+		objDir = new File(objDir, getAOL().toString());
+		final File[] objects = objDir.listFiles((dir, name) -> name.endsWith(".o") || name.endsWith(".obj"));
+		return objects == null ? 0 : objects.length;
 	}
 
 	/**
@@ -501,6 +572,7 @@ public class NarCompileMojo extends AbstractCompileMojo {
 			for (final Library library : getLibraries()) {
 				createLibrary(getAntProject(), library);
 			}
+			createTestArchive(getAntProject());
 		} else {
 			getLog().info("Nothing to compile");
 		}

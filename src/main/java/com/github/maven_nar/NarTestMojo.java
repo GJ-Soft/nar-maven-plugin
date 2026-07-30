@@ -118,6 +118,13 @@ public class NarTestMojo extends AbstractCompileMojo {
 		// them at runtime through the library path environment variable
 		addLinkerLibPaths(getLinker().getLibs(), sharedPaths);
 
+		// same, but for external libraries propagated from nar dependencies
+		// (their <linker><libs>): the test links them, so it must find them at runtime
+		for (final NarArtifact dependency : narArtifacts) {
+			final NarInfo depInfo = dependency.getNarInfo();
+			addLinkerLibPaths(depInfo.getExternalLibs(depInfo.getAOL(getAOL())), sharedPaths);
+		}
+
 		// set environment
 		if (!sharedPaths.isEmpty()) {
 			final StringBuilder sharedPath = new StringBuilder();

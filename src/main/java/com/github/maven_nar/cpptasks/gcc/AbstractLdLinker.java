@@ -98,6 +98,40 @@ public abstract class AbstractLdLinker extends CommandLineLinker {
     }
   }
 
+  /**
+   * Adds the multithreading flag when the task requests multithreaded code. Uses
+   * the explicit override configured on the task if present, otherwise a platform
+   * default for GCC/Clang: "-mthreads" for MinGW, "-pthread" for other POSIX
+   * targets (e.g. Linux), and none for Cygwin (threads are always available there;
+   * use an explicit override if a flag is really wanted). Kept consistent with the
+   * compile step.
+   *
+   * @param task the current task.
+   * @param args the linker argument list to append to.
+   */
+  protected void addThreadFlag(final CCTask task, final List<String> args) {
+    if (task == null || !task.isMultithreadedExplicit() || !task.getMultithreaded()) {
+      return;
+    }
+    final String override = task.getThreadFlag();
+    final String threadArg;
+    if (override != null && !override.isEmpty()) {
+      threadArg = override;
+    } else {
+      final String id = getIdentifier();
+      if (id.contains("mingw")) {
+        threadArg = "-mthreads";
+      } else if (id.contains("cygwin")) {
+        threadArg = null;
+      } else {
+        threadArg = "-pthread";
+      }
+    }
+    if (threadArg != null && !threadArg.isEmpty()) {
+      args.add(threadArg);
+    }
+  }
+
   @Override
   protected void addIncremental(final CCTask task, final boolean incremental, final List<String> args) {
     if (incremental) {

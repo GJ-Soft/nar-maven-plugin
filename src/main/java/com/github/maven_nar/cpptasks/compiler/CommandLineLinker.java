@@ -62,7 +62,10 @@ public abstract class CommandLineLinker extends AbstractLinker {
   private boolean dryRun;
 
   // FREEHEP
-  private final int maxPathLength = 250;
+  // Historically 250 (MSVC/MAX_PATH era). Too conservative for gcc/Cygwin/MinGW,
+  // which handle long paths fine; deep project trees (e.g. NAR classifier dirs)
+  // easily exceed 250. Raised to keep those builds working.
+  private final int maxPathLength = 4096;
 
   /** Creates a comand line linker invocation */
   public CommandLineLinker(final String command, final String identifierArg, final String[] extensions,

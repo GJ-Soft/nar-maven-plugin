@@ -97,6 +97,7 @@ public class GppLinker extends AbstractLdLinker {
         args.add("-mwindows");
       }
     }
+    addThreadFlag(task, args);
     // BEGINFREEHEP link or not with libstdc++
     // for MacOS X see:
     // http://developer.apple.com/documentation/DeveloperTools/Conceptual/CppRuntimeEnv/Articles/LibCPPDeployment.html

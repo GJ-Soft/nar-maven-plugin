@@ -55,6 +55,17 @@ public class Test implements Executable {
   private boolean run = true;
 
   /**
+   * When true, and only for a project building an "executable", the objects of
+   * the project are linked into this test through an archive built for the
+   * purpose, so that the test can exercise them. This requires main() to sit in a
+   * translation unit of its own, or the linker will pull it in and clash with the
+   * main() of the test. Set to false to link the test against nothing but its own
+   * sources and the dependencies. Defaults to true.
+   */
+  @Parameter(defaultValue = "true")
+  private boolean linkProjectObjects = true;
+
+  /**
    * Type of the library to generate. 
    * Possible choices are: "shared", "static" or "executable".
    * Defaults to "executable".
@@ -122,6 +133,10 @@ public class Test implements Executable {
 
   public String getType() {
     return this.type;
+  }
+
+  public final boolean linkProjectObjects() {
+    return this.linkProjectObjects;
   }
 
   public Map<String, String> getEnvironmentVariables() {

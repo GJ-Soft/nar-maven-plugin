@@ -76,6 +76,27 @@ public class Lib {
   @Parameter
   private List<Lib> libs;
 
+  public Lib() {
+  }
+
+  /**
+   * Creates a leaf (external/system) library. Used to reconstruct a &lt;lib&gt;
+   * propagated through a dependency's nar.properties.
+   *
+   * @param name         library name
+   * @param type         link type (e.g. shared, static)
+   * @param directory    location of the (import) library
+   * @param binDirectory optional location of the runtime shared library
+   */
+  public Lib(final String name, final String type, final File directory, final File binDirectory) {
+    this.name = name;
+    if (type != null) {
+      this.type = type;
+    }
+    this.directory = directory;
+    this.binDirectory = binDirectory;
+  }
+
   public final String getName() {
     return this.name;
   }

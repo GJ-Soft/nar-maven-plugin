@@ -114,6 +114,27 @@ public abstract class GccCompatibleCCompiler extends CommandLineCCompiler {
   }
 
   /**
+   * Returns the multithreading flag for GCC/Clang: an explicit override if given,
+   * otherwise a platform default: "-mthreads" for MinGW, "-pthread" for other
+   * POSIX targets (e.g. Linux), and none for Cygwin (threads are always available
+   * there; use an explicit override if a flag is really wanted).
+   */
+  @Override
+  protected String getThreadFlagArgument(final String threadFlagOverride) {
+    if (threadFlagOverride != null && !threadFlagOverride.isEmpty()) {
+      return threadFlagOverride;
+    }
+    final String id = getIdentifier();
+    if (id.contains("mingw")) {
+      return "-mthreads";
+    }
+    if (id.contains("cygwin")) {
+      return null;
+    }
+    return "-pthread";
+  }
+
+  /**
    * Adds an include path to the command.
    */
   public void addIncludePath(final String path, final List<String> cmd) {

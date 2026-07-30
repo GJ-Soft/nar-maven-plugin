@@ -19,14 +19,19 @@
  */
 package com.github.maven_nar;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.tools.ant.Project;
+
+import com.github.maven_nar.cpptasks.LinkerDef;
 
 /**
  * @author Mark Donszelmann
@@ -266,6 +271,52 @@ public abstract class AbstractCompileMojo extends AbstractDependencyMojo {
 		return getNarInfo().getOutput(aol, getOutput(!Library.EXECUTABLE.equals(type)));
 	}
 
+	/**
+	 * Prefixes an archiver may prepend to the name of a static library.
+	 */
+	private static final String[] ARCHIVE_PREFIXES = { "", "lib" };
+
+	/**
+	 * Extensions an archiver may give to a static library.
+	 */
+	private static final String[] ARCHIVE_EXTENSIONS = { ".a", ".lib" };
+
+	/**
+	 * Directory holding the test scoped archive built out of this project's own
+	 * objects. Only produced for "executable" projects, which have no library for
+	 * their test executable to link against. It is deliberately kept outside the
+	 * NAR layout, since it is an intermediate build artifact and must never be
+	 * packaged nor installed.
+	 *
+	 * @return the directory, which may not exist.
+	 */
+	protected final File getTestArchiveDirectory() throws MojoFailureException, MojoExecutionException {
+		return new File(new File(getTestTargetDirectory(), "lib"), getAOL().toString());
+	}
+
+	/**
+	 * Locates the static library built under the given base name. Which prefix and
+	 * extension the file ends up with is decided by the archiver of the toolchain
+	 * in use ("lib" and ".a" for gcc, none and ".lib" for msvc), so the file is
+	 * searched for rather than composed.
+	 *
+	 * @param dir      directory to search.
+	 * @param baseName output name the library was built with, without prefix or
+	 *                 extension.
+	 * @return the library file, or null if it was not found.
+	 */
+	protected final File findStaticLibrary(final File dir, final String baseName) {
+		for (final String prefix : ARCHIVE_PREFIXES) {
+			for (final String extension : ARCHIVE_EXTENSIONS) {
+				final File candidate = new File(dir, prefix + baseName + extension);
+				if (candidate.exists()) {
+					return candidate;
+				}
+			}
+		}
+		return null;
+	}
+
 	protected final Resource getResource() {
 		if (this.resource == null && !this.onlySpecifiedCompilers) {
 			setResource(new Resource());
@@ -350,5 +401,51 @@ public abstract class AbstractCompileMojo extends AbstractDependencyMojo {
 		}
 
 		return l;
+	}
+
+	private static String externalLibKey(final Lib lib) {
+		return lib.getName() + "|" + lib.getType() + "|"
+				+ (lib.getDirectory() == null ? "" : lib.getDirectory().getPath());
+	}
+
+	/**
+	 * Builds a dedup set seeded with this project's own &lt;linker&gt;&lt;libs&gt;,
+	 * so external libraries propagated from dependencies are not linked twice.
+	 *
+	 * @return a mutable set of keys for the own external libraries.
+	 */
+	protected Set<String> getOwnExternalLibKeys() {
+		final Set<String> seen = new HashSet<>();
+		final List<Lib> own = getLinker().getLibs();
+		if (own != null) {
+			for (final Lib lib : own) {
+				seen.add(externalLibKey(lib));
+			}
+		}
+		return seen;
+	}
+
+	/**
+	 * Adds the external libraries (&lt;linker&gt;&lt;libs&gt;) declared in a
+	 * dependency's nar.properties to the given linker, skipping any already present
+	 * in {@code seen} (by name/type/directory). Approach (a): the directory is the
+	 * absolute path recorded by the producer, so it must resolve on the consumer's
+	 * machine too.
+	 *
+	 * @param dependency the nar dependency to read external libs from.
+	 * @param aol        the AOL to read for.
+	 * @param linker     the linker definition to add the libraries to.
+	 * @param antProject the Ant project.
+	 * @param seen       dedup set (see {@link #getOwnExternalLibKeys()}).
+	 */
+	protected void addDependencyExternalLibs(final NarArtifact dependency, final AOL aol, final LinkerDef linker,
+			final Project antProject, final Set<String> seen) throws MojoFailureException, MojoExecutionException {
+		for (final Lib lib : dependency.getNarInfo().getExternalLibs(aol)) {
+			if (seen.add(externalLibKey(lib))) {
+				getLog().debug("Adding external lib from dependency " + dependency.getArtifactId() + ": "
+						+ lib.getName() + " (" + lib.getDirectory() + ")");
+				lib.addLibSet(this, linker, antProject);
+			}
+		}
 	}
 }

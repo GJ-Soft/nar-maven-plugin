@@ -259,6 +259,11 @@ public class Linker {
 			final String prefix, final String type, final List<String> linkPaths)
 			throws MojoFailureException, MojoExecutionException {
 		Project antProject = task.getProject();
+
+		// A static library is not linked but archived, and an archiver ("ar", "lib")
+		// does nothing but group object files: it takes neither the options nor the
+		// libraries of a link, and fails when handed them.
+		final boolean forLink = !Library.STATIC.equals(type);
 		if (this.name == null) {
 			throw new MojoFailureException("NAR: Please specify a <Name> as part of <Linker>");
 		}
@@ -281,7 +286,7 @@ public class Linker {
 		linker.setMap(this.map);
 
 		// Add options to linker
-		if (this.options != null) {
+		if (forLink && this.options != null) {
 			for (final String option : this.options) {
 				final LinkerArgument arg = new LinkerArgument();
 				arg.setValue(option);
@@ -289,7 +294,7 @@ public class Linker {
 			}
 		}
 
-		if (this.optionSet != null) {
+		if (forLink && this.optionSet != null) {
 
 			final String[] opts = this.optionSet.split("\\s");
 
@@ -302,7 +307,7 @@ public class Linker {
 			}
 		}
 
-		if (!this.clearDefaultOptions) {
+		if (forLink && !this.clearDefaultOptions) {
 			final String option = NarProperties.getInstance(mojo.getMavenProject()).getProperty(prefix + "options");
 			if (option != null) {
 				final String[] opt = option.split(" ");
@@ -380,48 +385,50 @@ public class Linker {
 		}
 
 		// Add Libraries to linker
-		if (this.libs != null || this.libSet != null) {
+		if (forLink) {
+			if (this.libs != null || this.libSet != null) {
 
-			if (this.libs != null) {
+				if (this.libs != null) {
 
-				for (final Object lib1 : this.libs) {
+					for (final Object lib1 : this.libs) {
 
-					final Lib lib = (Lib) lib1;
-					lib.addLibSet(mojo, linker, antProject);
+						final Lib lib = (Lib) lib1;
+						lib.addLibSet(mojo, linker, antProject);
+					}
 				}
-			}
 
-			if (this.libSet != null) {
-				addLibraries(this.libSet, linker, antProject, false);
-			}
-		} else {
-
-			final String libsList = NarProperties.getInstance(mojo.getMavenProject()).getProperty(prefix + "libs");
-
-			addLibraries(libsList, linker, antProject, false);
-		}
-
-		// Add System Libraries to linker
-		if (this.sysLibs != null || this.sysLibSet != null) {
-
-			if (this.sysLibs != null) {
-
-				for (final Object sysLib1 : this.sysLibs) {
-
-					final SysLib sysLib = (SysLib) sysLib1;
-					linker.addSyslibset(sysLib.getSysLibSet(antProject));
+				if (this.libSet != null) {
+					addLibraries(this.libSet, linker, antProject, false);
 				}
+			} else {
+
+				final String libsList = NarProperties.getInstance(mojo.getMavenProject()).getProperty(prefix + "libs");
+
+				addLibraries(libsList, linker, antProject, false);
 			}
 
-			if (this.sysLibSet != null) {
-				addLibraries(this.sysLibSet, linker, antProject, true);
+			// Add System Libraries to linker
+			if (this.sysLibs != null || this.sysLibSet != null) {
+
+				if (this.sysLibs != null) {
+
+					for (final Object sysLib1 : this.sysLibs) {
+
+						final SysLib sysLib = (SysLib) sysLib1;
+						linker.addSyslibset(sysLib.getSysLibSet(antProject));
+					}
+				}
+
+				if (this.sysLibSet != null) {
+					addLibraries(this.sysLibSet, linker, antProject, true);
+				}
+			} else {
+
+				final String sysLibsList = NarProperties.getInstance(mojo.getMavenProject())
+						.getProperty(prefix + "sysLibs");
+
+				addLibraries(sysLibsList, linker, antProject, true);
 			}
-		} else {
-
-			final String sysLibsList = NarProperties.getInstance(mojo.getMavenProject())
-					.getProperty(prefix + "sysLibs");
-
-			addLibraries(sysLibsList, linker, antProject, true);
 		}
 
 		return linker;

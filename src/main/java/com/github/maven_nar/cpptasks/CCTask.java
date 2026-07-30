@@ -210,6 +210,11 @@ public class CCTask extends Task {
   private boolean ordered = false;
   /** The compiler definitions. */
   private final List<CompilerDef> _compilers = new ArrayList<>();
+  /**
+   * Extra object inputs (e.g. static ".a" archives) to feed to the linker
+   * alongside the compiled ".o" files, rather than resolving them via -l.
+   */
+  private final List<File> additionalStaticObjects = new ArrayList<>();
   /** The output file type. */
   // private LinkType _linkType = LinkType.EXECUTABLE;
   /** The library sets. */
@@ -455,6 +460,20 @@ public class CCTask extends Task {
       throw new NullPointerException("libset");
     }
     this.linkerDef.addSyslibset(libset);
+  }
+
+  /**
+   * Adds an object input to be fed to the linker alongside the compiled object
+   * files, rather than resolved via -l. Intended for static ".a" archives (e.g.
+   * the module's own static library when linking its test executable). Only ".a"
+   * or ".o" files are accepted.
+   *
+   * @param libFile the archive/object file to add.
+   */
+  public void addStaticLibraryObject(final File libFile) {
+    if (CUtil.isObjectFile(libFile)) {
+      this.additionalStaticObjects.add(libFile);
+    }
   }
 
   /**
@@ -1053,6 +1072,17 @@ public class CCTask extends Task {
         objectFiles.add(compileTarget.getOutput());
       }
     }
+    //
+    // additional static objects (e.g. static ".a" archives) fed directly to
+    // the linker alongside the compiled objects, if the linker consumes them
+    //
+    for (final File staticObject : this.additionalStaticObjects) {
+      final int bid = linkerConfig.bid(staticObject.toString());
+      if (bid > 0) {
+        objectFiles.add(staticObject);
+        log(String.format("Included %s static object file", staticObject.getName()));
+      }
+    }
     final File[] objectFileArray = new File[objectFiles.size()];
     objectFiles.toArray(objectFileArray);
     final File[] sysObjectFileArray = new File[sysObjectFiles.size()];
@@ -1434,6 +1464,71 @@ public class CCTask extends Task {
    */
   public void setMultithreaded(final boolean multi) {
     this.compilerDef.setMultithreaded(multi);
+  }
+
+  /**
+   * Returns whether multithreaded code generation is enabled for this task.
+   *
+   * Mirrors the resolution used when building compiler configurations (see
+   * {@link CompilerDef#createConfiguration}): an explicit setting on the first
+   * active &lt;compiler&gt; wins, otherwise the captive &lt;cc&gt; definition is
+   * used (which itself defaults to true). Intended so linkers can emit
+   * thread-related flags consistently with the compile step.
+   *
+   * @return true if multithreaded code generation is enabled.
+   */
+  public boolean getMultithreaded() {
+    final CompilerDef[] defaultProviders = new CompilerDef[] {
+      this.compilerDef
+    };
+    for (int i = 0; i < this._compilers.size(); i++) {
+      final CompilerDef currentCompilerDef = this._compilers.get(i);
+      if (currentCompilerDef.isActive()) {
+        return currentCompilerDef.getMultithreaded(defaultProviders, 0);
+      }
+    }
+    return this.compilerDef.getMultithreaded(defaultProviders, 0);
+  }
+
+  /**
+   * Returns whether multithreaded code generation was explicitly configured
+   * (rather than left at the implicit default). Used to decide whether a thread
+   * flag should be emitted, so the historical default does not add one.
+   *
+   * @return true if multithreaded was explicitly set.
+   */
+  public boolean isMultithreadedExplicit() {
+    final CompilerDef[] defaultProviders = new CompilerDef[] {
+      this.compilerDef
+    };
+    for (int i = 0; i < this._compilers.size(); i++) {
+      final CompilerDef currentCompilerDef = this._compilers.get(i);
+      if (currentCompilerDef.isActive()) {
+        return currentCompilerDef.isMultithreadedSet(defaultProviders, 0);
+      }
+    }
+    return this.compilerDef.isMultithreadedSet(defaultProviders, 0);
+  }
+
+  /**
+   * Returns the explicit multithreading flag configured for this task, or null if
+   * none was set (in which case the linker applies a platform default). Resolved
+   * consistently with {@link #getMultithreaded()} so the link step matches the
+   * compile step.
+   *
+   * @return the configured thread flag, or null.
+   */
+  public String getThreadFlag() {
+    final CompilerDef[] defaultProviders = new CompilerDef[] {
+      this.compilerDef
+    };
+    for (int i = 0; i < this._compilers.size(); i++) {
+      final CompilerDef currentCompilerDef = this._compilers.get(i);
+      if (currentCompilerDef.isActive()) {
+        return currentCompilerDef.getThreadFlag(defaultProviders, 0);
+      }
+    }
+    return this.compilerDef.getThreadFlag(defaultProviders, 0);
   }
 
   //

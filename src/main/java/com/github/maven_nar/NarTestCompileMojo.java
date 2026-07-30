@@ -97,6 +97,15 @@ public class NarTestCompileMojo extends AbstractCompileMojo {
 		objDir.mkdirs();
 		task.setObjdir(objDir);
 
+		// The archive of this project must be linked into the test executable as an
+		// object input (alongside the .o files), not resolved via -l. See
+		// cpptasks CCTask.addStaticLibraryObject.
+		final File projectArchive = getProjectArchive(test);
+		if (projectArchive != null) {
+			getLog().info("Adding archive as object input to test link: '" + projectArchive + "'");
+			task.addStaticLibraryObject(projectArchive);
+		}
+
 		// failOnError, libtool
 		task.setFailonerror(failOnError(getAOL()));
 		task.setLibtool(useLibtool(getAOL()));
@@ -229,7 +238,9 @@ public class NarTestCompileMojo extends AbstractCompileMojo {
 		}
 
 		// add library of this package
-		if (libDir.exists()) {
+		// A static library of this package is linked as an object input above
+		// (addStaticLibraryObject), so it must NOT also be resolved via -l here.
+		if (libDir.exists() && !Library.STATIC.equals(linkType)) {
 			final LibrarySet libSet = new LibrarySet();
 			libSet.setProject(antProject);
 
@@ -289,6 +300,7 @@ public class NarTestCompileMojo extends AbstractCompileMojo {
 		}
 
 		Set<SysLib> dependencySysLibs = new HashSet<SysLib>();
+		final Set<String> seenExternalLibs = getOwnExternalLibKeys();
 
 		for (final Object depLib : dependencies) {
 			final NarArtifact dependency = (NarArtifact) depLib;
@@ -371,6 +383,9 @@ public class NarTestCompileMojo extends AbstractCompileMojo {
 				}
 
 				dependencySysLibs.addAll(getDependecySysLib(dependency));
+
+				// external libs (<linker><libs>) declared by the dependency
+				addDependencyExternalLibs(dependency, aol, linkerDefinition, antProject, seenExternalLibs);
 			}
 		}
 
@@ -387,8 +402,47 @@ public class NarTestCompileMojo extends AbstractCompileMojo {
 		try {
 			task.execute();
 		} catch (final BuildException e) {
-			throw new MojoExecutionException("NAR: Test-Compile failed", e);
+			throw new MojoExecutionException("NAR: Test-Compile failed: " + e.getMessage(), e);
 		}
+	}
+
+	/**
+	 * Locates the archive of this project that the given test has to link against
+	 * to be able to exercise its code. That is the static library when the project
+	 * builds one, and the archive built out of the objects of the project when it
+	 * builds an executable, which is not something a test executable could link
+	 * against. See NarCompileMojo#createTestArchive.
+	 *
+	 * @return the archive, or null when there is none to link against.
+	 */
+	private File getProjectArchive(final Test test) throws MojoExecutionException, MojoFailureException {
+		boolean executable = false;
+		for (final Library library : getLibraries()) {
+			if (Library.STATIC.equals(library.getType())) {
+				final File libDir = getLayout().getLibDirectory(getTargetDirectory(),
+						getMavenProject().getArtifactId(), getMavenProject().getVersion(), getAOL().toString(),
+						Library.STATIC);
+				final File staticLibrary = findStaticLibrary(libDir, getOutput(getAOL(), Library.STATIC));
+				if (staticLibrary == null) {
+					getLog().warn("Static library not found under '" + libDir
+							+ "', the test will not link against the code of this project.");
+				}
+				return staticLibrary;
+			}
+			executable |= Library.EXECUTABLE.equals(library.getType());
+		}
+
+		if (!executable || !test.linkProjectObjects()) {
+			return null;
+		}
+
+		final File archiveDir = getTestArchiveDirectory();
+		final File testArchive = findStaticLibrary(archiveDir, getOutput(getAOL(), Library.STATIC));
+		if (testArchive == null) {
+			getLog().warn("Archive of this project's objects not found under '" + archiveDir
+					+ "', the test will not link against the code of this project.");
+		}
+		return testArchive;
 	}
 
 	/**

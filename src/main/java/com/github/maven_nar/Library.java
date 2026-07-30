@@ -115,6 +115,28 @@ public class Library implements Executable {
 	@Parameter
 	private List<String> dependencyBindings = new ArrayList<>();
 
+	/**
+	 * Creates the static library used to link the objects of an "executable"
+	 * project into its test executable. It is not declared by the user and never
+	 * becomes a NAR artifact, it only exists so that the objects can be offered to
+	 * the test link as an archive.
+	 *
+	 * @param executable the "executable" library it is derived from, whose
+	 *                   compilation and linking settings it shares.
+	 * @return the derived static library.
+	 */
+	static Library createTestArchive(final Library executable) {
+		final Library testArchive = new Library();
+		testArchive.type = STATIC;
+		testArchive.subSystem = executable.subSystem;
+		testArchive.linkCPP = executable.linkCPP;
+		testArchive.linkFortran = executable.linkFortran;
+		testArchive.linkFortranMain = executable.linkFortranMain;
+		// narSystemPackage is left null on purpose: no NarSystem class is generated
+		// for it, the user declared library is the one that owns that.
+		return testArchive;
+	}
+
 	@Override
 	public final List<String> getArgs() {
 		return this.args;

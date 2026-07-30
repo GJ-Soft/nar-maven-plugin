@@ -83,6 +83,21 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
       LinkType linkType, Boolean rtti, OptimizationEnum optimization);
 
   /**
+   * Returns the flag to add when multithreaded code generation is requested, or
+   * null if none should be added.
+   *
+   * The base implementation only honors an explicit override configured by the
+   * user; toolchain-specific subclasses may return a platform default when no
+   * override is given.
+   *
+   * @param threadFlagOverride explicit flag configured by the user, or null.
+   * @return the flag to add, or null.
+   */
+  protected String getThreadFlagArgument(final String threadFlagOverride) {
+    return threadFlagOverride;
+  }
+
+  /**
    * Adds command-line arguments for include directories.
    * 
    * If relativeArgs is not null will add corresponding relative paths
@@ -327,6 +342,12 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
       final Boolean rtti = specificDef.getRtti(defaultProviders, 1);
       final OptimizationEnum optimization = specificDef.getOptimization(defaultProviders, 1);
       this.addImpliedArgs(args, debug, multithreaded, exceptions, linkType, rtti, optimization);
+      if (multithreaded && specificDef.isMultithreadedSet(defaultProviders, 1)) {
+        final String threadArg = getThreadFlagArgument(specificDef.getThreadFlag(defaultProviders, 1));
+        if (threadArg != null && !threadArg.isEmpty()) {
+          args.add(threadArg);
+        }
+      }
     }
 
     //

@@ -24,6 +24,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -165,6 +167,65 @@ public class NarInfo {
 
   public final String getSysLibs(final AOL aol) {
     return getProperty(aol, "syslibs.names");
+  }
+
+  /**
+   * Returns the external libraries (&lt;linker&gt;&lt;libs&gt;) recorded for this
+   * nar, so a consuming project can link them too. Stored as indexed keys to
+   * avoid delimiter clashes with paths (which contain ':' and '\\').
+   *
+   * @param aol the AOL to read for.
+   * @return the list of external libraries, possibly empty (never null).
+   */
+  public final List<Lib> getExternalLibs(final AOL aol) {
+    final List<Lib> result = new ArrayList<>();
+    final int count = getProperty(aol, "external.libs.count", 0);
+    for (int i = 0; i < count; i++) {
+      final String prefix = "external.libs." + i + ".";
+      final String name = getProperty(aol, prefix + "name");
+      if (name == null || name.isEmpty()) {
+        continue;
+      }
+      final String type = getProperty(aol, prefix + "type", Library.SHARED);
+      final String directory = getProperty(aol, prefix + "directory");
+      final String binDirectory = getProperty(aol, prefix + "binDirectory");
+      result.add(new Lib(name, type, directory == null ? null : new File(directory),
+          binDirectory == null ? null : new File(binDirectory)));
+    }
+    return result;
+  }
+
+  /**
+   * Records the external libraries (&lt;linker&gt;&lt;libs&gt;) so consumers can
+   * link them. Only leaf libraries (a name with a directory) are stored; grouped
+   * libraries with nested &lt;libs&gt; are skipped.
+   *
+   * @param aol  the AOL to write for.
+   * @param libs the libraries to record (may be null).
+   */
+  public final void setExternalLibs(final AOL aol, final List<Lib> libs) {
+    if (libs == null) {
+      return;
+    }
+    int index = 0;
+    for (final Lib lib : libs) {
+      if (lib.getName() == null || lib.getLibs() != null) {
+        continue;
+      }
+      final String prefix = "external.libs." + index + ".";
+      setProperty(aol, prefix + "name", lib.getName());
+      setProperty(aol, prefix + "type", lib.getType());
+      if (lib.getDirectory() != null) {
+        setProperty(aol, prefix + "directory", lib.getDirectory().getPath());
+      }
+      if (lib.getBinDirectory() != null) {
+        setProperty(aol, prefix + "binDirectory", lib.getBinDirectory().getPath());
+      }
+      index++;
+    }
+    if (index > 0) {
+      setProperty(aol, "external.libs.count", Integer.toString(index));
+    }
   }
 
   /**

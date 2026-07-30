@@ -231,7 +231,10 @@ All compiler elements share the same schema (`C`, `Cpp`, `Fortran`,
   <exceptions>true</exceptions>
   <rtti>true</rtti>
   <optimize>...</optimize>
-  <multiThreaded>false</multiThreaded>
+  <languageStandard>...</languageStandard>   <!-- optional; if set, adds -std=<value> (GCC/Clang) -->
+  <bitsArchitecture>...</bitsArchitecture>   <!-- optional; if set, adds -m<value>, e.g. 32/64 (GCC/Clang) -->
+  <multiThreaded>false</multiThreaded>       <!-- true (always true on Windows) adds a thread flag on compile+link -->
+  <threadFlag>...</threadFlag>               <!-- optional override; default (GCC/Clang): MinGW -mthreads, Linux -pthread, Cygwin none -->
   <defines>...</defines>      <defineSet>...</defineSet>      <clearDefaultDefines>false</clearDefaultDefines>
   <undefines>...</undefines>  <undefineSet>...</undefineSet>  <clearDefaultUndefines>false</clearDefaultUndefines>
   <includePaths>...</includePaths>
