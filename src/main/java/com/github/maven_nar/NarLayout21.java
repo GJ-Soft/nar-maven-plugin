@@ -42,8 +42,8 @@ import com.google.inject.spi.Dependency;
  *
  * <pre>
  * nar/noarch/include
- * nar/aol/<aol>-<type>/bin
- * nar/aol/<aol>-<type>/lib
+ * nar/aol/&lt;aol&gt;-&lt;type&gt;/bin
+ * nar/aol/&lt;aol&gt;-&lt;type&gt;/lib
  * </pre>
  *
  * This loayout has a one-to-one relation with the aol-type version of the nar.

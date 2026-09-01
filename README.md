@@ -31,7 +31,7 @@ In your POM:
 <build>
 	<plugins>
 		<plugin>
-			<groupId>org.gjs.maven.plugins</groupId>
+			<groupId>org.gjsoft.maven.plugins</groupId>
 			<artifactId>nar-maven-plugin</artifactId>
 			<version>4.0.0-SNAPSHOT</version>
 			<extensions>true</extensions>

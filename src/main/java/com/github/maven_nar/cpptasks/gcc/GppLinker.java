@@ -33,7 +33,7 @@ import com.github.maven_nar.cpptasks.types.LibrarySet;
 /**
  * Adapter for the g++ variant of the GCC linker
  *
- * @author Stephen M. Webb <stephen.webb@bregmasoft.com>
+ * @author Stephen M. Webb &lt;stephen.webb@bregmasoft.com&gt;
  */
 public class GppLinker extends AbstractLdLinker {
   public static final String GPP_COMMAND = "g++";

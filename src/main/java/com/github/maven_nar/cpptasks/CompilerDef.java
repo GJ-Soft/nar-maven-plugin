@@ -467,8 +467,8 @@ public final class CompilerDef extends ProcessorDef {
 	 * Sets compiler type.
 	 * 
 	 * 
-	 * <table width="100%" border="1">
-	 * <thead>Supported compilers </thead>
+	 * <table border="1">
+	 * <caption>Supported compilers</caption>
 	 * <tr>
 	 * <td>gcc (default)</td>
 	 * <td>GCC C++ compiler</td>
@@ -592,7 +592,7 @@ public final class CompilerDef extends ProcessorDef {
 	/**
 	 * List of source filenames without extensions
 	 * 
-	 * @param asList
+	 * @param order the source filenames, without extensions
 	 */
 	public void setOrder(final List<String> order) {
 		this.order = order;

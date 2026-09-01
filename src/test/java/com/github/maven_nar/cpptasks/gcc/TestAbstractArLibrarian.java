@@ -45,7 +45,7 @@ public class TestAbstractArLibrarian extends TestAbstractLinker {
   /**
    * Override of
    * 
-   * @see com.github.maven_nar.cpptasks.compiler.TestAbstractProcessor#testBid()
+   * @see com.github.maven_nar.cpptasks.compiler.TestAbstractLinker#testBid()
    */
   @Override
   @Test

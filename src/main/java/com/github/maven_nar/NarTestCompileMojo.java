@@ -180,25 +180,14 @@ public class NarTestCompileMojo extends AbstractCompileMojo {
 			}
 		}
 
-		// add dependency include paths
+		// add dependency include paths, from the normal unpack directory and failing
+		// that from the test one
 		for (final Object depLib1 : dependencies) {
 			final NarArtifact artifact = (NarArtifact) depLib1;
-
-			// check if it exists in the normal unpack directory
-			File include = getLayout().getIncludeDirectory(getUnpackDirectory(), artifact.getArtifactId(),
-					artifact.getBaseVersion());
-			if (!include.exists()) {
-				// otherwise try the test unpack directory
-				include = getLayout().getIncludeDirectory(getTestUnpackDirectory(), artifact.getArtifactId(),
-						artifact.getBaseVersion());
-			}
-			if (include.exists()) {
-				String includesType = artifact.getNarInfo().getIncludesType(null);
-				if (includesType.equals("system")) {
-					task.createSysIncludePath().setPath(include.getPath());
-				} else {
-					task.createIncludePath().setPath(include.getPath());
-				}
+			final File include = getDependencyIncludeDirectory(artifact, getUnpackDirectory(),
+					getTestUnpackDirectory());
+			if (include != null) {
+				addDependencyIncludePath(task, artifact, include);
 			}
 		}
 
@@ -471,7 +460,14 @@ public class NarTestCompileMojo extends AbstractCompileMojo {
 			getTestTargetDirectory().mkdirs();
 
 			for (final Object o : getTests()) {
-				createTest(getAntProject(), (Test) o);
+				final Test test = (Test) o;
+				if (!test.skipCheckFile() && !hasTestSources(test)) {
+					getLog().warn("Skipping test '" + test.getName() + "', no source file named after it was found"
+							+ " under the test source directories, so there is nothing to build it from."
+							+ " Set <skipCheckFile>true</skipCheckFile> on the test to build it anyway.");
+					continue;
+				}
+				createTest(getAntProject(), test);
 			}
 
 			if (replay != null) {

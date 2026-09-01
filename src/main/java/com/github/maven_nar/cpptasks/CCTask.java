@@ -1537,8 +1537,8 @@ public class CCTask extends Task {
   /**
    * Sets type of the default compiler and linker.
    * 
-   * <table width="100%" border="1">
-   * <thead>Supported compilers </thead>
+   * <table border="1">
+   * <caption>Supported compilers</caption>
    * <tr>
    * <td>gcc (default)</td>
    * <td>GCC C++ compiler</td>
@@ -1775,8 +1775,8 @@ public class CCTask extends Task {
    * Sets the nature of the subsystem under which that the program will
    * execute.
    * 
-   * <table width="100%" border="1">
-   * <thead>Supported subsystems </thead>
+   * <table border="1">
+   * <caption>Supported subsystems</caption>
    * <tr>
    * <td>gui</td>
    * <td>Graphical User Interface</td>

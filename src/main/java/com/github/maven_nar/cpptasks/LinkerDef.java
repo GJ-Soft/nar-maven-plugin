@@ -387,8 +387,8 @@ public class LinkerDef extends ProcessorDef {
    * Sets linker type.
    * 
    * 
-   * <table width="100%" border="1">
-   * <thead>Supported linkers </thead>
+   * <table border="1">
+   * <caption>Supported linkers</caption>
    * <tr>
    * <td>gcc</td>
    * <td>Gcc Linker</td>

@@ -620,8 +620,6 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 	 * @return Attached NAR Artifacts
 	 * @throws MojoFailureException
 	 * @throws MojoExecutionException
-	 * 
-	 * @see getArtifacts
 	 */
 	protected List<AttachedNarArtifact> getAttachedNarArtifacts(List<? extends Executable> libraries)
 			throws MojoFailureException, MojoExecutionException {

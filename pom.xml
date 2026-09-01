@@ -3,13 +3,13 @@
   <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.gjs.java.maven</groupId>
+        <groupId>org.gjsoft.java.maven</groupId>
         <artifactId>gjs-java-maven-parent</artifactId>
         <version>1.0.0-RC.2</version>    
-        <relativePath>../../gjs-java/gjs-java-parents/gjs-java-maven-parent</relativePath>
+        <relativePath/>
     </parent>
 
-    <groupId>org.gjs.maven.plugins</groupId>
+    <groupId>org.gjsoft.maven.plugins</groupId>
     <artifactId>nar-maven-plugin</artifactId>
     <version>4.0.0-SNAPSHOT</version>
     <packaging>maven-plugin</packaging>
@@ -86,67 +86,10 @@
 		</contributor>
 	</contributors>
 
-	<scm>
-		<connection>scm:git:git://github.com/GJ-Soft/nar-maven-plugin</connection>
-		<developerConnection>scm:git:git@github.com:GJ-Soft/nar-maven-plugin</developerConnection>
-		<url>https://github.com/GJ-Soft/nar-maven-plugin</url>
-		<tag>nar-maven-plugin-4.0.0</tag>
-	</scm>
-
-	<issueManagement>
-		<system>GitHub Issues</system>
-		<url>https://github.com/GJ-Soft/nar-maven-plugin/issues</url>
-	</issueManagement>
-	<ciManagement>
-		<system>GitHub Actions</system>
-		<url>https://github.com/GJ-Soft/nar-maven-plugin/actions</url>
-	</ciManagement>
-  <!--
-  <distributionManagement>
-    <snapshotRepository>
-      <id>sonatype-nexus-snapshots</id>
-      <name>Sonatype Nexus Snapshots</name>
-      <url>${sonatypeOssSnapshot}</url>
-    </snapshotRepository>
-    <repository>
-      <id>sonatype-nexus-releases</id>
-      <name>Nexus Release Repository</name>
-      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-    </repository>
-  </distributionManagement>
-  -->
-
-  <properties>
-    <invoker.debug>false</invoker.debug>
-    <its.to.skip>dummy</its.to.skip>
-    <skip.autoconf.it>it0013-gnu-executable/**</skip.autoconf.it>
-    <skip.it0029>it0029-gnu-libsName/**</skip.it0029>
-    <skip.fortran.it>it0018-fortran/**</skip.fortran.it>
-    <skip.toolchain.it>it0017-toolchain/**</skip.toolchain.it>
-    <sonatypeOssSnapshot>https://oss.sonatype.org/content/repositories/snapshots/</sonatypeOssSnapshot>
-    <mavenPluginPluginVersion>3.11.0</mavenPluginPluginVersion>
-    <distMgmtSnapshotsName />
-    <distMgmtSnapshotsUrl />
-    <maven.site.cache />
-    <maven.site.path />
-    <organization.logo />
-    <sonar.host.url />
-    <sourceReleaseAssemblyDescriptor>source-release</sourceReleaseAssemblyDescriptor>
-  </properties>
-
-  <repositories>
-    <repository>
-      <id>sonatype-nexus-snapshots</id>
-      <name>Sonatype Nexus Snapshots</name>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-      <releases>
-        <enabled>false</enabled>
-      </releases>
-      <snapshots>
-        <enabled>true</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
+	<properties>
+		<!-- Project management -->
+		<repository.name>nar-maven-plugin</repository.name>
+	</properties>
 
 	<dependencies>
 		<dependency>
@@ -170,12 +113,12 @@
 					https://issues.apache.org/jira/browse/MNG-5939
 					-->
 					<execution>
-					  <id>attach-sources</id>
-					  <phase>none</phase>
+						<id>attach-sources</id>
+						<phase>none</phase>
 					</execution>
 					<execution>
-					  <id>attach-sources-jar</id>
-					  <goals>
+						<id>attach-sources-jar</id>
+						<goals>
 						<goal>jar</goal>
 					  </goals>
 					</execution>
@@ -209,49 +152,20 @@
   </build>
 
   <profiles>
-    <profile>
-      <id>has-autoconf</id>
-      <activation>
-        <file>
-          <exists>/usr/bin/autoreconf</exists>
-        </file>
-      </activation>
-      <properties>
-        <skip.autoconf.it>false</skip.autoconf.it>
-        <skip.it0029>false</skip.it0029>
-      </properties>
-    </profile>
-    <profile>
-      <id>has-fortran</id>
-      <activation>
-        <file>
-          <exists>/usr/bin/gfortran</exists>
-        </file>
-      </activation>
-      <properties>
-        <skip.fortran.it>false</skip.fortran.it>
-      </properties>
-    </profile>
-    <profile>
-      <id>has-toolchain</id>
-      <activation>
-        <file>
-          <exists>${user.home}/.m2/toolchains.xml</exists>
-        </file>
-      </activation>
-      <properties>
-        <skip.toolchain.it>false</skip.toolchain.it>
-      </properties>
-    </profile>
-    <!-- NB: This profile disables doclint for Java 8+. -->
-    <profile>
-      <id>java-8</id>
-      <activation>
-        <jdk>[1.8,)</jdk>
-      </activation>
-      <properties>
-        <additionalparam>-Xdoclint:none</additionalparam>
-      </properties>
-    </profile>
-  </profiles>
+		<!-- NB: This profile relaxes doclint for Java 8+. Broken HTML and dangling
+			 references are still reported as errors; missing documentation is not,
+			 because the vendored cpptasks sources are not fully documented. -->
+		<profile>
+			<id>java-8</id>
+			<activation>
+				<jdk>(,9)</jdk>
+			</activation>
+			<properties>
+				<!-- additionalparam was dropped in maven-javadoc-plugin 3.0, so the old
+					-Xdoclint:none it carried was being silently ignored. Since 3.0 the
+					doclint parameter is driven by this property instead. -->
+				<maven.javadoc.doclint>all,-missing</maven.javadoc.doclint>
+			</properties>
+		</profile>
+	</profiles>
 </project>

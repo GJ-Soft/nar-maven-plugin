@@ -39,7 +39,7 @@ standard maven goals) attached to them. The order is left to right, top to botto
 *------------------------+---------------------------------------------------------------------+ 
 | generate-sources       | <<nar-unpack>>                                                      |
 *------------------------+---------------------------------------------------------------------+ 
-| process-sources        | <<nar-gnu-configure>>                                               |
+| process-sources        | <<nar-gnu-configure>>, <<nar-include-path>>                         |
 *------------------------+---------------------------------------------------------------------+ 
 | generate-resources     | <<nar-system-generate>>                             |
 *------------------------+---------------------------------------------------------------------+ 
@@ -51,7 +51,7 @@ standard maven goals) attached to them. The order is left to right, top to botto
 *------------------------+---------------------------------------------------------------------+ 
 | generate-test-sources  | <<nar-test-unpack>>                                                 |
 *------------------------+---------------------------------------------------------------------+ 
-| process-test-sources   |                                                                     |
+| process-test-sources   | <<nar-test-include-path>>                                           |
 *------------------------+---------------------------------------------------------------------+ 
 | generate-test-resources|                                                                     |
 *------------------------+---------------------------------------------------------------------+ 
@@ -85,5 +85,38 @@ standard maven goals) attached to them. The order is left to right, top to botto
 install and deploy plugins of maven do their job.
 
 	The nar-assembly goal is not part of the lifestyle and should be called independently.
+
+Include Path Goals: Pending Work
+
+	The <<nar-include-path>> and <<nar-test-include-path>> goals publish the include
+directories the sources compile against, so that an IDE can resolve the headers of a
+project that <does not compile yet>. Two known limitations still get in the way of that
+purpose, and both are pending:
+
+	[[1]] <<The test goals run too late.>> <<nar-test-unpack>> is bound to
+	generate-test-sources and <<nar-test-include-path>> to process-test-sources, and
+	both of those phases come <after> compile in the standard lifecycle. There is
+	therefore no way to obtain the include path of the test sources without compiling
+	the module first, which is precisely what these goals exist to avoid. They should
+	be rebound to phases before compile, as their main-scope counterparts already are
+	(initialize, generate-sources and process-sources).
+
+	[[2]] <<The goals are not self-sufficient on their own.>> They are meant to be
+	callable from the command line (<<<mvn nar:nar-include-path>>>) even though they
+	also run inside the lifecycle. They are invocable, but they collect the dependency
+	include directories from the unpack directory and silently drop the ones that do
+	not exist, so on a module that has just been cleaned they produce a
+	c_cpp_properties.json holding only the project's own include directory, with no
+	error or warning. To be genuinely standalone they must make sure the dependencies
+	are resolved and unpacked themselves, instead of relying on earlier phases having
+	run.
+
+	[]
+
+	Until both are addressed, a consumer of these goals has to drive them through the
+lifecycle instead of calling them directly, and stop before compile. That is what the
+Gjs Maven VS Code extension does: its Maven Update runs <<<mvn process-sources>>> on
+C/C++ modules, and uses only target/nar/c_cpp_properties.json, leaving the test one
+unused.
 	
 	

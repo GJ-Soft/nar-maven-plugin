@@ -158,8 +158,8 @@ public class NarManager {
 	 * Returns a list of all attached nar dependencies for a specific binding and
 	 * "noarch", but not where "local" is specified
 	 * 
-	 * @param scope compile, test, runtime, ....
-	 * @param aol   either a valid aol, noarch or null. In case of null both the
+	 * @param narArtifacts the nar artifacts to inspect
+	 * @param archOsLinker either a valid aol, noarch or null. In case of null both the
 	 *              default getAOL() and noarch dependencies are returned.
 	 * @param type  noarch, static, shared, jni, or null. In case of null the
 	 *              default binding found in narInfo is used.

@@ -209,7 +209,8 @@ public abstract class AbstractNarMojo extends GjsAbstractMojo implements NarCons
 	}
 
 	@Override
-	protected void goalExecution(Log log, List<String> errorMessages) throws Throwable {
+	protected void goalExecution(Log log, List<String> errorMessages)
+			throws MojoFailureException, MojoExecutionException {
 		validate();
 		narExecute();
 	}

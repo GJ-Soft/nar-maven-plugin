@@ -23,7 +23,7 @@ package com.github.maven_nar.cpptasks;
  * Place class description here.
  *
  * @author inger
- * @author <additional author>
+ * @author &lt;additional author&gt;
  *
  * @since
  ******************************************************************************/

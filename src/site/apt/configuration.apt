@@ -71,10 +71,16 @@ NAR Configuration
       <linkCPP/>
       <linkFortran/>
       <linkFortranMain/>
+      <narSystemPackage/>
+      <narSystemName/>
+      <narSystemDirectory/>
       <run/>
       <args>
         <arg/>
       </args>
+      <dependencyBindings>
+        <dependencyBinding/>
+      </dependencyBindings>
     </library>
   </libraries>
 
@@ -83,9 +89,18 @@ NAR Configuration
       <name/>
       <link/>
       <run/>
+      <skipCheckFile/>
+      <linkProjectObjects/>
+      <type/>
       <args>
         <arg/>
       </args>
+      <dependencyBindings>
+        <dependencyBinding/>
+      </dependencyBindings>
+      <environmentVariables>
+        <variableName>value</variableName>
+      </environmentVariables>
     </test>
   </tests>
 
@@ -329,47 +344,82 @@ wish to run a GNU configure step but not the full make process.
 
 * {libraries}
 
-	Section to specify what type or libraries to create. For each library you may specify:
-	
+	Section to specify what type of libraries to create. For each library you may specify:
+
 	[type] The type of the library: shared, static, jni, plugin, executable. Default is shared.
+
+	[subSystem] The subsystem to generate: gui, console, other. Default is console.
 
 	[linkCPP] Specifies if the stdc++ library should be linked with. Default is true.
 
-	[linkFortran] Specifies if the fortran library should be linked with. Default is false.
+	[linkFortran] Specifies if the fortran runtime should be linked with. Default is false.
 
-	[narSystemPackage] If specified a NarSystem class will be generated in this package and 
-	added to the main jar artifact. The NarSystem class contains the following methods:
-	
-	* loadLibrary() - which will load the <artifact>-<version> JNI library. Additionally, native-lib-loader
-	is supported when {{{https://github.com/scijava/native-lib-loader}native-lib-loader}} is specified in <dependency>.
+	[linkFortranMain] Specifies if the fortran startup should be linked with, so that the gcc
+	linker can find the "main" of fortran. Default is false.
+
+	[narSystemPackage] If specified a NarSystem class will be generated in this package and
+	added to the main jar artifact. That class holds a loadLibrary() method, which loads the
+	<artifact>-<version> JNI library. Additionally, native-lib-loader is supported when
+	{{{https://github.com/scijava/native-lib-loader}native-lib-loader}} is specified in <dependency>.
 	In that case, the native-lib-loader will expect the platform-dependent artifact (.nar files) to be present on the
 	class path and unpack the library from there before loading it. This method explicitly supports multi-platform
 	distributions, i.e. it handles the case where there are multiple platform-dependent artifacts on the class path.
 
 	[narSystemName] Specifies the NarSystem class. Defaults to NarSystem.
 
-	[narSystemDirectory] Specifies the NarSystem source directory. Defaults to target/nar/nar-generated.
-	
-	[]
-	
-	[run] If true will run this executable (only if type is executable).
-	
-	[args] List of arguments to be provided to executable.
-	
+	[narSystemDirectory] Specifies the NarSystem source directory, relative to the NAR target
+	directory. Defaults to nar-generated, that is target/nar/nar-generated.
+
+	[run] If true will run this executable, and only if type is executable. Default is false.
+
+	[args] List of arguments to be provided to executable. Only used if run is true and type is
+	executable.
+
+	[dependencyBindings] List of artifact:binding pairs, to pick the type of a dependency to link
+	against when there is a choice.
+
 	[]
 
 * {tests}
 
 	Section to specify which test executables should be created. For each test you may specify:
-	
-	[name] Name of the executable.
-	
-	[link] Type of linking to be used: shared or static. Default is shared.
 
-	[run] If true will run this test
-	
-	[args] List of arguments to be provided to test.
-	
+	[name] Name of the test. It names both the executable produced and the source file the test
+	is built from: the file carrying the name of the test is the one expected to hold its main().
+	Everything under the test source directories is compiled into the test, except for the files
+	named after the other tests, so that their main() does not clash with this one. When no source
+	file carries the name of the test there is nothing to build it from, so it is neither compiled
+	nor run, unless skipCheckFile is set.
+
+	[link] Type of linking to the main artifact to be used: shared or static. Defaults to the type
+	of the library when a single one is built, and to shared otherwise.
+
+	[run] If true will run this test. Only has an effect when type is executable, as there is
+	nothing to run for the other types. Default is true.
+
+	[skipCheckFile] If true the test is built and run without first checking that a source file
+	named after it exists. Set it when the main() of the test sits in a file named differently.
+	Note that the sources of a test whose name matches no file are not kept out of the other tests
+	either, which only matters when more than one test is declared. Default is false.
+
+	[linkProjectObjects] Only for a project building an executable. If true the objects of the
+	project are linked into the test through an archive built for the purpose, so that the test can
+	exercise them. This requires the main() of the project to sit in a translation unit of its own,
+	or the linker will pull it in and clash with the main() of the test. Set to false to link the
+	test against nothing but its own sources and the dependencies. Default is true.
+
+	[type] Type of the output to generate: shared, static or executable. A test that is not an
+	executable is built but never run, which allows test sources to be compiled without requiring
+	a main(). Default is executable.
+
+	[args] List of arguments to be provided to test. Only used if run is true.
+
+	[dependencyBindings] List of artifact:binding pairs, to pick the type of a dependency to link
+	against when there is a choice.
+
+	[environmentVariables] Additional environment variables to set when running the test. Each
+	child element names a variable and holds its value.
+
 	[]
 
 * {linker}

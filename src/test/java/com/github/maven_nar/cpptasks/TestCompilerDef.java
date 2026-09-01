@@ -183,8 +183,8 @@ public final class TestCompilerDef extends TestProcessorDef {
    *
    * A CompilerDef is created similar to what would be created for
    *
-   * <cc><defineset><define name="DEBUG" if="debug"/> <define name="NDEBUG"
-   * unless="debug"/> </defineset> </cc>
+   * &lt;cc&gt;&lt;defineset&gt;&lt;define name="DEBUG" if="debug"/&gt; &lt;define
+   * name="NDEBUG" unless="debug"/&gt; &lt;/defineset&gt; &lt;/cc&gt;
    *
    * Then getActiveDefines is called for a project without and with the
    * "debug" property defined. Return value from getActiveDefines should
@@ -225,7 +225,7 @@ public final class TestCompilerDef extends TestProcessorDef {
    *
    * A CompilerDef is created similar to what would be created for
    *
-   * <cc><includepath location=".." if="debug"/> </cc>
+   * &lt;cc&gt;&lt;includepath location=".." if="debug"/&gt; &lt;/cc&gt;
    *
    * and is evaluate for a project without and without "debug" set
    */

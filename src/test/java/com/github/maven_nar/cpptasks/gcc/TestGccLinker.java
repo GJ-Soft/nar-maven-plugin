@@ -36,9 +36,6 @@ public class TestGccLinker {
 
   /**
    * Constructor
-   * 
-   * @param name
-   *          test name
    */
   public TestGccLinker() {
     this.realOSName = System.getProperty("os.name");

@@ -492,11 +492,17 @@ public abstract class Compiler {
 		final Set<String> includeSet = getIncludes(type);
 		final Set<String> excludeSet = getExcludes(type);
 
-		// now add all but the current test to the excludes
-		for (final Object o : this.mojo.getTests()) {
-			final Test test = (Test) o;
-			if (!test.getName().equals(output)) {
-				excludeSet.add("**/" + test.getName() + ".*");
+		// when building a test, add all but the current one to the excludes, so that
+		// the main() of the other tests does not get dragged into this one. Only
+		// when building a test: the main compilation runs with a null output, which
+		// matches no test name, and excluding them there would drop a source file of
+		// the library for no other reason than a test carrying its name.
+		if (type.equals(TEST)) {
+			for (final Object o : this.mojo.getTests()) {
+				final Test test = (Test) o;
+				if (!test.getName().equals(output)) {
+					excludeSet.add("**/" + test.getName() + ".*");
+				}
 			}
 		}
 
@@ -620,7 +626,7 @@ public abstract class Compiler {
 		return getSourceDirectories("dummy");
 	}
 
-	private List<File> getSourceDirectories(final String type) {
+	protected final List<File> getSourceDirectories(final String type) {
 		final List<File> sourceDirectories = new ArrayList<>();
 		final File baseDir = this.mojo.getMavenProject().getBasedir();
 

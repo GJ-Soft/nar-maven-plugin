@@ -200,6 +200,11 @@ public class NarTestMojo extends AbstractCompileMojo {
 
 			// run all tests
 			for (final Test test : getTests()) {
+				if (!test.skipCheckFile() && !hasTestSources(test)) {
+					// already reported by nar-testCompile, which did not build it either
+					getLog().debug("Not running test '" + test.getName() + "', it has no sources.");
+					continue;
+				}
 				runTest(test);
 			}
 
@@ -233,6 +238,14 @@ public class NarTestMojo extends AbstractCompileMojo {
 	}
 
 	private void runTest(final Test test) throws MojoExecutionException, MojoFailureException {
+		// Only an executable test can be run. A test of type "static" or "shared"
+		// exists so that test sources can be compiled (and linked into a library)
+		// without requiring a main(), so there is nothing to run for it.
+		if (!Library.EXECUTABLE.equals(test.getType())) {
+			getLog().debug("Not running test " + test.getName() + ", its type is " + test.getType());
+			return;
+		}
+
 		// run if requested
 		if (test.shouldRun()) {
 			// NOTE should we use layout here ?

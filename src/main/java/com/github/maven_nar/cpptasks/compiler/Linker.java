@@ -88,4 +88,20 @@ public interface Linker extends Processor {
    * Returns true if the linker is case-sensitive
    */
   boolean isCaseSensitive();
+
+  /**
+   * Tells whether the patterns of {@link #getLibraryPatterns} describe the files
+   * a library actually takes the shape of on this platform, and so whether
+   * finding none of them means the library is really missing.
+   * <p>
+   * It holds for most linkers, and the caller warns when a library set matches
+   * nothing. It does not hold where the same linker builds libraries under names
+   * of a different shape than the ones it is asked to look for, in which case
+   * matching nothing is the normal outcome and warning about it is only noise.
+   *
+   * @return true unless matching nothing is to be expected.
+   */
+  default boolean hasReliableLibraryPatterns() {
+    return true;
+  }
 }

@@ -333,14 +333,18 @@ public class LibrarySet extends DataType {
           // style linkers but unnecessary fails
           // Unix style linkers. Will need to revisit.
           //
-          if (matches == 0 ) {
+          // Only worth reporting where finding nothing really does mean the library
+          // is not there. A linker whose libraries take the shape of names other
+          // than the ones it looks for, gcc building for Windows among them, matches
+          // nothing as a matter of course, and the link resolves them by name.
+          if (matches == 0 && linker.hasReliableLibraryPatterns()) {
             final StringBuilder msg = new StringBuilder("No file matching ");
             if (patterns.length == 1) {
               msg.append("pattern (");
               msg.append(patterns[0]);
               msg.append(")");
             } else {
-              msg.append("patterns (\"");
+              msg.append("patterns (");
               msg.append(patterns[0]);
               for (int k = 1; k < patterns.length; k++) {
                 msg.append(", ");

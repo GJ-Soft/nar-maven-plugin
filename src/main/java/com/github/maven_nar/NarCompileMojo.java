@@ -59,7 +59,6 @@ import com.github.maven_nar.cpptasks.types.LinkerArgument;
 /**
  * Compiles native source files.
  * 
- * @requiresSession
  * @author Mark Donszelmann
  */
 @Mojo(name = "nar-compile", defaultPhase = LifecyclePhase.COMPILE, requiresProject = true, requiresDependencyResolution = ResolutionScope.COMPILE)
@@ -294,23 +293,16 @@ public class NarCompileMojo extends AbstractCompileMojo {
 			final String binding = getBinding(library, narDependency);
 			getLog().debug("Looking for " + narDependency + " found binding " + binding);
 			if (!binding.equals(Library.JNI)) {
-				final File unpackDirectory = getUnpackDirectory();
-				final File include = getLayout().getIncludeDirectory(unpackDirectory, narDependency.getArtifactId(),
-						narDependency.getBaseVersion());
-				getLog().debug("Looking for include directory: " + include);
-				if (include.exists()) {
-					String includesType = narDependency.getNarInfo().getIncludesType(null);
-					if (includesType.equals("system")) {
-						task.createSysIncludePath().setPath(include.getPath());
-					} else {
-						task.createIncludePath().setPath(include.getPath());
-					}
+				final File include = getDependencyIncludeDirectory(narDependency, getUnpackDirectory());
+				if (include != null) {
+					addDependencyIncludePath(task, narDependency, include);
 				} else {
 					// Ideally includes are used from lib (static or shared)
 					// however it's not required.
 					// make a note in the log if something has gone wrong,
 					// but don't block compilation
-					getLog().warn(String.format("Unable to locate %1$s lib include path '%2$s'", binding, include));
+					getLog().warn(String.format("Unable to locate %1$s lib include path for '%2$s'", binding,
+							narDependency));
 				}
 			}
 		}

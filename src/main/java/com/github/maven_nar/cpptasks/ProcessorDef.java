@@ -115,7 +115,7 @@ public abstract class ProcessorDef extends DataType {
   }
 
   /**
-   * Adds a <compilerarg>or <linkerarg>
+   * Adds a &lt;compilerarg&gt; or &lt;linkerarg&gt;
    * 
    * @param arg
    *          command line argument, must not be null
@@ -135,7 +135,7 @@ public abstract class ProcessorDef extends DataType {
   }
 
   /**
-   * Adds a <compilerarg>or <linkerarg>
+   * Adds a &lt;compilerarg&gt; or &lt;linkerarg&gt;
    * 
    * @param param
    *          command line argument, must not be null
@@ -340,7 +340,7 @@ public abstract class ProcessorDef extends DataType {
    * Gets the inherit attribute. If the inherit value is true, this processor
    * definition will inherit default values from the containing cc element.
    * 
-   * @return if true then properties from the containing <cc>element are
+   * @return if true then properties from the containing &lt;cc&gt; element are
    *         used.
    */
   public final boolean getInherit() {

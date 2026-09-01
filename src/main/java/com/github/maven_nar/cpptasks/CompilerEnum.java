@@ -28,8 +28,8 @@ import com.github.maven_nar.cpptasks.gcc.WindresResourceCompiler;
 /**
  * Enumeration of supported compilers
  *
- * <table width="100%" border="1">
- * <thead>Supported compilers </thead>
+ * <table border="1">
+ * <caption>Supported compilers</caption>
  * <tr>
  * <td>gcc (default)</td>
  * <td>GCC C++ compiler</td>
@@ -151,7 +151,6 @@ import com.github.maven_nar.cpptasks.gcc.WindresResourceCompiler;
  * <td>tcc</td>
  * <td>ARM 16-bit C compiler</td>
  * </tr>
- * *
  * <tr>
  * <td>uic</td>
  * <td>Qt user interface compiler</td>

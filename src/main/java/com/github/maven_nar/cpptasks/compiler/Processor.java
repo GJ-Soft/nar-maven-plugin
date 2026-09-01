@@ -45,16 +45,16 @@ public interface Processor {
   Processor changeEnvironment(boolean newEnvironment, Environment env);
 
   /**
-   * Returns the compiler configuration for <cc>or <compiler>element.
+   * Returns the compiler configuration for &lt;cc&gt; or &lt;compiler&gt; element.
    * 
    * @param defaultProviders
-   *          When specificConfig corresponds to a <compiler>or linker
+   *          When specificConfig corresponds to a &lt;compiler&gt; or linker
    *          element, defaultProvider will be a zero to two element array.
    *          If there is an extends attribute, the first element will be
    *          the referenced ProcessorDef, unless inherit = false, the last
-   *          element will be the containing <cc>element
+   *          element will be the containing &lt;cc&gt; element
    * @param specificConfig
-   *          A <cc>or <compiler>element.
+   *          A &lt;cc&gt; or &lt;compiler&gt; element.
    * @return resulting configuration
    */
   ProcessorConfiguration createConfiguration(CCTask task, LinkType linkType, ProcessorDef[] defaultProviders,

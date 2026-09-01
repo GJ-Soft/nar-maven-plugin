@@ -49,10 +49,24 @@ public class Test implements Executable {
   private String link = null;
 
   /**
-   * When true run this test. Defaults to true;
+   * When true run this test. Defaults to true; Only has an effect when the test
+   * is of type "executable", as there is nothing to run for the other types.
    */
   @Parameter(defaultValue = "true")
   private boolean run = true;
+
+  /**
+   * When true, this test is built and run without first checking that a source
+   * file named after it exists. A test is normally built out of the source file
+   * carrying its name, so a missing one means there is nothing to build the test
+   * from and it is left out; set this to true when the main() of the test sits in
+   * a file named differently, in which case the check would be wrong. Note that
+   * the sources of a test whose name matches no file are not excluded from the
+   * other tests either, which only matters when more than one test is declared.
+   * Defaults to false.
+   */
+  @Parameter(defaultValue = "false")
+  private boolean skipCheckFile = false;
 
   /**
    * When true, and only for a project building an "executable", the objects of
@@ -137,6 +151,10 @@ public class Test implements Executable {
 
   public final boolean linkProjectObjects() {
     return this.linkProjectObjects;
+  }
+
+  public final boolean skipCheckFile() {
+    return this.skipCheckFile;
   }
 
   public Map<String, String> getEnvironmentVariables() {

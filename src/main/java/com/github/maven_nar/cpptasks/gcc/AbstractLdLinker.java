@@ -348,6 +348,19 @@ public abstract class AbstractLdLinker extends CommandLineLinker {
     return true;
   }
 
+  /**
+   * On Windows this linker builds and consumes libraries that are named nothing
+   * like the "lib&lt;name&gt;.a" and "lib&lt;name&gt;.so" it is made to look for: a shared
+   * library is "&lt;name&gt;.dll", reached through an import library named
+   * "lib&lt;name&gt;.dll.a" or through the dll itself. Matching none of the patterns is
+   * therefore the normal outcome there and says nothing about the library being
+   * missing, which the link resolves by name anyway through its "-l" switches.
+   */
+  @Override
+  public boolean hasReliableLibraryPatterns() {
+    return !isWindows();
+  }
+
   protected boolean isHPUX() {
     final String osname = System.getProperty("os.name").toLowerCase();
     if (osname.contains("hp") && osname.contains("ux")) {

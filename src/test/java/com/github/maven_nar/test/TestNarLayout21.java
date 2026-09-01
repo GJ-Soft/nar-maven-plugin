@@ -72,7 +72,7 @@ public class TestNarLayout21 {
 
   /**
    * Test method for
-   * {@link com.github.maven_nar.NarLayout20#getBinDirectory(java.io.File, java.lang.String)}
+   * {@link com.github.maven_nar.NarLayout21#getBinDirectory}
    * .
    * 
    * @throws MojoFailureException
@@ -87,7 +87,7 @@ public class TestNarLayout21 {
 
   /**
    * Test method for
-   * {@link com.github.maven_nar.NarLayout20#getIncludeDirectory(java.io.File)}.
+   * {@link com.github.maven_nar.NarLayout21#getIncludeDirectory}.
    * 
    * @throws MojoFailureException
    * @throws MojoExecutionException
@@ -106,7 +106,7 @@ public class TestNarLayout21 {
 
   /**
    * Test method for
-   * {@link com.github.maven_nar.NarLayout20#getLibDirectory(java.io.File, java.lang.String, java.lang.String)}
+   * {@link com.github.maven_nar.NarLayout21#getLibDirectory}
    * .
    * 
    * @throws MojoFailureException
