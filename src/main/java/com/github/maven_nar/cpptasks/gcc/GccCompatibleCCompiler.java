@@ -173,6 +173,24 @@ public abstract class GccCompatibleCCompiler extends CommandLineCCompiler {
       case 1:
         final String outputFileName = getOutputFileNames(filename, null)[0];
         final String objectName = new File(outputDir, outputFileName).toString();
+        // Relative to the working directory, the same treatment and the same switch
+        // as the source file below. It matters beyond tidiness when coverage is on:
+        // gcc records this very string in the object, and libgcov reopens it at exit
+        // to write the .gcda next to it. A Cygwin build handed an absolute Windows
+        // path does not recognise it as absolute, hangs it off the compile-time
+        // working directory and gives up with a ":Skip", so no counters are ever
+        // written. A relative path, or an absolute POSIX one, both work.
+        if (this.gccFileAbsolutePath) {
+          return objectName;
+        }
+        try {
+          final String relativeObject = CUtil.getRelativeCompilerPath(workDir, new File(objectName));
+          if (!relativeObject.isEmpty()) {
+            return relativeObject;
+          }
+        } catch (final Exception ex) {
+          // no relative path to be had, the absolute one still compiles
+        }
         return objectName;
     }
     String relative = "";

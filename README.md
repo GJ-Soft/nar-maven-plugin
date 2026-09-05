@@ -33,7 +33,7 @@ In your POM:
 		<plugin>
 			<groupId>org.gjsoft.maven.plugins</groupId>
 			<artifactId>nar-maven-plugin</artifactId>
-			<version>4.0.0-SNAPSHOT</version>
+			<version>4.0.0-RC.1</version>
 			<extensions>true</extensions>
 			<configuration>
 				...

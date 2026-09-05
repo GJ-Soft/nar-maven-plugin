@@ -71,6 +71,13 @@ public class NarTestCompileMojo extends AbstractCompileMojo {
 		final CCTask task = new CCTask();
 		task.setProject(antProject);
 
+		// Lo mismo que hace nar-compile con la libreria. Sin esto la tarea se quedaba
+		// con el true por defecto de CCTask y decoraba las opciones del enlazado de los
+		// tests aunque el parametro dijera lo contrario: las mismas <options> acababan
+		// como estan escritas en la libreria y envueltas en -Wl, en el test, que se las
+		// pasa a ld en vez de al driver. Un --coverage, por ejemplo, ld lo rechaza.
+		task.setDecorateLinkerOptions(this.decorateLinkerOptions);
+
 		// subsystem
 		final SubsystemEnum subSystem = new SubsystemEnum();
 		subSystem.setValue("console");

@@ -35,10 +35,16 @@ import org.apache.maven.shared.artifact.filter.collection.ScopeFilter;
  * Unpacks NAR files needed for tests compilation and execution. Unpacking
  * happens in the project target folder, and also sets flags on binaries and
  * corrects static libraries.
+ * <p>
+ * It runs in generate-sources, alongside the unpacking of the project itself,
+ * rather than in generate-test-sources where it would sit after the compilation
+ * of the project. What waits on it is the publishing of the include path of the
+ * tests, and the point of that is to be of use to whoever is editing tests that
+ * do not compile yet.
  *
  * @author Mark Donszelmann
  */
-@Mojo(name = "nar-test-unpack", defaultPhase = LifecyclePhase.GENERATE_TEST_SOURCES, requiresProject = true, requiresDependencyResolution = ResolutionScope.TEST)
+@Mojo(name = "nar-test-unpack", defaultPhase = LifecyclePhase.GENERATE_SOURCES, requiresProject = true, requiresDependencyResolution = ResolutionScope.TEST)
 public class NarTestUnpackMojo extends AbstractDependencyMojo {
 
 	@Override
@@ -67,6 +73,14 @@ public class NarTestUnpackMojo extends AbstractDependencyMojo {
 
 	@Override
 	public final void narExecute() throws MojoExecutionException, MojoFailureException {
+		// Nothing downstream of here reads the test unpack area when the tests are
+		// off: neither nar-testCompile nor nar-test do anything. It matters more now
+		// that this runs before compile, where a plain "mvn compile" would otherwise
+		// pay for unpacking what nobody is going to look at.
+		if (this.skipTests) {
+			getLog().info("Not unpacking test dependencies");
+			return;
+		}
 		final List<AttachedNarArtifact> attachedNarArtifacts = getAttachedNarArtifacts(tests);
 		unpackAttachedNars(attachedNarArtifacts);
 	}

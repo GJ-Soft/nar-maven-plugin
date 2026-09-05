@@ -32,13 +32,15 @@ import org.apache.maven.shared.artifact.filter.collection.ScopeFilter;
  * Publishes the include directories the tests of this project compile against,
  * into its test target directory.
  * <p>
- * It runs in process-test-sources, which comes after the test dependencies have
- * been unpacked and before the tests are compiled, so that the headers can be
- * resolved by an IDE on tests that do not compile yet.
+ * It runs in process-sources, next to the goal that does the same for the
+ * sources of the project, and not in process-test-sources: that phase comes
+ * after compile, and a path published there is of no use to whoever is editing
+ * tests of a module that does not compile yet, which is the whole point. Its
+ * dependencies are unpacked just before, in generate-sources.
  *
  * @see NarIncludePathMojo
  */
-@Mojo(name = "nar-test-include-path", defaultPhase = LifecyclePhase.PROCESS_TEST_SOURCES, requiresProject = true, requiresDependencyResolution = ResolutionScope.TEST)
+@Mojo(name = "nar-test-include-path", defaultPhase = LifecyclePhase.PROCESS_SOURCES, requiresProject = true, requiresDependencyResolution = ResolutionScope.TEST)
 public class NarTestIncludePathMojo extends AbstractNarIncludePathMojo {
 
 	@Override

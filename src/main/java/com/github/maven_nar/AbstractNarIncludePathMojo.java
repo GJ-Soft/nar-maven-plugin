@@ -117,19 +117,24 @@ public abstract class AbstractNarIncludePathMojo extends AbstractCompileMojo {
 	private boolean skipIncludePath;
 
 	/**
-	 * When true the dependencies are unpacked before being reported, so that the
-	 * goal is of use on its own against a project that has never been built:
+	 * Whether the dependencies are unpacked before being reported. Left unset it
+	 * decides on its own, and unpacks when, and only when, some dependency that
+	 * ships a noarch NAR has not been unpacked into the area of this scope yet.
+	 * That is what makes the goal of use on its own against a project that has
+	 * never been built:
 	 *
 	 * <pre>
-	 * mvn nar:nar-include-path -Dnar.includePath.unpack=true
+	 * mvn nar:nar-include-path
 	 * </pre>
 	 *
-	 * It defaults to false because unpacking is neither cached nor cheap, it
-	 * extracts every NAR afresh and runs ranlib over the libraries, and inside a
-	 * build the unpack goals have already done it.
+	 * and what keeps it free inside a build, where the unpack goals have already
+	 * run and nothing is missing. Unpacking is neither cached nor cheap, it
+	 * extracts every NAR afresh and runs ranlib over the libraries, so it is not
+	 * something to repeat for nothing. Set it to true to unpack always and to false
+	 * to never unpack, in which case whatever is missing is reported and left out.
 	 */
-	@Parameter(property = "nar.includePath.unpack", defaultValue = "false")
-	private boolean unpack;
+	@Parameter(property = "nar.includePath.unpack")
+	private Boolean unpack;
 
 	/**
 	 * When true nothing is printed to the log, the files and the property are still
@@ -186,16 +191,12 @@ public abstract class AbstractNarIncludePathMojo extends AbstractCompileMojo {
 			return;
 		}
 
-		if (this.unpack) {
+		if (shouldUnpack()) {
 			unpackAttachedNars(getAttachedNarArtifacts(getExecutables()));
 		}
 
 		final Set<String> includeDirectories = collectIncludeDirectories();
-		if (includeDirectories.isEmpty()) {
-			getLog().warn("No include directories found for the " + getScope() + " scope. Dependencies are only"
-					+ " visible once unpacked, so either let the unpack goals run first or ask this goal to do it"
-					+ " with -Dnar.includePath.unpack=true.");
-		}
+		warnAboutHeadersLeftOut(includeDirectories);
 
 		publishProperty(includeDirectories);
 		writeFiles(includeDirectories);
@@ -211,6 +212,97 @@ public abstract class AbstractNarIncludePathMojo extends AbstractCompileMojo {
 			// deliberately not through the log: the point is to leave the console holding
 			// the bare string and nothing else
 			System.out.println(String.join(File.pathSeparator, includeDirectories));
+		}
+	}
+
+	/**
+	 * Whether the dependencies have to be unpacked before they can be reported.
+	 * Honours the flag when it carries a decision, and otherwise takes the one the
+	 * state of the target area calls for.
+	 */
+	private boolean shouldUnpack() throws MojoExecutionException, MojoFailureException {
+		if (this.unpack != null) {
+			return this.unpack.booleanValue();
+		}
+		final List<NarArtifact> awaiting = getDependenciesAwaitingUnpack();
+		if (awaiting.isEmpty()) {
+			return false;
+		}
+		getLog().debug("Unpacking, these dependencies are not in " + getUnpackDirectory() + " yet: " + awaiting);
+		return true;
+	}
+
+	/**
+	 * The dependencies whose headers cannot be reached yet, that is those that ship
+	 * a noarch NAR, the one headers travel in, which has not been unpacked into the
+	 * area of this scope.
+	 * <p>
+	 * Reading what each dependency publishes, rather than looking for an include
+	 * directory, is what tells apart the two ways a dependency contributes nothing:
+	 * one that ships no noarch NAR has no headers to give and never will, while one
+	 * that ships it and is not unpacked is a hole in the answer.
+	 */
+	private List<NarArtifact> getDependenciesAwaitingUnpack() throws MojoExecutionException, MojoFailureException {
+		final List<NarArtifact> awaiting = new ArrayList<>();
+		final File unpackDirectory = getUnpackDirectory();
+		if (unpackDirectory == null) {
+			return awaiting;
+		}
+		for (final NarArtifact dependency : getNarArtifacts()) {
+			if (!shipsNoArchNar(dependency)) {
+				continue;
+			}
+			if (!getLayout()
+					.getNoArchDirectory(unpackDirectory, dependency.getArtifactId(), dependency.getBaseVersion())
+					.exists()) {
+				awaiting.add(dependency);
+			}
+		}
+		return awaiting;
+	}
+
+	/**
+	 * Whether the dependency publishes a noarch NAR at all, as declared by its own
+	 * nar.properties.
+	 */
+	private boolean shipsNoArchNar(final NarArtifact dependency) {
+		final String[] nars = dependency.getNarInfo().getAttachedNars(null, NarConstants.NAR_NO_ARCH);
+		if (nars == null) {
+			return false;
+		}
+		for (final String nar : nars) {
+			if (nar != null && !nar.trim().isEmpty()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Says out loud what the answer is missing. An incomplete include path is worse
+	 * than none: an IDE given one resolves some headers and reports the rest as not
+	 * found, which reads as a broken project rather than as a build that has not run
+	 * yet.
+	 */
+	private void warnAboutHeadersLeftOut(final Set<String> includeDirectories)
+			throws MojoExecutionException, MojoFailureException {
+		final List<NarArtifact> awaiting = getDependenciesAwaitingUnpack();
+		if (!awaiting.isEmpty()) {
+			final StringBuilder names = new StringBuilder();
+			for (final NarArtifact dependency : awaiting) {
+				names.append(names.length() == 0 ? "" : ", ").append(dependency.getArtifactId());
+			}
+			// the advice only makes sense where there is something to advise: with
+			// unpacking forbidden it is the setting to lift, and otherwise the unpack
+			// asked for did not bring them in, which is a fault rather than a choice
+			final String advice = Boolean.FALSE.equals(this.unpack)
+					? " Unpacking is off by -Dnar.includePath.unpack=false; drop it to have this goal do it."
+					: " They were meant to be unpacked and were not, so the include path is not to be trusted.";
+			getLog().warn("The " + getScope() + " include path leaves out the headers of " + awaiting.size()
+					+ " dependency(ies), not unpacked into " + getUnpackDirectory() + ": " + names + "." + advice);
+		} else if (includeDirectories.isEmpty()) {
+			getLog().warn("No include directories found for the " + getScope() + " scope. This project declares no"
+					+ " dependency that ships headers, and its own include directory does not exist either.");
 		}
 	}
 

@@ -1211,6 +1211,20 @@ public class CCTask extends Task {
     for (int i = 0; i < this._compilers.size(); i++) {
       final CompilerDef currentCompilerDef = this._compilers.get(i);
       if (currentCompilerDef.isActive()) {
+        //
+        // The working directory and the path style go in before the configuration is
+        // built, not after. The compilers are singletons, shared by every definition
+        // in the build, so a configuration built first would read whatever the
+        // previous one left behind: the arguments of a test compilation came out
+        // relative to the directory of the main sources. Anything the configuration
+        // needs to derive from the working directory, a path relative to it among
+        // it, can only be right this way round.
+        //
+        if (currentCompilerDef.getProcessor() instanceof AbstractCompiler) {
+          final AbstractCompiler definedCompiler = (AbstractCompiler) currentCompilerDef.getProcessor();
+          definedCompiler.setWorkDir(currentCompilerDef.getWorkDir());
+          definedCompiler.setGccFileAbsolutePath(currentCompilerDef.getGccFileAbsolutePath());
+        }
         final ProcessorConfiguration config = currentCompilerDef.createConfiguration(this, this.linkType,
             this.compilerDef, targetPlatform, versionInfo);
         //
@@ -1219,6 +1233,8 @@ public class CCTask extends Task {
         final PrecompileDef precompileDef = currentCompilerDef.getActivePrecompile(this.compilerDef);
         CommandLineCompilerConfiguration commandLineConfig = (CommandLineCompilerConfiguration) config;
         AbstractCompiler compiler = (AbstractCompiler) commandLineConfig.getCompiler();
+        // Again on the instance the configuration actually ended up with, which is not
+        // always the one the definition names: a libtool build wraps it in another.
         compiler.setWorkDir(currentCompilerDef.getWorkDir());
         compiler.setGccFileAbsolutePath(currentCompilerDef.getGccFileAbsolutePath());
         ProcessorConfiguration[] localConfigs = new ProcessorConfiguration[] {

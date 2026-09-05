@@ -117,7 +117,7 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
   protected void addIncludes(final String baseDirPath, final File[] includeDirs, final List<String> args,
       final List<String> relativeArgs, final StringBuilder includePathId, final boolean isSystem) {
     for (final File includeDir : includeDirs) {
-      args.add(getIncludeDirSwitch(includeDir.getAbsolutePath(), isSystem));
+      args.add(getIncludeDirSwitch(includeDirArgument(includeDir, isSystem), isSystem));
       if (relativeArgs != null) {
         final String relative = CUtil.getRelativePath(baseDirPath, includeDir);
         relativeArgs.add(getIncludeDirSwitch(relative, isSystem));
@@ -131,6 +131,46 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
         }
       }
     }
+  }
+
+  /**
+   * The include directory as it is handed to the compiler: relative to the working
+   * directory the compiler is run from, the same treatment the source file and the
+   * object file already get, and under the same switch.
+   * <p>
+   * It is not a matter of tidiness. The compiler records the path of every header
+   * that contributes code, exactly as it was reached through the include switch, and
+   * a coverage run has to read those paths back. Handed an absolute path in a style
+   * the runtime does not take as absolute, a Windows one under Cygwin, it hangs it
+   * off the compile-time working directory, and the header becomes unreadable: the
+   * report of an inline function turns into a file that is not there.
+   * <p>
+   * This reads the working directory, so it only holds while CCTask sets it before
+   * building the configuration and not after. The compilers are singletons and would
+   * otherwise be carrying the directory of whoever was configured last.
+   * <p>
+   * The directories of the system are left alone. Nothing of theirs is reported on,
+   * and walking out of the project to reach them would only produce a long stretch of
+   * parent directories.
+   *
+   * @param includeDir the directory to reach.
+   * @param isSystem   whether it is a system include directory, left absolute.
+   * @return the path to hand over.
+   */
+  private String includeDirArgument(final File includeDir, final boolean isSystem) {
+    final String absolute = includeDir.getAbsolutePath();
+    if (isSystem || this.gccFileAbsolutePath || this.workDir == null) {
+      return absolute;
+    }
+    try {
+      final String relative = CUtil.getRelativeCompilerPath(this.workDir, includeDir);
+      if (!relative.isEmpty()) {
+        return relative;
+      }
+    } catch (final Exception ex) {
+      // nothing relative to be had, the absolute path still compiles
+    }
+    return absolute;
   }
 
   abstract protected void addWarningSwitch(List<String> args, int warnings);

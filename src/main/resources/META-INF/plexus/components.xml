@@ -34,11 +34,13 @@
 						org.gjsoft.maven.plugins:nar-maven-plugin:nar-download
 					</initialize>
 					<generate-sources>
-						org.gjsoft.maven.plugins:nar-maven-plugin:nar-unpack
+						org.gjsoft.maven.plugins:nar-maven-plugin:nar-unpack,
+						org.gjsoft.maven.plugins:nar-maven-plugin:nar-test-unpack
 					</generate-sources>
 					<process-sources>
 						org.gjsoft.maven.plugins:nar-maven-plugin:nar-gnu-configure,
-						org.gjsoft.maven.plugins:nar-maven-plugin:nar-include-path
+						org.gjsoft.maven.plugins:nar-maven-plugin:nar-include-path,
+						org.gjsoft.maven.plugins:nar-maven-plugin:nar-test-include-path
 					</process-sources>
 					<generate-resources>
 						org.gjsoft.maven.plugins:nar-maven-plugin:nar-system-generate
@@ -57,12 +59,14 @@
 						org.gjsoft.maven.plugins:nar-maven-plugin:nar-gnu-process,
 						org.gjsoft.maven.plugins:nar-maven-plugin:nar-process-libraries
 					</process-classes>
-					<generate-test-sources>
-						org.gjsoft.maven.plugins:nar-maven-plugin:nar-test-unpack
-					</generate-test-sources>
-					<process-test-sources>
-						org.gjsoft.maven.plugins:nar-maven-plugin:nar-test-include-path
-					</process-test-sources>
+					<!-- Las cabeceras de los tests se publican antes de compile, junto a las
+					     del proyecto: un IDE las necesita para resolver los includes de un
+					     modulo que todavia no compila, y estas dos fases van despues de
+					     compile en el ciclo de vida estandar. Por eso nar-test-unpack y
+					     nar-test-include-path viven arriba, en generate-sources y
+					     process-sources. -->
+					<generate-test-sources></generate-test-sources>
+					<process-test-sources></process-test-sources>
 					<generate-test-resources></generate-test-resources>
 					<process-test-resources>
 						org.apache.maven.plugins:maven-resources-plugin:testResources
