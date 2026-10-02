@@ -53,9 +53,7 @@ public abstract class CommandLineLinker extends AbstractLinker {
   private Environment env = null;
   private String identifier;
   private final String identifierArg;
-  private final boolean isLibtool;
   private String[] librarySets;
-  private final CommandLineLinker libtoolLinker;
   private final boolean newEnvironment = false;
   private final String outputSuffix;
   private List<String[]> commands;
@@ -69,14 +67,11 @@ public abstract class CommandLineLinker extends AbstractLinker {
 
   /** Creates a comand line linker invocation */
   public CommandLineLinker(final String command, final String identifierArg, final String[] extensions,
-      final String[] ignoredExtensions, final String outputSuffix, final boolean isLibtool,
-      final CommandLineLinker libtoolLinker) {
+      final String[] ignoredExtensions, final String outputSuffix) {
     super(extensions, ignoredExtensions);
     this.command = command;
     this.identifierArg = identifierArg;
     this.outputSuffix = outputSuffix;
-    this.isLibtool = isLibtool;
-    this.libtoolLinker = libtoolLinker;
   }
 
   protected void addBase(final CCTask task, final long base, final List<String> args) {
@@ -306,13 +301,6 @@ public abstract class CommandLineLinker extends AbstractLinker {
     return this.identifier;
   }
 
-  public final CommandLineLinker getLibtoolLinker() {
-    if (this.libtoolLinker != null) {
-      return this.libtoolLinker;
-    }
-    return this;
-  }
-
   protected abstract int getMaximumCommandLength();
 
   @Override
@@ -403,15 +391,9 @@ public abstract class CommandLineLinker extends AbstractLinker {
     final String[] preargs = config.getPreArguments();
     final String[] endargs = config.getEndArguments();
     final String outputSwitch[] = getOutputFileSwitch(task, outputFile);
-    int allArgsCount = preargs.length + 1 + outputSwitch.length + sourceFiles.length + endargs.length;
-    if (this.isLibtool) {
-      allArgsCount++;
-    }
+    final int allArgsCount = preargs.length + 1 + outputSwitch.length + sourceFiles.length + endargs.length;
     final String[] allArgs = new String[allArgsCount];
     int index = 0;
-    if (this.isLibtool) {
-      allArgs[index++] = "libtool";
-    }
     allArgs[index++] = getCommandWithPath(config);
     final StringBuilder buf = new StringBuilder();
 
@@ -461,10 +443,7 @@ public abstract class CommandLineLinker extends AbstractLinker {
     final String baseName = outputFile.getName();
     final File commandFile = new File(outputFile.getParent(), baseName + ".rsp");
     final FileWriter writer = new FileWriter(commandFile);
-    int execArgCount = 1;
-    if (this.isLibtool) {
-      execArgCount++;
-    }
+    final int execArgCount = 1;
     final String[] execArgs = new String[execArgCount + 1];
     System.arraycopy(args, 0, execArgs, 0, execArgCount);
     execArgs[execArgCount] = getCommandFileSwitch(commandFile.toString());

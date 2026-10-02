@@ -63,6 +63,17 @@ public class Linker {
 	private String prefix;
 
 	/**
+	 * Directory holding the runtime libraries of the toolchain itself, such as the
+	 * bin folder with libstdc++-6.dll and libgcc_s_seh-1.dll of a MinGW cross
+	 * compiler. It plays no part in linking: it is added to the runtime library
+	 * path (PATH / LD_LIBRARY_PATH) when running tests and executables, so they can
+	 * start even when the toolchain is not on the system path. Ignored when unset
+	 * or when it points to a directory that does not exist.
+	 */
+	@Parameter
+	private File runtimeDirectory;
+
+	/**
 	 * Path location of the linker tool
 	 */
 	@Parameter
@@ -177,13 +188,6 @@ public class Linker {
 	@Parameter(defaultValue = "false")
 	protected boolean pushDepsToLowestOrder = false;
 
-	/**
-	 * Specify that the linker should generate an intermediate manifest based on the
-	 * inputs.
-	 */
-	@Parameter(property = "nar.generateManifest", defaultValue = "true")
-	private boolean generateManifest = true;
-
 	private final Log log;
 
 	public Linker() {
@@ -245,13 +249,6 @@ public class Linker {
 				linker.addSyslibset((SystemLibrarySet) librarySet);
 			}
 		}
-	}
-
-	/**
-	 *  
-	 **/
-	public boolean isGenerateManifest() {
-		return generateManifest;
 	}
 
 	@SuppressWarnings({ "unchecked", "unchecked", "unchecked" })
@@ -523,6 +520,10 @@ public class Linker {
 			throw new MojoFailureException("Cannot deduce version number from: " + out.toString());
 		}
 		return version;
+	}
+
+	public File getRuntimeDirectory() {
+		return this.runtimeDirectory;
 	}
 
 	public List<Lib> getLibs() {

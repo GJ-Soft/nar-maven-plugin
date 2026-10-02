@@ -78,7 +78,6 @@ public abstract class ProcessorDef extends DataType {
    * element
    */
   private boolean inherit;
-  private Boolean libtool = null;
   protected boolean newEnvironment = false;
   /**
    * Processor.
@@ -347,20 +346,6 @@ public abstract class ProcessorDef extends DataType {
     return this.inherit;
   }
 
-  public boolean getLibtool() {
-    if (this.libtool != null) {
-      return this.libtool.booleanValue();
-    }
-    if (isReference()) {
-      return (getCheckedRef(ProcessorDef.class, "ProcessorDef")).getLibtool();
-    }
-    final ProcessorDef extendsDef = getExtends();
-    if (extendsDef != null) {
-      return extendsDef.getLibtool();
-    }
-    return false;
-  }
-
   /**
    * Obtains the appropriate processor (compiler, linker)
    * 
@@ -572,21 +557,6 @@ public abstract class ProcessorDef extends DataType {
       throw super.tooManyAttributes();
     }
     this.inherit = inherit;
-  }
-
-  /**
-   * Set use of libtool.
-   * 
-   * If set to true, the "libtool " will be prepended to the command line
-   * 
-   * @param libtool
-   *          If true, use libtool.
-   */
-  public void setLibtool(final boolean libtool) {
-    if (isReference()) {
-      throw tooManyAttributes();
-    }
-    this.libtool = booleanValueOf(libtool);
   }
 
   /**

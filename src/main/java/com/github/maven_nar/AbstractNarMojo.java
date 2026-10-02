@@ -46,10 +46,19 @@ public abstract class AbstractNarMojo extends GjsAbstractMojo implements NarCons
 	protected boolean skip;
 
 	/**
-	 * Skip the tests. Listens to Maven's general 'maven.skip.test'.
+	 * Skip the tests altogether, compilation included. Listens to Maven's
+	 * general 'maven.test.skip'.
 	 */
 	@Parameter(property = "maven.test.skip")
 	protected boolean skipTests;
+
+	/**
+	 * Skip only the running of the tests; they are still compiled and linked.
+	 * Listens to Maven's general 'skipTests', with the same meaning it has
+	 * for surefire.
+	 */
+	@Parameter(property = "skipTests")
+	protected boolean skipTestRun;
 
 	/**
 	 * Ignore errors and failures.

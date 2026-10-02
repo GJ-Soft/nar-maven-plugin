@@ -49,7 +49,6 @@ NAR Configuration
   <output/>
   <failOnError/>
   <runtime/>
-  <libtool/>
   <directDepsOnly/>
   <sharedObjectName/>
   <includesType/>
@@ -69,8 +68,6 @@ NAR Configuration
       <type/>
       <subSystem/>
       <linkCPP/>
-      <linkFortran/>
-      <linkFortranMain/>
       <narSystemPackage/>
       <narSystemName/>
       <narSystemDirectory/>
@@ -187,10 +184,6 @@ NAR Configuration
     ... same as for <cpp>
   </c>
 
-  <fortran>
-    ... same as for <cpp>
-  </fortran>
-  
   <java>
     <include/>
     <includePaths>
@@ -294,12 +287,8 @@ Defaults to "${project.build.directory}/test-nar" for "compile-test" goal
 * {runtime}
 
 	Sets the type of runtime library, possible values "dynamic", "static".
-Default is dynamic.
-
-* {libtool}
-
-	Set use of libtool. If set to true, the "libtool " will be prepended to 
-the command line for compatible compilers/linkers. Default is false.
+Default is dynamic. With gcc, "static" links with -static and -static-libgcc, and
+with libstdc++.a for C++.
 
 * {directDepsOnly}
 
@@ -349,13 +338,9 @@ wish to run a GNU configure step but not the full make process.
 	[type] The type of the library: shared, static, jni, plugin, executable. Default is shared.
 
 	[subSystem] The subsystem to generate: gui, console, other. Default is console.
+	On MinGW it becomes -mwindows ( gui ) or -mconsole ( console ).
 
 	[linkCPP] Specifies if the stdc++ library should be linked with. Default is true.
-
-	[linkFortran] Specifies if the fortran runtime should be linked with. Default is false.
-
-	[linkFortranMain] Specifies if the fortran startup should be linked with, so that the gcc
-	linker can find the "main" of fortran. Default is false.
 
 	[narSystemPackage] If specified a NarSystem class will be generated in this package and
 	added to the main jar artifact. That class holds a loadLibrary() method, which loads the
@@ -428,7 +413,7 @@ wish to run a GNU configure step but not the full make process.
 
 ** {linker name}
 
-	The Linker. Some choices are: "g++", "gcc", "gfortran".
+	The Linker. Some choices are: "g++", "gcc".
     Default is Architecture OS specific.
 
 ** {linker prefix}
@@ -501,7 +486,7 @@ executables. Useful for Cygwin/MinGW layouts where <<<directory>>> holds the imp
 
 ** {cpp name}
 
-	The name of the compiler. For C++ this is "g++" (for C: "gcc", for Fortran: "gfortran").
+	The name of the compiler. For C++ this is "g++" (for C: "gcc").
     Default is AOL specific.
     
 ** {cpp prefix}
@@ -619,11 +604,6 @@ executables. Useful for Cygwin/MinGW layouts where <<<directory>>> holds the imp
 	Clear options specified in AOL properties.
 	
 * {c}
-
-	Same definitions as for \<cpp\>
-
-
-* {fortran}
 
 	Same definitions as for \<cpp\>
 

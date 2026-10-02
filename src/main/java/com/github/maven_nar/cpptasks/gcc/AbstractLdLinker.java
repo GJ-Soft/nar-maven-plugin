@@ -41,9 +41,8 @@ public abstract class AbstractLdLinker extends CommandLineLinker {
   private final String outputPrefix;
 
   protected AbstractLdLinker(final String command, final String identifierArg, final String[] extensions,
-      final String[] ignoredExtensions, final String outputPrefix, final String outputSuffix, final boolean isLibtool,
-      final AbstractLdLinker libtoolLinker) {
-    super(command, identifierArg, extensions, ignoredExtensions, outputSuffix, isLibtool, libtoolLinker);
+      final String[] ignoredExtensions, final String outputPrefix, final String outputSuffix) {
+    super(command, identifierArg, extensions, ignoredExtensions, outputSuffix);
     this.outputPrefix = outputPrefix;
   }
 

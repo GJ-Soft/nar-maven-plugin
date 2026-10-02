@@ -103,7 +103,9 @@
         </os>
       </activation>
       <properties>
-        <command.executable>echo.bat</command.executable>
+        <!-- With the full path: a bare name is not looked up in the project
+             directory when the process is started. -->
+        <command.executable>${project.basedir}/echo.bat</command.executable>
       </properties>
     </profile>
   </profiles>

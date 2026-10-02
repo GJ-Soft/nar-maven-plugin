@@ -30,10 +30,8 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Objects;
 import java.util.Set;
-import java.util.Vector;
 
 import org.apache.maven.artifact.Artifact;
-import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
@@ -68,19 +66,6 @@ public class NarCompileMojo extends AbstractCompileMojo {
 	protected String getGoalName() {
 		return "nar-compile";
 	}
-
-	/**
-	 * Specify that the final manifest should be embedded in the output (default
-	 * true) or false for side by side.
-	 */
-	@Parameter(property = "nar.embedManifest", defaultValue = "true")
-	protected boolean embedManifest = true;
-
-	/**
-	 * The current build session instance.
-	 */
-	@Parameter(defaultValue = "${session}", readonly = true)
-	protected MavenSession session;
 
 	private void copyInclude(final Compiler c) throws IOException, MojoExecutionException, MojoFailureException {
 		if (c == null) {
@@ -127,10 +112,6 @@ public class NarCompileMojo extends AbstractCompileMojo {
 		// stdc++
 		task.setLinkCPP(library.linkCPP());
 
-		// fortran
-		task.setLinkFortran(library.linkFortran());
-		task.setLinkFortranMain(library.linkFortranMain());
-
 		// outDir
 		File outDir;
 		if (testArchiveDir != null) {
@@ -163,57 +144,21 @@ public class NarCompileMojo extends AbstractCompileMojo {
 		objDir.mkdirs();
 		task.setObjdir(objDir);
 
-		// failOnError, libtool
+		// failOnError
 		task.setFailonerror(failOnError(getAOL()));
-		task.setLibtool(useLibtool(getAOL()));
 
 		// runtime
 		final RuntimeType runtimeType = new RuntimeType();
 		runtimeType.setValue(getRuntime(getAOL()));
 		task.setRuntime(runtimeType);
 
-		// IDL, MC, RC compilations should probably be 'generate source' type
-		// actions, seperate from main build.
-		// Needs resolution of handling for generate sources.
-		// Order is somewhat important here, IDL and MC generate outputs that are
-		// (often) included in the RC compilation
-		if (getIdl() != null) {
-			final CompilerDef idl = getIdl().getCompiler(Compiler.MAIN, null);
-			if (idl != null) {
-				task.addConfiguredCompiler(idl);
-				task.createIncludePath().setPath(objDir.getPath()); // generated
-																	// 'sources'
-			}
-		}
-		if (getMessage() != null) {
-			final CompilerDef mc = getMessage().getCompiler(Compiler.MAIN, null);
-			if (mc != null) {
-				task.addConfiguredCompiler(mc);
-				task.createIncludePath().setPath(objDir.getPath()); // generated
-																	// 'sources'
-			}
-		}
+		// RC compilations should probably be a 'generate source' type action,
+		// separate from the main build.
 		if (getResource() != null) {
 			final CompilerDef res = getResource().getCompiler(Compiler.MAIN, null);
 			if (res != null) {
 				task.addConfiguredCompiler(res);
 			}
-		}
-
-		if (getOS().equals(OS.WINDOWS) && getArchitecture().equals("amd64")) {
-
-			int noOfASMSources = getSourcesFor(getAssembler()).size();
-
-			if (noOfASMSources > 0) { // Assmbler files exist
-
-				CompilerDef assembler = getAssembler().getCompiler(Compiler.MAIN, null);
-
-				// CompilerDef msAssembler64bitCompiler =
-				// MSAssmbler64bitCompiler.getCompiler(Compiler.MAIN, getOutput(
-				// ),getAntProject() );
-				task.addConfiguredCompiler(assembler);
-			}
-
 		}
 
 		// Darren Sargent Feb 11 2010: Use Compiler.MAIN for "type"...appears the
@@ -224,8 +169,6 @@ public class NarCompileMojo extends AbstractCompileMojo {
 		if (getCpp() != null) {
 			final CompilerDef cpp = getCpp().getCompiler(Compiler.MAIN, null);
 			if (cpp != null) {
-				// Set FortifyID attribute
-				cpp.setFortifyID(getfortifyID());
 				cpp.setCommands(compileCommands);
 				cpp.setDryRun(dryRun);
 				task.addConfiguredCompiler(cpp);
@@ -236,21 +179,9 @@ public class NarCompileMojo extends AbstractCompileMojo {
 		if (getC() != null) {
 			final CompilerDef c = getC().getCompiler(Compiler.MAIN, null);
 			if (c != null) {
-				// Set FortifyID attribute
-				c.setFortifyID(getfortifyID());
 				c.setCommands(compileCommands);
 				c.setDryRun(dryRun);
 				task.addConfiguredCompiler(c);
-			}
-		}
-
-		// add Fortran compiler
-		if (getFortran() != null) {
-			final CompilerDef fortran = getFortran().getCompiler(Compiler.MAIN, null);
-			if (fortran != null) {
-				fortran.setCommands(compileCommands);
-				fortran.setDryRun(dryRun);
-				task.addConfiguredCompiler(fortran);
 			}
 		}
 
@@ -554,10 +485,6 @@ public class NarCompileMojo extends AbstractCompileMojo {
 		int noOfSources = 0;
 		noOfSources += getSourcesFor(getCpp()).size();
 		noOfSources += getSourcesFor(getC()).size();
-		noOfSources += getSourcesFor(getFortran()).size();
-		if (getOS().equals(OS.WINDOWS) && getArchitecture().equals("amd64")) {
-			noOfSources += getSourcesFor(getAssembler()).size();
-		}
 
 		if (noOfSources > 0) {
 			getLog().info("Compiling " + noOfSources + " native files");
@@ -573,7 +500,6 @@ public class NarCompileMojo extends AbstractCompileMojo {
 			// FIXME, should the include paths be defined at a higher level ?
 			copyInclude(getCpp());
 			copyInclude(getC());
-			copyInclude(getFortran());
 		} catch (final IOException e) {
 			throw new MojoExecutionException("NAR: could not copy include files", e);
 		}
@@ -587,18 +513,6 @@ public class NarCompileMojo extends AbstractCompileMojo {
 			File linkCommandFile = new File(replay.getOutputDirectory(), NarConstants.REPLAY_LINK_NAME);
 			NarUtil.writeCommandFile(linkCommandFile, linkCommands);
 		}
-	}
-
-	public boolean isEmbedManifest() {
-		return embedManifest;
-	}
-
-	private void getManifests(String generated, Vector<String> manifests) {
-		// TODO: /manifest should be followed by the list of manifest files
-		// - the one generated by link, any others provided in source.
-		// search the source for .manifest files.
-		if (getLinker().isGenerateManifest())
-			manifests.add(generated + ".manifest");
 	}
 
 }

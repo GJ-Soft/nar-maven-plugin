@@ -87,14 +87,6 @@ public class NarValidateMojo extends AbstractCompileMojo {
 				}
 			}
 
-			if (getFortran() != null && getFortran().getName() != null) {
-				noOfCompilers++;
-				// need includes
-				if (getFortran().getIncludes(Compiler.MAIN).isEmpty()) {
-					throw new MojoExecutionException("No includes defined for compiler " + getFortran().getName());
-				}
-			}
-
 			// at least one compiler has to be defined
 			// OR
 			// a <gnuSourceDirectory> is configured.

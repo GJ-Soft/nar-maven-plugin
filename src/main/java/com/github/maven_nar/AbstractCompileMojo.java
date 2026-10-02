@@ -53,35 +53,10 @@ public abstract class AbstractCompileMojo extends AbstractDependencyMojo {
 	private C c;
 
 	/**
-	 * Fortran Compiler
-	 */
-	@Parameter
-	private Fortran fortran;
-
-	/**
-	 * Assembler Compiler
-	 *
-	 */
-	@Parameter
-	private Assembler assembler;
-
-	/**
 	 * Resource Compiler
 	 */
 	@Parameter
 	private Resource resource;
-
-	/**
-	 * IDL Compiler
-	 */
-	@Parameter
-	private IDL idl;
-
-	/**
-	 * Message Compiler
-	 */
-	@Parameter
-	private Message message;
 
 	/**
 	 * By default NAR compile will attempt to compile using all known compilers
@@ -118,13 +93,6 @@ public abstract class AbstractCompileMojo extends AbstractDependencyMojo {
 	private String runtime;
 
 	/**
-	 * Set use of libtool. If set to true, the "libtool " will be prepended to the
-	 * command line for compatible processors.
-	 */
-	@Parameter(defaultValue = "false", required = true)
-	private boolean libtool;
-
-	/**
 	 * Forces project to specify all it's dependencies and not inherit transitive
 	 * dependencies.
 	 * 
@@ -152,17 +120,6 @@ public abstract class AbstractCompileMojo extends AbstractDependencyMojo {
 	 */
 	@Parameter
 	private Java java;
-
-	/**
-	 * To support scanning the code with HPE Fortify.
-	 * <p>
-	 * The attribute functions as a flag that indicates Fortify is required, and the
-	 * value is an ID, prepended to the command line as
-	 * {@code sourceanalyzer –b <fortifyID>}.
-	 * </p>
-	 */
-	@Parameter(defaultValue = "")
-	private String fortifyID;
 
 	/**
 	 * Flag to cpptasks to indicate whether linker options should be decorated or
@@ -218,28 +175,6 @@ public abstract class AbstractCompileMojo extends AbstractDependencyMojo {
 		return this.dependencyLibOrder;
 	}
 
-	protected final Fortran getFortran() {
-		if (this.fortran == null && !this.onlySpecifiedCompilers) {
-			setFortran(new Fortran());
-		}
-		return this.fortran;
-	}
-
-	protected final Assembler getAssembler() {
-		if (assembler == null) {
-			assembler = new Assembler();
-		}
-		assembler.setAbstractCompileMojo(this);
-		return assembler;
-	}
-
-	protected final IDL getIdl() {
-		if (this.idl == null && !this.onlySpecifiedCompilers) {
-			setIdl(new IDL());
-		}
-		return this.idl;
-	}
-
 	protected final Java getJava() {
 		if (this.java == null) {
 			this.java = new Java();
@@ -260,13 +195,6 @@ public abstract class AbstractCompileMojo extends AbstractDependencyMojo {
 	 */
 	protected boolean getDirectDepsOnly() {
 		return this.directDepsOnly;
-	}
-
-	protected final Message getMessage() {
-		if (this.message == null && !this.onlySpecifiedCompilers) {
-			setMessage(new Message());
-		}
-		return this.message;
 	}
 
 	protected final String getOutput(final AOL aol, final String type) throws MojoExecutionException {
@@ -424,7 +352,7 @@ public abstract class AbstractCompileMojo extends AbstractDependencyMojo {
 		if (this.testSourceBaseNames == null) {
 			this.testSourceBaseNames = new HashSet<>();
 			for (final Compiler compiler : new Compiler[] {
-					getCpp(), getC(), getFortran()
+					getCpp(), getC()
 			}) {
 				if (compiler != null && compiler.getName() != null) {
 					collectTestSourceBaseNames(compiler, this.testSourceBaseNames);
@@ -489,36 +417,13 @@ public abstract class AbstractCompileMojo extends AbstractDependencyMojo {
 		cpp.setAbstractCompileMojo(this);
 	}
 
-	protected final String getfortifyID() {
-		return this.fortifyID;
-	}
-
 	public final void setDependencyLibOrder(final List<String> order) {
 		this.dependencyLibOrder = order;
-	}
-
-	public void setFortran(final Fortran fortran) {
-		this.fortran = fortran;
-		fortran.setAbstractCompileMojo(this);
-	}
-
-	public void setIdl(final IDL idl) {
-		this.idl = idl;
-		idl.setAbstractCompileMojo(this);
-	}
-
-	public void setMessage(final Message message) {
-		this.message = message;
-		message.setAbstractCompileMojo(this);
 	}
 
 	public void setResource(final Resource resource) {
 		this.resource = resource;
 		resource.setAbstractCompileMojo(this);
-	}
-
-	protected final boolean useLibtool(final AOL aol) throws MojoExecutionException {
-		return getNarInfo().getProperty(aol, "libtool", this.libtool);
 	}
 
 	public List<SysLib> getDependecySysLib(final NarArtifact dependency)

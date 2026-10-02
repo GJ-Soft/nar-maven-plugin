@@ -31,16 +31,14 @@ public final class GccLibrarian extends AbstractArLibrarian {
   private static String[] objFileExtensions = new String[] {
     ".o"
   };
-  private static GccLibrarian instance = new GccLibrarian("ar", objFileExtensions, false, new GccLibrarian("ar",
-      objFileExtensions, true, null));
+  private static GccLibrarian instance = new GccLibrarian("ar", objFileExtensions);
 
   public static GccLibrarian getInstance() {
     return instance;
   }
 
-  private GccLibrarian(final String command, final String[] inputExtensions, final boolean isLibtool,
-      final GccLibrarian libtoolLibrarian) {
-    super(command, "V", inputExtensions, new String[0], "lib", ".a", isLibtool, libtoolLibrarian);
+  private GccLibrarian(final String command, final String[] inputExtensions) {
+    super(command, "V", inputExtensions, new String[0], "lib", ".a");
   }
 
   @Override

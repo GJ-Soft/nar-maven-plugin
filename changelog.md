@@ -71,3 +71,43 @@ This project is an update to Java 21 from version 3.10.1 as it was on 17/04/2020
 
 ## 4.0.0
 
+### Added
+- A `run-its` profile to run the integration tests under `src/it`
+  ( `mvn -Prun-its verify` ). The configuration used to come from the parent of
+  the original NAR plugin, so since the move to the new coordinates they had not
+  been run. They are copied to `target/it` and use a repository of their own,
+  `target/it-repo`. On Windows `it-parent` sets the linker to `g++`, since the
+  default in `aol.properties` is still `msvc`.
+
+### Fixed
+- `nar-compile` failed with a `NullPointerException` ( `this.session` is null )
+  whenever it needed the dependency tree, that is with `directDepsOnly` or
+  `pushDepsToLowestOrder`. `AbstractDependencyMojo` got a `session` field in the
+  move to Maven 3.9 while `NarCompileMojo` kept its own of the same name, and Maven
+  only injected the one of the subclass.
+
+### Removed
+- Options that had no use with the GNU toolchains, the only ones this plugin
+  supports. A pom that still sets one of the top level ones gets a Maven warning
+  about an unknown parameter; the nested ones ( `<linkFortran>` /
+  `<linkFortranMain>` in `<library>`, `<generateManifest>` in `<linker>` ) make
+  the plugin configuration fail, and have to be removed from the pom.
+  - `<fortran>`, `<assembler>`, `<idl>` and `<message>`, with their classes, the
+    `g77` and `gfortran` compilers, the Fortran dependency parser and the
+    Fortran entries of `aol.properties`; and `<linkFortran>` / `<linkFortranMain>`
+    in `<library>`.
+  - `libtool`, down to the libtool variants every gcc compiler and linker kept
+    alongside the normal one.
+  - `fortifyID`, the wrapper that put `sourceanalyzer` ( HPE Fortify ) in front of
+    the compiler.
+  - `embedManifest` and `generateManifest`, which nothing read.
+- `runtime` and `subSystem` stay: with gcc they do take effect ( `-static`,
+  `-static-libgcc` and the static `libstdc++` for the first, `-mconsole` /
+  `-mwindows` on MinGW for the second ).
+- `src/xdocs`, the Maven 1 location of the site pages, which the current site
+  plugin does not read. It held the `maven.nar.*` properties of the Maven 1
+  plugin and an old copy of `narDependencies.apt`.
+
+### Changed
+- The copy of `aol.properties` in the site page `aol.apt` was out of date; it is
+  now the current file.

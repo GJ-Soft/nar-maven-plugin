@@ -61,8 +61,8 @@ import com.github.maven_nar.cpptasks.types.SystemLibrarySet;
  * <p>
  * This task can compile various source languages and produce executables,
  * shared libraries (aka DLL's) and static libraries. Compiler adaptors are
- * currently available for several C/C++ compilers, FORTRAN, MIDL and Windows
- * Resource files.
+ * currently available for the GNU C/C++ compilers ( gcc, g++, clang ) and
+ * Windows resource files ( windres ).
  * </p>
  * 
  * @author Adam Murdoch
@@ -1234,7 +1234,7 @@ public class CCTask extends Task {
         CommandLineCompilerConfiguration commandLineConfig = (CommandLineCompilerConfiguration) config;
         AbstractCompiler compiler = (AbstractCompiler) commandLineConfig.getCompiler();
         // Again on the instance the configuration actually ended up with, which is not
-        // always the one the definition names: a libtool build wraps it in another.
+        // always the one the definition names.
         compiler.setWorkDir(currentCompilerDef.getWorkDir());
         compiler.setGccFileAbsolutePath(currentCompilerDef.getGccFileAbsolutePath());
         ProcessorConfiguration[] localConfigs = new ProcessorConfiguration[] {
@@ -1428,20 +1428,6 @@ public class CCTask extends Task {
   }
 
   /**
-   * Set use of libtool.
-   * 
-   * If set to true, the "libtool " will be prepended to the command line for
-   * compatible processors
-   * 
-   * @param libtool
-   *          If true, use libtool.
-   */
-  public void setLibtool(final boolean libtool) {
-    this.compilerDef.setLibtool(libtool);
-    this.linkerDef.setLibtool(libtool);
-  }
-
-  /**
    * Sets the output file type. Supported values "executable", "shared", and
    * "static". Deprecated, specify outtype instead.
    * 
@@ -1455,14 +1441,6 @@ public class CCTask extends Task {
   // BEGINFREEHEP
   public void setLinkCPP(final boolean linkCPP) {
     this.linkType.setLinkCPP(linkCPP);
-  }
-
-  public void setLinkFortran(final boolean linkFortran) {
-    this.linkType.setLinkFortran(linkFortran);
-  }
-
-  public void setLinkFortranMain(final boolean linkFortranMain) {
-    this.linkType.setLinkFortranMain(linkFortranMain);
   }
 
   // ENDFREEHEP
@@ -1557,7 +1535,7 @@ public class CCTask extends Task {
    * <caption>Supported compilers</caption>
    * <tr>
    * <td>gcc (default)</td>
-   * <td>GCC C++ compiler</td>
+   * <td>GCC C compiler</td>
    * </tr>
    * <tr>
    * <td>g++</td>
@@ -1568,92 +1546,16 @@ public class CCTask extends Task {
    * <td>GCC C++ compiler</td>
    * </tr>
    * <tr>
-   * <td>g77</td>
-   * <td>GNU FORTRAN compiler</td>
+   * <td>clang</td>
+   * <td>clang / llvm C compiler</td>
    * </tr>
    * <tr>
-   * <td>msvc</td>
-   * <td>Microsoft Visual C++</td>
+   * <td>clang++</td>
+   * <td>clang++ / llvm C++ compiler</td>
    * </tr>
    * <tr>
-   * <td>bcc</td>
-   * <td>Borland C++ Compiler</td>
-   * </tr>
-   * <tr>
-   * <td>msrc</td>
-   * <td>Microsoft Resource Compiler</td>
-   * </tr>
-   * <tr>
-   * <td>brc</td>
-   * <td>Borland Resource Compiler</td>
-   * </tr>
-   * <tr>
-   * <td>df</td>
-   * <td>Compaq Visual Fortran Compiler</td>
-   * </tr>
-   * <tr>
-   * <td>midl</td>
-   * <td>Microsoft MIDL Compiler</td>
-   * </tr>
-   * <tr>
-   * <td>icl</td>
-   * <td>Intel C++ compiler for Windows (IA-32)</td>
-   * </tr>
-   * <tr>
-   * <td>ecl</td>
-   * <td>Intel C++ compiler for Windows (IA-64)</td>
-   * </tr>
-   * <tr>
-   * <td>icc</td>
-   * <td>Intel C++ compiler for Linux (IA-32)</td>
-   * </tr>
-   * <tr>
-   * <td>ecc</td>
-   * <td>Intel C++ compiler for Linux (IA-64)</td>
-   * </tr>
-   * <tr>
-   * <td>CC</td>
-   * <td>Sun ONE C++ compiler</td>
-   * </tr>
-   * <tr>
-   * <td>aCC</td>
-   * <td>HP aC++ C++ Compiler</td>
-   * </tr>
-   * <tr>
-   * <td>os390</td>
-   * <td>OS390 C Compiler</td>
-   * </tr>
-   * <tr>
-   * <td>os400</td>
-   * <td>Icc Compiler</td>
-   * </tr>
-   * <tr>
-   * <td>sunc89</td>
-   * <td>Sun C89 C Compiler</td>
-   * </tr>
-   * <tr>
-   * <td>xlC</td>
-   * <td>VisualAge C Compiler</td>
-   * </tr>
-   * <tr>
-   * <td>uic</td>
-   * <td>Qt user interface compiler (creates .h, .cpp and moc_*.cpp files).</td>
-   * </tr>
-   * <tr>
-   * <td>moc</td>
-   * <td>Qt meta-object compiler</td>
-   * </tr>
-   * <tr>
-   * <td>xpidl</td>
-   * <td>Mozilla xpidl compiler (creates .h and .xpt files).</td>
-   * </tr>
-   * <tr>
-   * <td>wcl</td>
-   * <td>OpenWatcom C/C++ compiler</td>
-   * </tr>
-   * <tr>
-   * <td>wfl</td>
-   * <td>OpenWatcom FORTRAN compiler</td>
+   * <td>windres</td>
+   * <td>GNU resource compiler</td>
    * </tr>
    * </table>
    * 

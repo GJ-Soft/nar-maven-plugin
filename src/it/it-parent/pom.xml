@@ -45,10 +45,10 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
+        <version>3.15.0</version>
         <configuration>
-          <source>1.6</source>
-          <target>1.6</target>
+          <!-- 1.6 is no longer accepted by the JDK 21 compiler. -->
+          <release>8</release>
         </configuration>
       </plugin>
     </plugins>
@@ -64,6 +64,31 @@
   </dependencies>
   
   <profiles>
+    <profile>
+      <!-- On Windows the default linker in aol.properties is still msvc; this
+           plugin only supports the GNU toolchains. -->
+      <id>windows-it-profile</id>
+      <activation>
+        <os>
+          <family>windows</family>
+        </os>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>@project.groupId@</groupId>
+            <artifactId>nar-maven-plugin</artifactId>
+            <version>@project.version@</version>
+            <extensions>true</extensions>
+            <configuration>
+              <linker>
+                <name>g++</name>
+              </linker>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
     <profile>
       <id>aix-it-profile</id>
       <activation>

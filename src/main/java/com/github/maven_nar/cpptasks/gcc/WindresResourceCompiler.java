@@ -50,7 +50,7 @@ public final class WindresResourceCompiler extends CommandLineCompiler {
       ".rc"
     }, new String[] {
         ".h", ".hpp", ".inl"
-    }, ".o", false, null, newEnvironment, env);
+    }, ".o", newEnvironment, env);
   }
 
   @Override

@@ -41,17 +41,16 @@ public abstract class GccCompatibleCCompiler extends CommandLineCCompiler {
       ".h", ".hpp", ".inl"
   };
   private final static String[] sourceExtensions = new String[] {
-      ".c", ".cc", ".cpp", ".cxx", ".c++", ".i", ".f", ".for", ".f90"
+      ".c", ".cc", ".cpp", ".cxx", ".c++", ".i"
   };
 
   /**
    * Private constructor. Use GccCCompiler.getInstance() to get singleton
    * instance of this class.
    */
-  protected GccCompatibleCCompiler(final String command, final String identifierArg, final boolean libtool,
-      final GccCompatibleCCompiler libtoolCompiler, final boolean newEnvironment, final Environment env) {
-    super(command, identifierArg, sourceExtensions, headerExtensions, libtool ? ".fo" : ".o", libtool, libtoolCompiler,
-        newEnvironment, env);
+  protected GccCompatibleCCompiler(final String command, final String identifierArg, final boolean newEnvironment,
+      final Environment env) {
+    super(command, identifierArg, sourceExtensions, headerExtensions, ".o", newEnvironment, env);
   }
 
   /**
@@ -59,10 +58,8 @@ public abstract class GccCompatibleCCompiler extends CommandLineCCompiler {
    * instance of this class.
    */
   protected GccCompatibleCCompiler(final String command, final String identifierArg, final String[] sourceExtensions,
-      final String[] headerExtensions, final boolean libtool, final GccCompatibleCCompiler libtoolCompiler,
-      final boolean newEnvironment, final Environment env) {
-    super(command, identifierArg, sourceExtensions, headerExtensions, libtool ? ".fo" : ".o", libtool, libtoolCompiler,
-        newEnvironment, env);
+      final String[] headerExtensions, final boolean newEnvironment, final Environment env) {
+    super(command, identifierArg, sourceExtensions, headerExtensions, ".o", newEnvironment, env);
   }
 
   @Override

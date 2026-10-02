@@ -290,10 +290,6 @@ public class LinkerDef extends ProcessorDef {
     if (linker == null) {
       linker = GccLinker.getInstance();
     }
-    if (getLibtool() && linker instanceof CommandLineLinker) {
-      final CommandLineLinker cmdLineLinker = (CommandLineLinker) linker;
-      linker = cmdLineLinker.getLibtoolLinker();
-    }
     return linker;
   }
 
@@ -391,83 +387,27 @@ public class LinkerDef extends ProcessorDef {
    * <caption>Supported linkers</caption>
    * <tr>
    * <td>gcc</td>
-   * <td>Gcc Linker</td>
+   * <td>GCC linker</td>
    * </tr>
    * <tr>
    * <td>g++</td>
-   * <td>G++ Linker</td>
+   * <td>G++ linker</td>
+   * </tr>
+   * <tr>
+   * <td>clang</td>
+   * <td>clang / llvm linker</td>
+   * </tr>
+   * <tr>
+   * <td>clang++</td>
+   * <td>clang++ / llvm linker</td>
    * </tr>
    * <tr>
    * <td>ld</td>
-   * <td>Ld Linker</td>
+   * <td>ld linker</td>
    * </tr>
    * <tr>
    * <td>ar</td>
-   * <td>Gcc Librarian</td>
-   * </tr>
-   * <tr>
-   * <td>msvc</td>
-   * <td>Microsoft Linker</td>
-   * </tr>
-   * <tr>
-   * <td>bcc</td>
-   * <td>Borland Linker</td>
-   * </tr>
-   * <tr>
-   * <td>df</td>
-   * <td>Compaq Visual Fortran Linker</td>
-   * </tr>
-   * <tr>
-   * <td>icl</td>
-   * <td>Intel Linker for Windows (IA-32)</td>
-   * </tr>
-   * <tr>
-   * <td>ecl</td>
-   * <td>Intel Linker for Windows (IA-64)</td>
-   * </tr>
-   * <tr>
-   * <td>icc</td>
-   * <td>Intel Linker for Linux (IA-32)</td>
-   * </tr>
-   * <tr>
-   * <td>ecc</td>
-   * <td>Intel Linker for Linux (IA-64)</td>
-   * </tr>
-   * <tr>
-   * <td>CC</td>
-   * <td>Sun ONE Linker</td>
-   * </tr>
-   * <tr>
-   * <td>aCC</td>
-   * <td>HP aC++ Linker</td>
-   * </tr>
-   * <tr>
-   * <td>os390</td>
-   * <td>OS390 Linker</td>
-   * </tr>
-   * <tr>
-   * <td>os390batch</td>
-   * <td>OS390 Linker</td>
-   * </tr>
-   * <tr>
-   * <td>os400</td>
-   * <td>IccLinker</td>
-   * </tr>
-   * <tr>
-   * <td>sunc89</td>
-   * <td>C89 Linker</td>
-   * </tr>
-   * <tr>
-   * <td>xlC</td>
-   * <td>VisualAge Linker</td>
-   * </tr>
-   * <tr>
-   * <td>wcl</td>
-   * <td>OpenWatcom C/C++ linker</td>
-   * </tr>
-   * <tr>
-   * <td>wfl</td>
-   * <td>OpenWatcom FORTRAN linker</td>
+   * <td>ar librarian</td>
    * </tr>
    * </table>
    * 

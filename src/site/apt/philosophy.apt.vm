@@ -55,14 +55,12 @@ test resources are organized the same way.
                      /include
                      /c++
                      /c
-                     /fortran
                /test
                     /java
                     /resources
                     /include
                     /c++
                     /c
-                    /fortran			    
 +--
 
 	Organizing the information this way means that it is easy to find, 

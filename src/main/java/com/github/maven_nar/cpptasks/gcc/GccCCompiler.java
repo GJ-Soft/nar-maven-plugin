@@ -31,7 +31,6 @@ import com.github.maven_nar.cpptasks.compiler.LinkType;
 import com.github.maven_nar.cpptasks.compiler.Linker;
 import com.github.maven_nar.cpptasks.compiler.Processor;
 import com.github.maven_nar.cpptasks.parser.CParser;
-import com.github.maven_nar.cpptasks.parser.FortranParser;
 import com.github.maven_nar.cpptasks.parser.Parser;
 
 /**
@@ -48,9 +47,6 @@ public final class GccCCompiler extends GccCompatibleCCompiler {
       ".c++", /* C++ */
       ".i", /* preprocessed C */
       ".ii", /* preprocessed C++ */
-      ".f", /* FORTRAN */
-      ".for", /* FORTRAN */
-      ".f90", /* FORTRAN 90 */
       ".m", /* Objective-C */
       ".mm", /* Objected-C++ */
       ".s" /* Assembly */
@@ -59,20 +55,15 @@ public final class GccCCompiler extends GccCompatibleCCompiler {
       ".h", ".hpp", ".inl"
   };
   private static final GccCCompiler cppInstance = new GccCCompiler("c++", sourceExtensions, headerExtensions, false,
-      new GccCCompiler("c++", sourceExtensions, headerExtensions, true, null, false, null), false, null);
-  private static final GccCCompiler g77Instance = new GccCCompiler("g77", sourceExtensions, headerExtensions, false,
-      new GccCCompiler("g77", sourceExtensions, headerExtensions, true, null, false, null), false, null);
-  // FREEHEP
-  private static final GccCCompiler gfortranInstance = new GccCCompiler("gfortran", sourceExtensions, headerExtensions,
-      false, new GccCCompiler("gfortran", sourceExtensions, headerExtensions, true, null, false, null), false, null);
+      null);
   private static final GccCCompiler gppInstance = new GccCCompiler("g++", sourceExtensions, headerExtensions, false,
-      new GccCCompiler("g++", sourceExtensions, headerExtensions, true, null, false, null), false, null);
+      null);
   private static final GccCCompiler instance = new GccCCompiler("gcc", sourceExtensions, headerExtensions, false,
-      new GccCCompiler("gcc", sourceExtensions, headerExtensions, true, null, false, null), false, null);
+      null);
   private static final GccCCompiler clangInstance = new GccCCompiler("clang", sourceExtensions, headerExtensions,
-      false, new GccCCompiler("clang", sourceExtensions, headerExtensions, true, null, false, null), false, null);
+      false, null);
   private static final GccCCompiler cpplangInstance = new GccCCompiler("clang++", sourceExtensions, headerExtensions,
-      false, new GccCCompiler("clang++", sourceExtensions, headerExtensions, true, null, false, null), false, null);
+      false, null);
 
   /**
    * Gets clang adapter
@@ -96,22 +87,6 @@ public final class GccCCompiler extends GccCompatibleCCompiler {
   }
 
   /**
-   * Gets g77 adapter
-   */
-  public static GccCCompiler getG77Instance() {
-    return g77Instance;
-  }
-
-  /**
-   * Gets g77 adapter
-   */
-  // FREEHEPBEGIN
-  public static GccCCompiler getGFortranInstance() {
-    return gfortranInstance;
-  }
-
-  // FREEHEPEND
-  /**
    * Gets gpp adapter
    */
   public static GccCCompiler getGppInstance() {
@@ -134,8 +109,8 @@ public final class GccCCompiler extends GccCompatibleCCompiler {
    * instance of this class.
    */
   private GccCCompiler(final String command, final String[] sourceExtensions, final String[] headerExtensions,
-      final boolean isLibtool, final GccCCompiler libtoolCompiler, final boolean newEnvironment, final Environment env) {
-    super(command, null, sourceExtensions, headerExtensions, isLibtool, libtoolCompiler, newEnvironment, env);
+      final boolean newEnvironment, final Environment env) {
+    super(command, null, sourceExtensions, headerExtensions, newEnvironment, env);
     this.isPICMeaningful = !System.getProperty("os.name").contains("Windows");
   }
 
@@ -148,7 +123,7 @@ public final class GccCCompiler extends GccCompatibleCCompiler {
     }
     // BEGINFREEHEP
     // Add -fno_rtti only for g++ and c++
-    if (!getCommand().equals("g77") && !getCommand().equals("gcc") && rtti != null && !rtti.booleanValue()) {
+    if (!getCommand().equals("gcc") && rtti != null && !rtti.booleanValue()) {
       // Darren Sargent: fix RTTI option
       args.add("-fno-rtti");
     }
@@ -158,30 +133,17 @@ public final class GccCCompiler extends GccCompatibleCCompiler {
   @Override
   public Processor changeEnvironment(final boolean newEnvironment, final Environment env) {
     if (newEnvironment || env != null) {
-      return new GccCCompiler(getCommand(), this.getSourceExtensions(), this.getHeaderExtensions(), this.getLibtool(),
-          (GccCCompiler) this.getLibtoolCompiler(), newEnvironment, env);
+      return new GccCCompiler(getCommand(), this.getSourceExtensions(), this.getHeaderExtensions(), newEnvironment,
+          env);
     }
     return this;
   }
 
   /**
    * Create parser to determine dependencies.
-   * 
-   * Will create appropriate parser (C++, FORTRAN) based on file extension.
-   * 
    */
   @Override
   protected Parser createParser(final File source) {
-    if (source != null) {
-      final String sourceName = source.getName();
-      final int lastDot = sourceName.lastIndexOf('.');
-      if (lastDot >= 0 && lastDot + 1 < sourceName.length()) {
-        final char afterDot = sourceName.charAt(lastDot + 1);
-        if (afterDot == 'f' || afterDot == 'F') {
-          return new FortranParser();
-        }
-      }
-    }
     return new CParser();
   }
 
@@ -260,12 +222,7 @@ public final class GccCCompiler extends GccCompatibleCCompiler {
   @Override
   public String getIdentifier() throws BuildException {
     if (this.identifier == null) {
-      StringBuilder buf;
-      if (getLibtool()) {
-        buf = new StringBuilder("libtool ");
-      } else {
-        buf = new StringBuilder(" ");
-      }
+      final StringBuilder buf = new StringBuilder(" ");
       buf.append(getCommand());
       buf.append(' ');
       buf.append(GccProcessor.getVersion());

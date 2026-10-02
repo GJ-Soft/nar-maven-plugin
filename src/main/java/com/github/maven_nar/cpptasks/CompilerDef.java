@@ -63,7 +63,6 @@ public final class CompilerDef extends ProcessorDef {
 	private String compilerPrefix;
 	private File workDir;
 	private boolean gccFileAbsolutePath;
-	private String fortifyID = "";
 	private List<String[]> commands;
 	private boolean dryRun;
 
@@ -350,10 +349,6 @@ public final class CompilerDef extends ProcessorDef {
 		if (processor == null) {
 			processor = GccCCompiler.getInstance();
 		}
-		if (getLibtool() && processor instanceof CommandLineCompiler) {
-			final CommandLineCompiler compiler = (CommandLineCompiler) processor;
-			processor = compiler.getLibtoolCompiler();
-		}
 		return processor;
 	}
 
@@ -471,7 +466,7 @@ public final class CompilerDef extends ProcessorDef {
 	 * <caption>Supported compilers</caption>
 	 * <tr>
 	 * <td>gcc (default)</td>
-	 * <td>GCC C++ compiler</td>
+	 * <td>GCC C compiler</td>
 	 * </tr>
 	 * <tr>
 	 * <td>g++</td>
@@ -482,88 +477,16 @@ public final class CompilerDef extends ProcessorDef {
 	 * <td>GCC C++ compiler</td>
 	 * </tr>
 	 * <tr>
-	 * <td>g77</td>
-	 * <td>GNU Fortran compiler</td>
+	 * <td>clang</td>
+	 * <td>clang / llvm C compiler</td>
 	 * </tr>
 	 * <tr>
-	 * <td>msvc</td>
-	 * <td>Microsoft Visual C++</td>
+	 * <td>clang++</td>
+	 * <td>clang++ / llvm C++ compiler</td>
 	 * </tr>
 	 * <tr>
-	 * <td>bcc</td>
-	 * <td>Borland C++ Compiler</td>
-	 * </tr>
-	 * <tr>
-	 * <td>msrc</td>
-	 * <td>Microsoft Resource Compiler</td>
-	 * </tr>
-	 * <tr>
-	 * <td>brc</td>
-	 * <td>Borland Resource Compiler</td>
-	 * </tr>
-	 * <tr>
-	 * <td>df</td>
-	 * <td>Compaq Visual Fortran Compiler</td>
-	 * </tr>
-	 * <tr>
-	 * <td>midl</td>
-	 * <td>Microsoft MIDL Compiler</td>
-	 * </tr>
-	 * <tr>
-	 * <td>icl</td>
-	 * <td>Intel C++ compiler for Windows (IA-32)</td>
-	 * </tr>
-	 * <tr>
-	 * <td>ecl</td>
-	 * <td>Intel C++ compiler for Windows (IA-64)</td>
-	 * </tr>
-	 * <tr>
-	 * <td>icc</td>
-	 * <td>Intel C++ compiler for Linux (IA-32)</td>
-	 * </tr>
-	 * <tr>
-	 * <td>ecc</td>
-	 * <td>Intel C++ compiler for Linux (IA-64)</td>
-	 * </tr>
-	 * <tr>
-	 * <td>CC</td>
-	 * <td>Sun ONE C++ compiler</td>
-	 * </tr>
-	 * <tr>
-	 * <td>aCC</td>
-	 * <td>HP aC++ C++ Compiler</td>
-	 * </tr>
-	 * <tr>
-	 * <td>os390</td>
-	 * <td>OS390 C Compiler</td>
-	 * </tr>
-	 * <tr>
-	 * <td>os400</td>
-	 * <td>Icc Compiler</td>
-	 * </tr>
-	 * <tr>
-	 * <td>sunc89</td>
-	 * <td>Sun C89 C Compiler</td>
-	 * </tr>
-	 * <tr>
-	 * <td>xlC</td>
-	 * <td>VisualAge C Compiler</td>
-	 * </tr>
-	 * <tr>
-	 * <td>uic</td>
-	 * <td>Qt user interface compiler</td>
-	 * </tr>
-	 * <tr>
-	 * <td>moc</td>
-	 * <td>Qt meta-object compiler</td>
-	 * </tr>
-	 * <tr>
-	 * <td>wcl</td>
-	 * <td>OpenWatcom C/C++ compiler</td>
-	 * </tr>
-	 * <tr>
-	 * <td>wfl</td>
-	 * <td>OpenWatcom FORTRAN compiler</td>
+	 * <td>windres</td>
+	 * <td>GNU resource compiler</td>
 	 * </tr>
 	 * </table>
 	 * 
@@ -630,14 +553,6 @@ public final class CompilerDef extends ProcessorDef {
 
 	public void setWorkDir(final File workDir) {
 		this.workDir = workDir;
-	}
-
-	public void setFortifyID(final String fortifyID) {
-		this.fortifyID = fortifyID;
-	}
-
-	public String getFortifyID() {
-		return this.fortifyID;
 	}
 
 	/**

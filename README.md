@@ -16,8 +16,8 @@ Gjs NAR Maven plugin
 
 ## Description
 
-The GJS NAR plugin for Maven allows you to compile native code (C++, C and
-Fortran) with GNU g++, gcc. This plugin inherits from thr classic NAR plugin for Maven. For the moment, it focuses only on GNU compilers.
+The GJS NAR plugin for Maven allows you to compile native code (C++ and C)
+with GNU g++, gcc. This plugin inherits from thr classic NAR plugin for Maven. For the moment, it focuses only on GNU compilers.
 
 The output produced is wrapped up in Native ARchive files (.nar) some of which are machine independent (-noarch), while others are machine specific and thus depend on a combination of machine architecture(A), operating-system(O) and linker(L) identified as AOL. These nar files can be installed in the local Maven repository and deployed to a standard Maven (web) server, using the standard 
 `maven-install-plugin` and `maven-deploy-plugin`.
@@ -156,8 +156,7 @@ own helper classes and are expanded further down.
 
   <!-- ===== Compilation (AbstractCompileMojo) ===== -->
   <failOnError>true</failOnError>
-  <libtool>false</libtool>
-  <runtime>dynamic</runtime>             <!-- dynamic | static -->
+  <runtime>dynamic</runtime>             <!-- dynamic | static ( -static, static libgcc / libstdc++ ) -->
   <maxCores>0</maxCores>                 <!-- 0 = unlimited -->
   <commandLogLevel>...</commandLogLevel>
   <directDepsOnly>false</directDepsOnly>
@@ -165,15 +164,9 @@ own helper classes and are expanded further down.
   <onlySpecifiedCompilers>false</onlySpecifiedCompilers>
   <syslibsFromDependencies>...</syslibsFromDependencies>
   <sharedObjectName>...</sharedObjectName>   <!-- AIX only -->
-  <fortifyID>...</fortifyID>
-  <embedManifest>true</embedManifest>        <!-- NarCompileMojo -->
 
   <cpp>...</cpp>            <!-- C++ compiler   (Cpp -> Compiler) -->
   <c>...</c>               <!-- C compiler     (C -> Compiler) -->
-  <fortran>...</fortran>   <!-- Fortran        (Fortran -> Compiler) -->
-  <assembler>...</assembler>  <!-- (Assembler -> Compiler) -->
-  <idl>...</idl>           <!-- IDL            (IDL -> Compiler) -->
-  <message>...</message>   <!-- Message        (Message -> Compiler) -->
   <resource>...</resource> <!-- Resource compiler -->
   <linker>...</linker>     <!-- Linker -->
   <java>...</java>         <!-- Java info for includes and linking -->
@@ -213,10 +206,10 @@ own helper classes and are expanded further down.
 </configuration>
 ```
 
-#### Complex element: `<cpp>` / `<c>` / `<fortran>` / `<assembler>` / `<idl>` / `<message>` (class `Compiler`)
+#### Complex element: `<cpp>` / `<c>` (class `Compiler`)
 
-All compiler elements share the same schema (`C`, `Cpp`, `Fortran`,
-`Assembler`, `IDL` and `Message` all extend `Compiler`):
+Both compiler elements share the same schema (`C` and `Cpp` extend `Compiler`;
+`<resource>`, the windres compiler, does too):
 
 ```xml
 <cpp>
@@ -271,7 +264,6 @@ All compiler elements share the same schema (`C`, `Cpp`, `Fortran`,
   <narDependencyLibOrder>...</narDependencyLibOrder>
   <narDefaultDependencyLibOrder>...</narDefaultDependencyLibOrder>
   <pushDepsToLowestOrder>false</pushDepsToLowestOrder>
-  <generateManifest>...</generateManifest>
 </linker>
 ```
 
@@ -293,9 +285,8 @@ All compiler elements share the same schema (`C`, `Cpp`, `Fortran`,
 <libraries>
   <library>
     <type>...</type>                <!-- shared, static, jni, executable, plugin, none -->
-    <subSystem>...</subSystem>
+    <subSystem>...</subSystem>      <!-- console | gui | other; MinGW: -mconsole / -mwindows -->
     <linkCPP>true</linkCPP>
-    <linkFortran>...</linkFortran>  <linkFortranMain>...</linkFortranMain>
     <narSystemPackage>...</narSystemPackage>
     <narSystemName>...</narSystemName>
     <narSystemDirectory>...</narSystemDirectory>
@@ -329,7 +320,6 @@ the backing `@Parameter` field is declared. Read-only/injected values show up as
 |-----------|------|:----:|-------------|-------------|
 | `aol` | String |  | `AbstractNarMojo` | Architecture-OS-Linker name. Defaults to: arch-os-linker. |
 | `architecture` | String |  | `AbstractNarMojo` | The Architecture for the nar. Some choices: "x86", "i386", "amd64", "ppc", "sparc"... |
-| `assembler` | Assembler |  | `AbstractCompileMojo` | Assembler Compiler. |
 | `baseDirectory` | File | Yes | *(Maven built-in)* | Base directory of the project. |
 | `c` | C |  | `AbstractCompileMojo` | C Compiler. |
 | `classesDirectory` | File |  | `AbstractNarMojo` | *(injected)* |
@@ -341,13 +331,10 @@ the backing `@Parameter` field is declared. Read-only/injected values show up as
 | `decorateLinkerOptions` | boolean |  | `AbstractCompileMojo` | Whether linker options should be decorated or not. |
 | `directDepsOnly` | boolean |  | `AbstractCompileMojo` | Force the project to specify all its dependencies and not inherit transitive ones. |
 | `dryRun` | boolean | Yes | `AbstractNarMojo` | Do everything besides actually compiling or linking any sources. |
-| `embedManifest` | boolean |  | `NarCompileMojo` | Whether the final manifest should be embedded in the output (default true). |
 | `excludeArtifactIds` | String |  | `AbstractDependencyMojo` | Comma separated list of Artifact names to exclude. |
 | `excludeGroupIds` | String |  | `AbstractDependencyMojo` | Comma separated list of GroupId names to exclude. |
 | `failOnError` | boolean | Yes | `AbstractCompileMojo` | Fail on compilation/linking error. |
 | `finalName` | String | Yes | *(Maven built-in)* | Final name of the artifact. |
-| `fortifyID` | String |  | `AbstractCompileMojo` | Support scanning the code with HPE Fortify. |
-| `fortran` | Fortran |  | `AbstractCompileMojo` | Fortran Compiler. |
 | `gnuAutogenSkip` | boolean |  | `NarGnuConfigureMojo` | Skip running of autogen.sh (aka buildconf). |
 | `gnuBuildconfArgs` | String |  | `NarGnuConfigureMojo` | Arguments to pass to GNU buildconf. |
 | `gnuConfigureArgs` | String |  | `NarGnuConfigureMojo` | Arguments to pass to GNU configure. |
@@ -360,7 +347,6 @@ the backing `@Parameter` field is declared. Read-only/injected values show up as
 | `gnuSourceDirectory` | File |  | `AbstractGnuMojo`, `NarValidateMojo` | Source directory for GNU style project. |
 | `gnuTargetDirectory` | File |  | `AbstractGnuMojo` | Directory in which gnu sources are copied and "configured". |
 | `gnuUseOnWindows` | boolean | Yes | `AbstractGnuMojo` | Use GNU goals on Windows. |
-| `idl` | IDL |  | `AbstractCompileMojo` | IDL Compiler. |
 | `ignore` | boolean |  | `AbstractNarMojo` | Ignore errors and failures. |
 | `includeArtifactIds` | String |  | `AbstractDependencyMojo` | Comma separated list of Artifact names to include. |
 | `includeGroupIds` | String |  | `AbstractDependencyMojo` | Comma separated list of GroupIds to include. |
@@ -370,12 +356,10 @@ the backing `@Parameter` field is declared. Read-only/injected values show up as
 | `layout` | String | Yes | `AbstractNarMojo` | Layout to be used for building and unpacking artifacts. |
 | `libraries` | List |  | `AbstractNarMojo` | List of libraries to create. |
 | `libsName` | String |  | `AbstractNarMojo` | Name of the libraries included. |
-| `libtool` | boolean | Yes | `AbstractCompileMojo` | Set use of libtool ("libtool " is prepended to the command line). |
 | `linker` | Linker |  | `AbstractNarMojo` | Linker. |
 | `localRepository` | LocalRepository | Yes | *(Maven built-in)* | *(injected)* |
 | `mavenProject` | MavenProject |  | `AbstractNarMojo` | *(injected)* |
 | `maxCores` | int |  | `AbstractCompileMojo` | Maximum number of Cores/CPUs to use. 0 means unlimited. |
-| `message` | Message |  | `AbstractCompileMojo` | Message Compiler. |
 | `mojoExecution` | MojoExecution | Yes | *(Maven built-in)* | *(injected)* |
 | `onlySpecifiedCompilers` | boolean |  | `AbstractCompileMojo` | Compile only with the explicitly configured compilers instead of all known ones. |
 | `os` | String |  | `AbstractNarMojo` | The Operating System for the nar (Windows, Linux, MacOSX, SunOS, AIX...). |
@@ -392,7 +376,7 @@ the backing `@Parameter` field is declared. Read-only/injected values show up as
 | `resourceIncludeDir` | String | Yes | `AbstractResourcesMojo` | Include directory. |
 | `resourceLibDir` | String | Yes | `AbstractResourcesMojo` | Library directory. |
 | `resourcesCopyAOL` | boolean | Yes | `NarResourcesMojo` | Use given AOL only; if false, copy for all available AOLs. |
-| `runtime` | String | Yes | `AbstractCompileMojo` | Type of runtime library: "dynamic" or "static". |
+| `runtime` | String | Yes | `AbstractCompileMojo` | Type of runtime library: "dynamic" or "static". With gcc, "static" links with `-static` and `-static-libgcc`, and with `libstdc++.a` for C++. |
 | `session` | MavenSession | Yes | *(Maven built-in)* | *(injected)* |
 | `sharedObjectName` | String |  | `AbstractCompileMojo` | AIX-only: name for shared library projects. |
 | `skip` | boolean |  | `AbstractNarMojo` | Skip running of NAR plugins (any) altogether. |

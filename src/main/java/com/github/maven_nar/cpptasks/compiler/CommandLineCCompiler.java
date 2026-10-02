@@ -34,10 +34,9 @@ import com.github.maven_nar.cpptasks.parser.Parser;
  */
 public abstract class CommandLineCCompiler extends CommandLineCompiler {
   protected CommandLineCCompiler(final String command, final String identifierArg, final String[] sourceExtensions,
-      final String[] headerExtensions, final String outputSuffix, final boolean libtool,
-      final CommandLineCCompiler libtoolCompiler, final boolean newEnvironment, final Environment env) {
-    super(command, identifierArg, sourceExtensions, headerExtensions, outputSuffix, libtool, libtoolCompiler,
-        newEnvironment, env);
+      final String[] headerExtensions, final String outputSuffix, final boolean newEnvironment,
+      final Environment env) {
+    super(command, identifierArg, sourceExtensions, headerExtensions, outputSuffix, newEnvironment, env);
   }
 
   @Override

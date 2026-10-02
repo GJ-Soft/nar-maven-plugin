@@ -35,8 +35,6 @@ public class LinkType {
 
   // BEGINFREEHEP
   private boolean linkCPP = true;
-  private boolean linkFortran = false;
-  private boolean linkFortranMain = false;
 
   // ENDFREEHEP
 
@@ -147,27 +145,11 @@ public class LinkType {
     return this.linkCPP;
   }
 
-  public boolean linkFortran() {
-    return this.linkFortran;
-  }
-
-  public boolean linkFortranMain() {
-    return this.linkFortranMain;
-  }
-
   // ENDFREEHEP
 
   // BEGINFREEHEP
   public void setLinkCPP(final boolean linkCPP) {
     this.linkCPP = linkCPP;
-  }
-
-  public void setLinkFortran(final boolean linkFortran) {
-    this.linkFortran = linkFortran;
-  }
-
-  public void setLinkFortranMain(final boolean linkFortranMain) {
-    this.linkFortranMain = linkFortranMain;
   }
 
   /**

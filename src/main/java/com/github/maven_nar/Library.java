@@ -64,19 +64,6 @@ public class Library implements Executable {
 	private boolean linkCPP = true;
 
 	/**
-	 * Link with fortran runtime if necessary Defaults to false.
-	 */
-	@Parameter
-	private boolean linkFortran = false;
-
-	/**
-	 * Link with fortran startup, so that the gcc linker can find the "main" of
-	 * fortran. Defaults to false.
-	 */
-	@Parameter
-	private boolean linkFortranMain = false;
-
-	/**
 	 * If specified will create the NarSystem class with methods to load a JNI
 	 * library.
 	 */
@@ -130,8 +117,6 @@ public class Library implements Executable {
 		testArchive.type = STATIC;
 		testArchive.subSystem = executable.subSystem;
 		testArchive.linkCPP = executable.linkCPP;
-		testArchive.linkFortran = executable.linkFortran;
-		testArchive.linkFortranMain = executable.linkFortranMain;
 		// narSystemPackage is left null on purpose: no NarSystem class is generated
 		// for it, the user declared library is the one that owns that.
 		return testArchive;
@@ -177,14 +162,6 @@ public class Library implements Executable {
 
 	public final boolean linkCPP() {
 		return this.linkCPP;
-	}
-
-	public final boolean linkFortran() {
-		return this.linkFortran;
-	}
-
-	public final boolean linkFortranMain() {
-		return this.linkFortranMain;
 	}
 
 	@Override

@@ -118,6 +118,11 @@ public class NarTestMojo extends AbstractCompileMojo {
 		// them at runtime through the library path environment variable
 		addLinkerLibPaths(getLinker().getLibs(), sharedPaths);
 
+		// add the runtime directory of the toolchain itself (e.g. the MinGW bin folder
+		// holding libstdc++-6.dll): it is no dependency of the project, but without it
+		// the executable does not even start, and the OS reports a bare "DLL not found"
+		addToolchainRuntimePath(sharedPaths);
+
 		// same, but for external libraries propagated from nar dependencies
 		// (their <linker><libs>): the test links them, so it must find them at runtime
 		for (final NarArtifact dependency : narArtifacts) {
@@ -148,6 +153,27 @@ public class NarTestMojo extends AbstractCompileMojo {
 		env.add("CLASSPATH=" + StringUtils.join(this.classpathElements.iterator(), File.pathSeparator));
 
 		return env.toArray(new String[0]);
+	}
+
+	/**
+	 * Adds the directory configured as {@code <linker><runtimeDirectory>} to the
+	 * runtime library path. A directory that is unset or missing is skipped: the
+	 * configuration is optional, and on platforms where the toolchain lives on the
+	 * system path there is nothing to add.
+	 *
+	 * @param sharedPaths the set of directories to contribute to
+	 */
+	private void addToolchainRuntimePath(final Set<File> sharedPaths) {
+		final File runtimeDirectory = getLinker().getRuntimeDirectory();
+		if (runtimeDirectory == null) {
+			return;
+		}
+		if (!runtimeDirectory.isDirectory()) {
+			getLog().debug("Skipping toolchain runtime directory, it does not exist: " + runtimeDirectory);
+			return;
+		}
+		getLog().debug("Adding path to toolchain runtime: " + runtimeDirectory);
+		sharedPaths.add(runtimeDirectory);
 	}
 
 	/**
@@ -194,7 +220,7 @@ public class NarTestMojo extends AbstractCompileMojo {
 
 	@Override
 	public final void narExecute() throws MojoExecutionException, MojoFailureException {
-		if (this.skipTests || this.dryRun) {
+		if (this.skipTests || this.skipTestRun || this.dryRun) {
 			getLog().info("Tests are skipped");
 		} else {
 

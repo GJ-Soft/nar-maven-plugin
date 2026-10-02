@@ -113,9 +113,8 @@ public class NarTestCompileMojo extends AbstractCompileMojo {
 			task.addStaticLibraryObject(projectArchive);
 		}
 
-		// failOnError, libtool
+		// failOnError
 		task.setFailonerror(failOnError(getAOL()));
-		task.setLibtool(useLibtool(getAOL()));
 
 		// runtime
 		final RuntimeType runtimeType = new RuntimeType();
@@ -141,17 +140,6 @@ public class NarTestCompileMojo extends AbstractCompileMojo {
 				cCompiler.setCommands(testCompileCommands);
 				cCompiler.setDryRun(dryRun);
 				task.addConfiguredCompiler(cCompiler);
-			}
-		}
-
-		// add Fortran compiler
-		final Fortran fortran = getFortran();
-		if (fortran != null) {
-			final CompilerDef fortranCompiler = getFortran().getTestCompiler(type, test.getName());
-			if (fortranCompiler != null) {
-				fortranCompiler.setCommands(testCompileCommands);
-				fortranCompiler.setDebug(dryRun);
-				task.addConfiguredCompiler(fortranCompiler);
 			}
 		}
 

@@ -32,7 +32,9 @@ long Operation1(long n1, long n2, long n3) {
 	 * The directory containing the library file is added to the path by nar-maven-plugin
 	 * test goal, so we only need the library name (without its path) to load it
 	 */
-#ifdef WIN32
+	/* gcc on Windows ( MinGW, Cygwin ) does not define WIN32, but the library is
+	   a .dll all the same. */
+#if defined(WIN32) || defined(_WIN32) || defined(__CYGWIN__)
 	result = CallDynamicOperation("it0028-scope-runtime-shared-1.0-SNAPSHOT.dll", n1, n2);
 #else
 	result = CallDynamicOperation("libit0028-scope-runtime-shared-1.0-SNAPSHOT.so", n1, n2);

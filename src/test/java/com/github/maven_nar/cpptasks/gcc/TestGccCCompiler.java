@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import com.github.maven_nar.cpptasks.compiler.AbstractProcessor;
 import com.github.maven_nar.cpptasks.parser.CParser;
-import com.github.maven_nar.cpptasks.parser.FortranParser;
 import com.github.maven_nar.cpptasks.parser.Parser;
 
 /**
@@ -80,24 +79,6 @@ public class TestGccCCompiler extends TestGccCompatibleCCompiler {
   public void testCreateCParser3() {
     final Parser parser = GccCCompiler.getInstance().createParser(new File("foo"));
     assertTrue(parser instanceof CParser);
-  }
-
-  @Test
-  public void testCreateFortranParser1() {
-    final Parser parser = GccCCompiler.getInstance().createParser(new File("foo.f"));
-    assertTrue(parser instanceof FortranParser);
-  }
-
-  @Test
-  public void testCreateFortranParser2() {
-    final Parser parser = GccCCompiler.getInstance().createParser(new File("foo.FoR"));
-    assertTrue(parser instanceof FortranParser);
-  }
-
-  @Test
-  public void testCreateFortranParser3() {
-    final Parser parser = GccCCompiler.getInstance().createParser(new File("foo.f90"));
-    assertTrue(parser instanceof FortranParser);
   }
 
 }

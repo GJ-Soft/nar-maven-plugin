@@ -161,5 +161,65 @@
 				<maven.javadoc.doclint>all,-missing</maven.javadoc.doclint>
 			</properties>
 		</profile>
+		<!-- Integration tests under src/it: mvn -Prun-its verify. They are copied to
+			 target/it and run against a repository of their own, target/it-repo, so
+			 neither src/it nor the user's local repository gets anything written into.
+			 Excluded, as in the original NAR plugin: it0021 / it0022, which only work
+			 on Mac OS ( a .dylib, Objective-C ), and the ones that need tools not
+			 always there ( autoconf: it0013, it0029; a JDK toolchain: it0017 ). -->
+		<profile>
+			<id>run-its</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-invoker-plugin</artifactId>
+						<version>3.10.1</version>
+						<configuration>
+							<cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
+							<localRepositoryPath>${project.build.directory}/it-repo</localRepositoryPath>
+							<settingsFile>src/it/settings.xml</settingsFile>
+							<setupIncludes>
+								<setupInclude>it-parent/pom.xml</setupInclude>
+								<setupInclude>it0007-lib-shared/pom.xml</setupInclude>
+								<setupInclude>it0010-lib-static/pom.xml</setupInclude>
+								<setupInclude>it0020-lib-3rdparty/pom.xml</setupInclude>
+								<setupInclude>it0026-native-lib-loader/pom.xml</setupInclude>
+								<setupInclude>it0026-native-lib-loader-2.3.0/pom.xml</setupInclude>
+								<setupInclude>it0031-push-deps-to-lowest-order-agg/pom.xml</setupInclude>
+								<setupInclude>it0034-upstream-aol1-multi-aol/pom.xml</setupInclude>
+								<setupInclude>it0034-upstream-aol2-multi-aol/pom.xml</setupInclude>
+								<setupInclude>it0039-includesTypes/pom.xml</setupInclude>
+							</setupIncludes>
+							<pomIncludes>
+								<pomInclude>*/pom.xml</pomInclude>
+							</pomIncludes>
+							<pomExcludes>
+								<pomExclude>it0013-*/**</pomExclude>
+								<pomExclude>it0017-*/**</pomExclude>
+								<pomExclude>it0021-*/**</pomExclude>
+								<pomExclude>it0022-*/**</pomExclude>
+								<pomExclude>it0029-*/**</pomExclude>
+							</pomExcludes>
+							<preBuildHookScript>setup</preBuildHookScript>
+							<postBuildHookScript>verify</postBuildHookScript>
+							<goals>
+								<goal>clean</goal>
+								<goal>install</goal>
+							</goals>
+						</configuration>
+						<executions>
+							<execution>
+								<id>integration-test</id>
+								<goals>
+									<goal>install</goal>
+									<goal>run</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
 	</profiles>
 </project>

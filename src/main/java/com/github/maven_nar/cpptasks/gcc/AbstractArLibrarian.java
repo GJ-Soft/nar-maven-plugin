@@ -40,9 +40,8 @@ public abstract class AbstractArLibrarian extends CommandLineLinker {
   String outputPrefix;
 
   protected AbstractArLibrarian(final String command, final String identificationArg, final String[] inputExtensions,
-      final String[] ignoredExtensions, final String outputPrefix, final String outputExtension,
-      final boolean isLibtool, final AbstractArLibrarian libtoolLibrarian) {
-    super(command, identificationArg, inputExtensions, ignoredExtensions, outputExtension, isLibtool, libtoolLibrarian);
+      final String[] ignoredExtensions, final String outputPrefix, final String outputExtension) {
+    super(command, identificationArg, inputExtensions, ignoredExtensions, outputExtension);
     this.outputPrefix = outputPrefix;
   }
 

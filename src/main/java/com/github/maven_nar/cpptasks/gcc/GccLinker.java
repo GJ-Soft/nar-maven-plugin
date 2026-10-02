@@ -37,9 +37,6 @@ public class GccLinker extends AbstractLdLinker {
   private static final String[] objFiles = new String[] {
       ".o", ".a", ".lib", ".dll", ".so", ".sl"
   };
-  private static final String[] libtoolObjFiles = new String[] {
-      ".fo", ".a", ".lib", ".dll", ".so", ".sl"
-  };
   private static String[] linkerOptions = new String[] {
       "-bundle",
       // FREEHEP
@@ -47,21 +44,17 @@ public class GccLinker extends AbstractLdLinker {
       "-symbolic", "-Xlinker", "--export-all-symbols", "-static-libgcc", "-p", "-pg", "-pthread"
   };
   // FREEHEP refactored dllLinker to soLinker
-  private static final GccLinker soLinker = new GccLinker("gcc", objFiles, discardFiles, "lib", ".so", false,
-      new GccLinker("gcc", objFiles, discardFiles, "lib", ".so", true, null));
-  private static final GccLinker instance = new GccLinker("gcc", objFiles, discardFiles, "", "", false, null);
-  private static final GccLinker clangInstance = new GccLinker("clang", objFiles, discardFiles, "", "", false, null);
-  private static final GccLinker machBundleLinker = new GccLinker("gcc", objFiles, discardFiles, "lib", ".bundle",
-      false, null);
-  private static final GccLinker machDllLinker = new GccLinker("gcc", objFiles, discardFiles, "lib", ".dylib", false,
-      null);
-  private static final GccLinker machJNILinker = new GccLinker("gcc", objFiles, discardFiles, "lib", ".jnilib", false,
-      null);
+  private static final GccLinker soLinker = new GccLinker("gcc", objFiles, discardFiles, "lib", ".so");
+  private static final GccLinker instance = new GccLinker("gcc", objFiles, discardFiles, "", "");
+  private static final GccLinker clangInstance = new GccLinker("clang", objFiles, discardFiles, "", "");
+  private static final GccLinker machBundleLinker = new GccLinker("gcc", objFiles, discardFiles, "lib", ".bundle");
+  private static final GccLinker machDllLinker = new GccLinker("gcc", objFiles, discardFiles, "lib", ".dylib");
+  private static final GccLinker machJNILinker = new GccLinker("gcc", objFiles, discardFiles, "lib", ".jnilib");
   // FREEHEP added dllLinker for windows
-  private static final GccLinker dllLinker = new GccLinker("gcc", objFiles, discardFiles, "", ".dll", false, null);
+  private static final GccLinker dllLinker = new GccLinker("gcc", objFiles, discardFiles, "", ".dll");
 
    //Support running on AIX
-  private static final GccLinker aLinker = new GccLinker("gcc", objFiles, discardFiles, "lib", ".a", false,  null);
+  private static final GccLinker aLinker = new GccLinker("gcc", objFiles, discardFiles, "lib", ".a");
   
   public static GccLinker getCLangInstance() {
     return clangInstance;
@@ -74,8 +67,8 @@ public class GccLinker extends AbstractLdLinker {
   private File[] libDirs;
 
   protected GccLinker(final String command, final String[] extensions, final String[] ignoredExtensions,
-      final String outputPrefix, final String outputSuffix, final boolean isLibtool, final GccLinker libtoolLinker) {
-    super(command, "-dumpversion", extensions, ignoredExtensions, outputPrefix, outputSuffix, isLibtool, libtoolLinker);
+      final String outputPrefix, final String outputSuffix) {
+    super(command, "-dumpversion", extensions, ignoredExtensions, outputPrefix, outputSuffix);
   }
 
   @Override

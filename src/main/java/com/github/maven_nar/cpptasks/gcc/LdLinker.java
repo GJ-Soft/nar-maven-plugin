@@ -34,12 +34,8 @@ public final class LdLinker extends AbstractLdLinker {
   private static final String[] objFiles = new String[] {
       ".o", ".a", ".lib", ".dll", ".so", ".sl"
   };
-  private static final LdLinker dllLinker = new LdLinker("ld", objFiles, discardFiles, "lib", ".so", false,
-      new LdLinker("ld", objFiles, discardFiles, "lib", ".so", true, null));
-  private static final LdLinker instance = new LdLinker("ld", objFiles, discardFiles, "", "", false, null);
-  private static final String[] libtoolObjFiles = new String[] {
-      ".fo", ".a", ".lib", ".dll", ".so", ".sl"
-  };
+  private static final LdLinker dllLinker = new LdLinker("ld", objFiles, discardFiles, "lib", ".so");
+  private static final LdLinker instance = new LdLinker("ld", objFiles, discardFiles, "", "");
 
   public static LdLinker getInstance() {
     return instance;
@@ -48,8 +44,8 @@ public final class LdLinker extends AbstractLdLinker {
   private File[] libDirs;
 
   private LdLinker(final String command, final String[] extensions, final String[] ignoredExtensions,
-      final String outputPrefix, final String outputSuffix, final boolean isLibtool, final LdLinker libtoolLinker) {
-    super(command, "-version", extensions, ignoredExtensions, outputPrefix, outputSuffix, isLibtool, libtoolLinker);
+      final String outputPrefix, final String outputSuffix) {
+    super(command, "-version", extensions, ignoredExtensions, outputPrefix, outputSuffix);
   }
 
   @Override

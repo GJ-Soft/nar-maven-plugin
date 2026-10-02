@@ -101,8 +101,6 @@ Examples
 	
 	[#link_it( 'it0016-layout', '' )] Tests for different repository layouts, currently NarLayout20 and NarLayout21.
 	
-	[#link_it( 'it0018-fortran', '' )] A Fortran 90 program, not enabled on Windows. 
-	
 	[#link_it( 'it0019-compiler', '' )] Test to run with an explicitly configured compiler.
 	
 	[]

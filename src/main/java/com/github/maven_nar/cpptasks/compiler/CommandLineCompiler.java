@@ -56,24 +56,15 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
   private final Environment env;
   private String identifier;
   private final String identifierArg;
-  private final boolean libtool;
-  private final CommandLineCompiler libtoolCompiler;
   private final boolean newEnvironment;
-  private String fortifyID="";
   private List<String[]> commands;
   private boolean dryRun;
 
   protected CommandLineCompiler(final String command, final String identifierArg, final String[] sourceExtensions,
-      final String[] headerExtensions,
-      final String outputSuffix, final boolean libtool, final CommandLineCompiler libtoolCompiler,
-      final boolean newEnvironment, final Environment env) {
+      final String[] headerExtensions, final String outputSuffix, final boolean newEnvironment,
+      final Environment env) {
     super(sourceExtensions, headerExtensions, outputSuffix);
     this.command = command;
-    if (libtool && libtoolCompiler != null) {
-      throw new java.lang.IllegalArgumentException("libtoolCompiler should be null when libtool is true");
-    }
-    this.libtool = libtool;
-    this.libtoolCompiler = libtoolCompiler;
     this.identifierArg = identifierArg;
     this.newEnvironment = newEnvironment;
     this.env = env;
@@ -237,9 +228,6 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
       args = ObjectArrays.concat(compilerCommand, args);
     }
     int baseLength = command.length() + args.length + endArgs.length;
-    if (this.libtool) {
-      baseLength += 8;
-    }
     for (final String arg : args) {
       baseLength += arg.length();
     }
@@ -269,16 +257,6 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
       }
 
       ArrayList<String> commandlinePrefix = new ArrayList<>();
-      if (this.libtool) {
-        commandlinePrefix.add("libtool");
-      }
-      if((this.fortifyID !=null) && (!this.fortifyID.isEmpty()))
-      {// If FortifyID attribute was set, run the Fortify framework
-
-        commandlinePrefix.add("sourceanalyzer");
-        commandlinePrefix.add("-b");
-        commandlinePrefix.add(this.fortifyID);
-      }
       commandlinePrefix.add(command);
       Collections.addAll(commandlinePrefix, args);
 
@@ -482,9 +460,6 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
     } else {
       compiler = (CommandLineCompiler) compiler.changeEnvironment(specificDef.isNewEnvironment(), environment);
     }
-    // Pass the fortifyID for compiler
-    compiler.fortifyID = specificDef.getFortifyID();
-    
     compiler.setCommands(specificDef.getCommands());
     compiler.setDryRun(specificDef.isDryRun());
 
@@ -577,22 +552,6 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
       return buf;
     }
     return inputFile;
-  }
-
-  protected final boolean getLibtool() {
-    return this.libtool;
-  }
-
-  /**
-   * Obtains the same compiler, but with libtool set
-   * 
-   * Default behavior is to ignore libtool
-   */
-  public final CommandLineCompiler getLibtoolCompiler() {
-    if (this.libtoolCompiler != null) {
-      return this.libtoolCompiler;
-    }
-    return this;
   }
 
   abstract public int getMaximumCommandLength();

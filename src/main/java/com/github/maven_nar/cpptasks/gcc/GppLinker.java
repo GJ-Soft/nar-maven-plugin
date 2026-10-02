@@ -43,29 +43,23 @@ public class GppLinker extends AbstractLdLinker {
       ".o", ".a", ".lib", ".dll", ".so", ".sl"
   };
   private final static String libPrefix = "libraries: =";
-  protected static final String[] libtoolObjFiles = new String[] {
-      ".fo", ".a", ".lib", ".dll", ".so", ".sl"
-  };
   private static String[] linkerOptions = new String[] {
       "-bundle", "-dylib", "-dynamic", "-dynamiclib", "-nostartfiles", "-nostdlib", "-prebind", "-s", "-static",
       "-shared", "-symbolic", "-Xlinker", "-static-libgcc", "-shared-libgcc", "-p", "-pg", "-pthread"
   };
   // FREEHEP refactored dllLinker into soLinker
-  private static final GppLinker soLinker = new GppLinker(GPP_COMMAND, objFiles, discardFiles, "lib", ".so", false,
-      new GppLinker(GPP_COMMAND, objFiles, discardFiles, "lib", ".so", true, null));
-  private static final GppLinker instance = new GppLinker(GPP_COMMAND, objFiles, discardFiles, "", "", false, null);
-  private static final GppLinker clangInstance = new GppLinker("clang", objFiles, discardFiles, "", "", false, null);
-  private static final GppLinker machDllLinker = new GppLinker(GPP_COMMAND, objFiles, discardFiles, "lib", ".dylib",
-      false, null);
+  private static final GppLinker soLinker = new GppLinker(GPP_COMMAND, objFiles, discardFiles, "lib", ".so");
+  private static final GppLinker instance = new GppLinker(GPP_COMMAND, objFiles, discardFiles, "", "");
+  private static final GppLinker clangInstance = new GppLinker("clang", objFiles, discardFiles, "", "");
+  private static final GppLinker machDllLinker = new GppLinker(GPP_COMMAND, objFiles, discardFiles, "lib", ".dylib");
   private static final GppLinker machPluginLinker = new GppLinker(GPP_COMMAND, objFiles, discardFiles, "lib",
-      ".bundle", false, null);
+      ".bundle");
   /*On AIX shared libaries use .a for extension */
-    private static final GppLinker aLinker = new GppLinker(GPP_COMMAND,objFiles, discardFiles, "lib", ".a", false, null);
+    private static final GppLinker aLinker = new GppLinker(GPP_COMMAND,objFiles, discardFiles, "lib", ".a");
   // FREEHEP
-  private static final GppLinker machJNILinker = new GppLinker(GPP_COMMAND, objFiles, discardFiles, "lib", ".jnilib",
-      false, null);
+  private static final GppLinker machJNILinker = new GppLinker(GPP_COMMAND, objFiles, discardFiles, "lib", ".jnilib");
   // FREEHEP added dllLinker for windows
-  private static final GppLinker dllLinker = new GppLinker(GPP_COMMAND, objFiles, discardFiles, "", ".dll", false, null);
+  private static final GppLinker dllLinker = new GppLinker(GPP_COMMAND, objFiles, discardFiles, "", ".dll");
 
   public static GppLinker getCLangInstance() {
     return clangInstance;
@@ -78,11 +72,11 @@ public class GppLinker extends AbstractLdLinker {
   private File[] libDirs;
   private String runtimeLibrary;
   // FREEEHEP
-  private String gccLibrary, gfortranLibrary, gfortranMainLibrary;
+  private String gccLibrary;
 
   protected GppLinker(final String command, final String[] extensions, final String[] ignoredExtensions,
-      final String outputPrefix, final String outputSuffix, final boolean isLibtool, final GppLinker libtoolLinker) {
-    super(command, "-dumpversion", extensions, ignoredExtensions, outputPrefix, outputSuffix, isLibtool, libtoolLinker);
+      final String outputPrefix, final String outputSuffix) {
+    super(command, "-dumpversion", extensions, ignoredExtensions, outputPrefix, outputSuffix);
   }
 
   @Override
@@ -101,38 +95,6 @@ public class GppLinker extends AbstractLdLinker {
     // BEGINFREEHEP link or not with libstdc++
     // for MacOS X see:
     // http://developer.apple.com/documentation/DeveloperTools/Conceptual/CppRuntimeEnv/Articles/LibCPPDeployment.html
-    this.gfortranLibrary = null;
-    if (linkType.linkFortran()) {
-      if (linkType.isStaticRuntime()) {
-        final String[] cmdin = new String[] {
-            "gfortran", "-print-file-name=libgfortran.a"
-        };
-        final String[] cmdout = CaptureStreamHandler.run(cmdin);
-        if (cmdout.length > 0 && cmdout[0].indexOf('/') >= 0) {
-          this.gfortranLibrary = cmdout[0];
-        }
-      } else {
-        this.gfortranLibrary = "-lgfortran";
-      }
-    }
-
-    this.gfortranMainLibrary = null;
-    if (linkType.linkFortran()) {
-      if (linkType.isExecutable() && linkType.linkFortranMain() && !isDarwin()) {
-        if (linkType.isStaticRuntime()) {
-          final String[] cmdin = new String[] {
-              "gfortran", "-print-file-name=libgfortranbegin.a"
-          };
-          final String[] cmdout = CaptureStreamHandler.run(cmdin);
-          if (cmdout.length > 0 && cmdout[0].indexOf('/') >= 0) {
-            this.gfortranMainLibrary = cmdout[0];
-          }
-        } else {
-          this.gfortranMainLibrary = "-lgfortranbegin";
-        }
-      }
-    }
-
     this.runtimeLibrary = null;
     if (linkType.linkCPP()) {
       if (linkType.isStaticRuntime()) {
@@ -183,12 +145,6 @@ public class GppLinker extends AbstractLdLinker {
       final List<String> midargs, final List<String> endargs) {
     final String[] rs = super.addLibrarySets(task, libsets, preargs, midargs, endargs);
     // BEGINFREEHEP
-    if (this.gfortranLibrary != null) {
-      endargs.add(this.gfortranLibrary);
-    }
-    if (this.gfortranMainLibrary != null) {
-      endargs.add(this.gfortranMainLibrary);
-    }
     if (this.gccLibrary != null) {
       endargs.add(this.gccLibrary);
     }

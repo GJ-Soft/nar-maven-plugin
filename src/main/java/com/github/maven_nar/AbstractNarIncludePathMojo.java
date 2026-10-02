@@ -370,7 +370,7 @@ public abstract class AbstractNarIncludePathMojo extends AbstractCompileMojo {
 	private List<Compiler> getConfiguredCompilers() throws MojoExecutionException, MojoFailureException {
 		final List<Compiler> compilers = new ArrayList<>();
 		for (final Compiler compiler : new Compiler[] {
-				getCpp(), getC(), getFortran()
+				getCpp(), getC()
 		}) {
 			if (compiler != null && compiler.getName() != null) {
 				compilers.add(compiler);

@@ -28,9 +28,9 @@ Introduction
  
 	NOTE: <<bold>> print is <<NOT implemented yet>>.
 
-	This plugin for Maven allows you to compile native code (c++, c and fortran) on
+	This plugin for Maven allows you to compile native code (c++ and c) on
 a number of different architectures (Linux, Windows via Cygwin/MinGW, ...) with the
-GNU toolchain (g++, gcc and gfortran).
+GNU toolchain (g++ and gcc).
 The output produced is wrapped up in Native ARchive files (.nar) some of which
 are machine independent (-noarch), while others are machine specific and thus depend
 on a combination of machine architecture(A), operating-system(O) and linker(L) identified
@@ -157,24 +157,24 @@ nar-gnu-process goal.
                 
 * {nar-compile}
                 
-	This goal will compile the native source code (c, c++ or fortran) and archive it into a shared library.
+	This goal will compile the native source code (c or c++) and archive it into a shared library.
 You can also produce a jni or a static library by setting <<<library.type>>>.
 To handle the variety of compilers and linkers, the NAR plugin uses a derivative of the cpptasks from the ant-contrib
 project, with some minor improvements and additions of compilers. Most of the settings for cpptasks, such as compiler,
 linker, options and include dirs are available through the NAR plugin, see {{{./configuration.html}configuration}}.
 
 	The NAR plugin searches the directory structure under COMPILER.sourceDirectory, which defaults to
-src/main. The standard way to separate your sources for different languages would be src/main/c, src/main/c++
-and src/main/fortran, but any file under src/main is searched for.
+src/main. The standard way to separate your sources for different languages would be src/main/c and
+src/main/c++, but any file under src/main is searched for.
 
-	The nar plugin will automatically select the correct compiler (c, c++ or fortran) based on the type of
-source, as specified in the patterns in <<<AOL.c.includes>>>, 
-<<<AOL.cpp.includes>>> and <<<AOL.fortran.includes>>>, where AOL is a dotted qualifier of the architecture,
+	The nar plugin will automatically select the correct compiler (c or c++) based on the type of
+source, as specified in the patterns in <<<AOL.c.includes>>> and
+<<<AOL.cpp.includes>>>, where AOL is a dotted qualifier of the architecture,
 os and linker (<<<amd64.Windows.gcc>>> for example).
 
 	Include paths are added in this order from:
 
-    * any directories set in <<<COMPILER.includePaths>>>, where COMPILER is c, cpp or fortran.
+    * any directories set in <<<COMPILER.includePaths>>>, where COMPILER is c or cpp.
 
     * if <<<java.include>>> is true
     exists we add one of the following, relative to the java home directory:
@@ -188,7 +188,7 @@ os and linker (<<<amd64.Windows.gcc>>> for example).
     
     * the header files of any of the nar type dependencies, unless it is a jni library.
     
-    * any system directories set in <<<COMPILER.sysincludepath>>>, where COMPILER is c, cpp or fortran.
+    * any system directories set in <<<COMPILER.sysincludepath>>>, where COMPILER is c or cpp.
 
 	[]
 
@@ -222,18 +222,18 @@ compilation and executions.
                 
 * {nar-testCompile}
 
-	This goal will compile the native test source code (c, c++ or fortran) and create executables from it.
+	This goal will compile the native test source code (c or c++) and create executables from it.
 To handle the variety of compilers and linkers, the NAR plugin uses a derivative of the cpptasks from the ant-contrib
 project, with some minor improvements and additions of compilers.  Most of the settings for cpptasks, such as compiler,
 linker, options and include dirs are available through the NAR plugin, see {{{./configuration.html}configuration}}.
 
 	The NAR plugin searches the directory structure under COMPILER.sourceDirectory, which defaults to
-src/test. The standard way to separate your sources for different languages would be src/test/c, src/test/c++
-and src/test/fortran, but any file under src/test is searched for.
+src/test. The standard way to separate your sources for different languages would be src/test/c and
+src/test/c++, but any file under src/test is searched for.
 
-	The compiler will automatically select the correct compiler (c, c++ or fortran) based on the type of
-sources, as specified in the patterns in <<<AOL.c.includes>>>, 
-<<<AOL.nar.src.includes>>> and <<<AOL.fortran.includes>>>, where AOL is a dotted qualifier of the architecture,
+	The compiler will automatically select the correct compiler (c or c++) based on the type of
+sources, as specified in the patterns in <<<AOL.c.includes>>> and
+<<<AOL.nar.src.includes>>>, where AOL is a dotted qualifier of the architecture,
 os and linker (<<<amd64.Windows.gcc>>> for example).
                 
 	<<TBD If you set maven.nar.includefilesonly to true the compile-tests goal will be 
