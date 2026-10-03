@@ -1,0 +1,182 @@
+# Continuous integration of nar-maven-plugin.
+#
+# The parent pom (org.gjsoft.java.maven:gjs-java-maven-parent) lives in the gjs
+# repository and is not on Maven Central yet. So every job checks out gjs next
+# to the plugin and runs its arranque.sh, which installs the chain of parent
+# poms in the runner's local repository. Once gjs is published those steps go
+# away: the parent will resolve from Central like any other.
+#
+# Jobs:
+#   - unit-tests:        build and unit tests. Plain Java, one job is enough.
+#   - integration-tests: the projects under src/it (profile run-its), which
+#                        really compile C and C++, in the two Windows modes of
+#                        the gjs stack: Cygwin and plain Windows (MinGW).
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # Integration tests left out. It is the filter the suite went green with on
+  # 2026-10-01 (30 out of 30):
+  #   - it0014, it0017, it0024, it0026 and it0027: JNI. Nothing generates the
+  #     headers any more (javah is gone since JDK 10); still to decide whether
+  #     they are removed or moved to 'javac -h'.
+  #   - it0021: links against a Mac dylib.
+  #   - it0029: autotools, does not find the header of the library it builds.
+  #   - it0013 and it0022: already excluded by the run-its profile. A
+  #     -Dinvoker.test replaces its pomExcludes, so they have to be repeated.
+  ITS_FILTER: '*,!it0013*,!it0014*,!it0017*,!it0021*,!it0022*,!it0024*,!it0026*,!it0027*,!it0029*'
+
+jobs:
+  unit-tests:
+    name: Unit tests
+    runs-on: windows-latest
+    steps:
+      - name: Check out nar-maven-plugin
+        uses: actions/checkout@v4
+        with:
+          path: nar-maven-plugin
+
+      - name: Check out gjs
+        uses: actions/checkout@v4
+        with:
+          repository: GJ-Soft/gjs
+          path: gjs
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      # arranque.sh installs gjs-python-common, which is built with pip.
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      # Everything but the org/gjsoft artifacts: they keep the same version
+      # from one run to the next, and a cached copy would be a stale parent.
+      - name: Cache the local Maven repository
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.m2/repository
+            !~/.m2/repository/org/gjsoft
+          key: m2-${{ runner.os }}-${{ hashFiles('nar-maven-plugin/pom.xml', 'gjs/**/pom.xml') }}
+          restore-keys: m2-${{ runner.os }}-
+
+      # Through bash: on Windows, git does not keep the executable bit.
+      - name: Install the gjs parent poms
+        shell: bash
+        run: bash gjs/arranque.sh
+
+      - name: Build and run the unit tests
+        working-directory: nar-maven-plugin
+        run: mvn -B -ntp verify
+
+      - name: Upload the logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-tests-logs
+          path: |
+            gjs/target/arranque/
+            nar-maven-plugin/target/surefire-reports/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  integration-tests:
+    name: Integration tests (${{ matrix.mode }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [ cygwin, windows ]
+    steps:
+      - name: Check out nar-maven-plugin
+        uses: actions/checkout@v4
+        with:
+          path: nar-maven-plugin
+
+      - name: Check out gjs
+        uses: actions/checkout@v4
+        with:
+          repository: GJ-Soft/gjs
+          path: gjs
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Cache the local Maven repository
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.m2/repository
+            !~/.m2/repository/org/gjsoft
+          key: m2-${{ runner.os }}-${{ hashFiles('nar-maven-plugin/pom.xml', 'gjs/**/pom.xml') }}
+          restore-keys: m2-${{ runner.os }}-
+
+      - name: Install the gjs parent poms
+        shell: bash
+        run: bash gjs/arranque.sh
+
+      - name: Install Cygwin with gcc and g++
+        if: matrix.mode == 'cygwin'
+        uses: cygwin/cygwin-install-action@v4
+        with:
+          packages: gcc-core gcc-g++ make
+          add-to-path: false
+
+      # As from mintty: a Cygwin login shell, with the CYGWIN variable defined,
+      # which is what selects the mode (even when empty).
+      - name: Integration tests (Cygwin)
+        if: matrix.mode == 'cygwin'
+        shell: C:\cygwin\bin\bash.exe --login -eo pipefail -o igncr '{0}'
+        run: |
+          export CYGWIN=
+          cd "$(cygpath -u "$GITHUB_WORKSPACE")/nar-maven-plugin"
+          gcc --version | head -1
+          mvn -B -ntp -Prun-its -DskipTests "-Dinvoker.test=$ITS_FILTER" verify
+
+      # Plain Windows: the MinGW-w64 g++ that ships with the runner image, put
+      # ahead of any other gcc in the PATH.
+      - name: Integration tests (Windows, MinGW)
+        if: matrix.mode == 'windows'
+        working-directory: nar-maven-plugin
+        shell: pwsh
+        run: |
+          $env:PATH = "C:\mingw64\bin;$env:PATH"
+          g++ --version | Select-Object -First 1
+          mvn -B -ntp -Prun-its -DskipTests "-Dinvoker.test=$env:ITS_FILTER" verify
+
+      - name: Upload the logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-tests-${{ matrix.mode }}-logs
+          path: |
+            gjs/target/arranque/
+            nar-maven-plugin/target/it/**/build.log
+          if-no-files-found: ignore
+          retention-days: 7
