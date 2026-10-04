@@ -331,7 +331,7 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
       for (final CommandLineArgument commandArg : commandArgs) {
         if (commandArg.getLocation() == 0) {
           String arg = commandArg.getValue();
-          if (isWindows() && arg.matches(".*[ \"].*")) {
+          if (isWindows() && (arg.indexOf(' ') >= 0 || arg.indexOf('"') >= 0)) {
             // Work around inconsistent quoting by Ant
             arg = "\"" + arg.replaceAll("[\\\\\"]", "\\\\$0") + "\"";
           }

@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -327,7 +328,10 @@ public class Linker {
 					|| getName(null, null).equals("xlc"))) {
 				String dependencies = new StringBuilder(
 						mojo.dependencyTreeOrderStr(pushDepsToLowestOrder, mojo.getDirectDepsOnly())).toString();
-				List<String> dependency_list = Arrays.asList(dependencies.split("\\s*,\\s*"));
+				// The order string is built by dependencyTreeOrderStr: groupId:artifactId
+				// entries joined by commas. Split and trim, with no regular expression.
+				List<String> dependency_list = Arrays.stream(dependencies.split(",")).map(String::trim)
+						.collect(Collectors.toList());
 				Collections.reverse(dependency_list);
 				StringBuilder libOrder = new StringBuilder();
 				boolean first = true;

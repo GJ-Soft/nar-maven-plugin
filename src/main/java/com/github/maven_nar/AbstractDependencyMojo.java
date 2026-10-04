@@ -28,7 +28,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.Map;
 import java.util.ListIterator;
 import java.util.Set;
@@ -894,8 +896,10 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 	private static String cleanToBeTokenizedString(String str) {
 		String ret = "";
 		if (!StringUtils.isEmpty(str)) {
-			// remove initial and ending spaces, plus all spaces next to commas
-			ret = str.trim().replaceAll("[\\s]*,[\\s]*", ",");
+			// remove initial and ending spaces, plus all spaces next to commas. Split
+			// and trim instead of a regular expression, whose \s* before the comma
+			// backtracks on long runs of spaces.
+			ret = Arrays.stream(str.trim().split(",", -1)).map(String::trim).collect(Collectors.joining(","));
 		}
 
 		return ret;

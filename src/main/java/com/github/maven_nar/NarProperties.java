@@ -127,7 +127,9 @@ public class NarProperties {
 
 	public Collection<String> getKnownAOLs() {
 		final Collection<String> result = new LinkedHashSet<>();
-		final Pattern pattern = Pattern.compile("([^.]+)\\.([^.]+)\\.([^.]+).*");
+		// Possessive: a part never contains the dot that follows it, so giving characters
+		// back cannot help, and the pattern does not backtrack.
+		final Pattern pattern = Pattern.compile("([^.]++)\\.([^.]++)\\.([^.]++).*");
 		for (final String key : this.properties.stringPropertyNames()) {
 			final Matcher matcher = pattern.matcher(key);
 			if (matcher.matches()) {
