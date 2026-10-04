@@ -28,6 +28,10 @@ import org.apache.tools.ant.types.Reference;
  *
  */
 public final class TargetDef extends DataType {
+
+  /** Name of this data type in the Ant reference checks. */
+  private static final String DATA_TYPE_NAME = "TargetDef";
+
   /**
    * if property.
    */
@@ -61,6 +65,7 @@ public final class TargetDef extends DataType {
    *
    */
   public TargetDef() {
+    // Nothing to initialize: the fields keep their default values.
   }
 
   /**
@@ -78,7 +83,7 @@ public final class TargetDef extends DataType {
    */
   public ArchEnum getArch() {
     if (isReference()) {
-      final TargetDef refPlatform = getCheckedRef(TargetDef.class, "TargetDef");
+      final TargetDef refPlatform = getCheckedRef(TargetDef.class, DATA_TYPE_NAME);
       return refPlatform.getArch();
     }
     return this.arch;
@@ -92,7 +97,7 @@ public final class TargetDef extends DataType {
    */
   public CPUEnum getCpu() {
     if (isReference()) {
-      final TargetDef refPlatform = getCheckedRef(TargetDef.class, "TargetDef");
+      final TargetDef refPlatform = getCheckedRef(TargetDef.class, DATA_TYPE_NAME);
       return refPlatform.getCpu();
     }
     return this.cpu;
@@ -106,7 +111,7 @@ public final class TargetDef extends DataType {
    */
   public OSFamilyEnum getOsfamily() {
     if (isReference()) {
-      final TargetDef refPlatform = getCheckedRef(TargetDef.class, "TargetDef");
+      final TargetDef refPlatform = getCheckedRef(TargetDef.class, DATA_TYPE_NAME);
       return refPlatform.getOsfamily();
     }
     return this.osFamily;

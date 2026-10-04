@@ -39,10 +39,12 @@ public class NarLogger implements BuildListener {
 
   @Override
   public void buildFinished(final BuildEvent event) {
+    // Only the messages go to the Maven log; build, target and task events do not.
   }
 
   @Override
   public void buildStarted(final BuildEvent event) {
+    // Only the messages go to the Maven log; build, target and task events do not.
   }
 
   @Override
@@ -80,17 +82,21 @@ public class NarLogger implements BuildListener {
 
   @Override
   public void targetFinished(final BuildEvent event) {
+    // Only the messages go to the Maven log; build, target and task events do not.
   }
 
   @Override
   public void targetStarted(final BuildEvent event) {
+    // Only the messages go to the Maven log; build, target and task events do not.
   }
 
   @Override
   public void taskFinished(final BuildEvent event) {
+    // Only the messages go to the Maven log; build, target and task events do not.
   }
 
   @Override
   public void taskStarted(final BuildEvent event) {
+    // Only the messages go to the Maven log; build, target and task events do not.
   }
 }

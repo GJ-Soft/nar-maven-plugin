@@ -26,6 +26,7 @@ package com.github.maven_nar;
  */
 public class Cpp extends Compiler {
   public Cpp() {
+    // Nothing to initialize: the fields keep their default values.
   }
 
   @Override

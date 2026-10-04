@@ -165,14 +165,9 @@ public class GccLinker extends AbstractLdLinker {
       });
       String[] libpath;
       if (libpaths[0].length > 0) {
-        libpath = new String[libpaths[0].length + 3];
-        int i = 0;
-        for (; i < libpaths[0].length; i++) {
-          libpath[i] = libpaths[0][i];
-        }
-        libpath[i++] = buf.toString();
-        libpath[i++] = "/lib/w32api";
-        libpath[i++] = "/lib";
+        libpath = new String[libpaths[0].length + impliedLibPath.length];
+        System.arraycopy(libpaths[0], 0, libpath, 0, libpaths[0].length);
+        System.arraycopy(impliedLibPath, 0, libpath, libpaths[0].length, impliedLibPath.length);
       } else {
         //
         // if a failure to find any matches then
@@ -221,13 +216,34 @@ public class GccLinker extends AbstractLdLinker {
     }
     // BEGINFREEHEP
     if (type.isJNIModule()) {
-      return isDarwin() ? machJNILinker : isWindows() ? dllLinker : soLinker;
+      if (isDarwin()) {
+        return machJNILinker;
+      }
+      if (isWindows()) {
+        return dllLinker;
+      }
+      return soLinker;
     }
     if (type.isPluginModule()) {
-      return isDarwin() ? machBundleLinker : isWindows() ? dllLinker : soLinker;
+      if (isDarwin()) {
+        return machBundleLinker;
+      }
+      if (isWindows()) {
+        return dllLinker;
+      }
+      return soLinker;
     }
     if (type.isSharedLibrary()) {
-      return isDarwin() ? machDllLinker : isWindows() ? dllLinker : isAIX() ?  aLinker : soLinker;
+      if (isDarwin()) {
+        return machDllLinker;
+      }
+      if (isWindows()) {
+        return dllLinker;
+      }
+      if (isAIX()) {
+        return aLinker;
+      }
+      return soLinker;
     }
     // ENDFREEHEP
     return instance;

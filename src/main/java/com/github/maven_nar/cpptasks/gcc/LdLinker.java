@@ -19,7 +19,6 @@
  */
 package com.github.maven_nar.cpptasks.gcc;
 
-import java.io.File;
 
 import com.github.maven_nar.cpptasks.compiler.LinkType;
 import com.github.maven_nar.cpptasks.compiler.Linker;
@@ -41,7 +40,6 @@ public final class LdLinker extends AbstractLdLinker {
     return instance;
   }
 
-  private File[] libDirs;
 
   private LdLinker(final String command, final String[] extensions, final String[] ignoredExtensions,
       final String outputPrefix, final String outputSuffix) {

@@ -22,7 +22,6 @@ package com.github.maven_nar.cpptasks.compiler;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -70,7 +69,7 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
     this.env = env;
   }
 
-  abstract protected void addImpliedArgs(List<String> args, boolean debug, boolean multithreaded, boolean exceptions,
+  protected abstract void addImpliedArgs(List<String> args, boolean debug, boolean multithreaded, boolean exceptions,
       LinkType linkType, Boolean rtti, OptimizationEnum optimization);
 
   /**
@@ -113,7 +112,7 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
         final String relative = CUtil.getRelativePath(baseDirPath, includeDir);
         relativeArgs.add(getIncludeDirSwitch(relative, isSystem));
         if (includePathId != null) {
-          if (includePathId.length() == 0) {
+          if (includePathId.isEmpty()) {
             includePathId.append("/I");
           } else {
             includePathId.append(" /I");
@@ -164,7 +163,7 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
     return absolute;
   }
 
-  abstract protected void addWarningSwitch(List<String> args, int warnings);
+  protected abstract void addWarningSwitch(List<String> args, int warnings);
 
   protected void buildDefineArguments(final CompilerDef[] defs, final List<String> args) {
     //
@@ -493,7 +492,7 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
     }
   }
 
-  abstract protected void getDefineSwitch(StringBuilder buffer, String define, String value);
+  protected abstract void getDefineSwitch(StringBuilder buffer, String define, String value);
 
   protected abstract File[] getEnvironmentIncludePath();
 
@@ -513,7 +512,7 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
     return this.identifier;
   }
 
-  abstract protected String getIncludeDirSwitch(String source);
+  protected abstract String getIncludeDirSwitch(String source);
 
   /**
    * Added by Darren Sargent 22Oct2008 Returns the include dir switch value.
@@ -540,6 +539,7 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
     try {
       relative = CUtil.getRelativeCompilerPath(workDir, new File(filename));
     } catch (Exception ex) {
+      // No relative path (another drive, for instance): the file name is used as it is.
     }
     if (relative.isEmpty()) {
       inputFile = filename;
@@ -547,14 +547,12 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
       inputFile = relative;
     }
     if (inputFile.indexOf(' ') >= 0) {
-      final String buf = "\"" + inputFile +
-          "\"";
-      return buf;
+      return "\"" + inputFile + "\"";
     }
     return inputFile;
   }
 
-  abstract public int getMaximumCommandLength();
+  public abstract int getMaximumCommandLength();
 
   protected int getMaximumInputFilesPerCommand() {
     return Integer.MAX_VALUE;
@@ -578,7 +576,7 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
     return len + argumentCountPerInputFile; // argumentCountPerInputFile added for spaces
   }
 
-  abstract protected void getUndefineSwitch(StringBuilder buffer, String define);
+  protected abstract void getUndefineSwitch(StringBuilder buffer, String define);
 
   /**
    * This method is exposed so test classes can overload and test the

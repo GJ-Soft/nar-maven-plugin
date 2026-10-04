@@ -38,8 +38,8 @@ import org.codehaus.plexus.util.PropertyUtils;
 
 public class NarProperties {
 
-	private final static String AOL_PROPERTIES = "aol.properties";
-	private final static String CUSTOM_AOL_PROPERTY_KEY = "nar.aolProperties";
+	private static final String AOL_PROPERTIES = "aol.properties";
+	private static final String CUSTOM_AOL_PROPERTY_KEY = "nar.aolProperties";
 	private static final Map<MavenProject, NarProperties> instances = new HashMap<>();
 
 	/**
@@ -118,7 +118,9 @@ public class NarProperties {
 							"NAR: Could not load custom properties file: '" + customPropertyLocation + "'.");
 				}
 			} catch (final IOException e) {
-				// ignore (FIXME)
+				// The file exists but cannot be read: going on with the defaults would
+				// silently ignore the project's settings.
+				throw new MojoFailureException("NAR: Could not read properties file: '" + narFile + "'.", e);
 			}
 		}
 	}

@@ -24,6 +24,7 @@ package com.github.maven_nar.cpptasks.types;
  */
 public class CompilerArgument extends CommandLineArgument {
   public CompilerArgument() {
+    // Nothing to initialize: the fields keep their default values.
   }
 
   public void execute() throws org.apache.tools.ant.BuildException {

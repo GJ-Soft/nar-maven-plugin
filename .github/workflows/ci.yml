@@ -143,7 +143,8 @@ jobs:
 
       - name: Install Cygwin with gcc and g++
         if: matrix.mode == 'cygwin'
-        uses: cygwin/cygwin-install-action@v4
+        # Third-party action: pinned to the commit of tag v4.
+        uses: cygwin/cygwin-install-action@006ad0b0946ca6d0a3ea2d4437677fa767392401 # v4
         with:
           packages: gcc-core gcc-g++ make
           add-to-path: false

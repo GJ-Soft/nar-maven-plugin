@@ -53,7 +53,6 @@ public abstract class CommandLineLinker extends AbstractLinker {
   private Environment env = null;
   private String identifier;
   private final String identifierArg;
-  private String[] librarySets;
   private final boolean newEnvironment = false;
   private final String outputSuffix;
   private List<String[]> commands;
@@ -199,10 +198,8 @@ public abstract class CommandLineLinker extends AbstractLinker {
 
     String[] libnames = null;
     final LibrarySet[] libsets = specificDef.getActiveLibrarySets(defaultProviders, 1);
-    // FREEHEP call at all times
-    // if (libsets.length > 0) {
+    // FREEHEP call at all times, even with no library sets
     libnames = addLibrarySets(task, libsets, preargs, midargs, endargs);
-    // }
 
     final StringBuilder buf = new StringBuilder(getIdentifier());
     for (int i = 0; i < 3; i++) {
@@ -241,7 +238,6 @@ public abstract class CommandLineLinker extends AbstractLinker {
     setCommands(specificDef.getCommands());
     setDryRun(specificDef.isDryRun());
 
-    // task.log("libnames:"+libnames.length, Project.MSG_VERBOSE);
     return new CommandLineLinkerConfiguration(this, configId, options, paramArray, rebuild, map, debug, libnames,
         startupObject, toolPath);
   }
@@ -442,25 +438,25 @@ public abstract class CommandLineLinker extends AbstractLinker {
   protected String[] prepareResponseFile(final File outputFile, final String[] args) throws IOException {
     final String baseName = outputFile.getName();
     final File commandFile = new File(outputFile.getParent(), baseName + ".rsp");
-    final FileWriter writer = new FileWriter(commandFile);
     final int execArgCount = 1;
     final String[] execArgs = new String[execArgCount + 1];
     System.arraycopy(args, 0, execArgs, 0, execArgCount);
     execArgs[execArgCount] = getCommandFileSwitch(commandFile.toString());
-    for (int i = execArgCount; i < args.length; i++) {
-      //
-      // if embedded space and not quoted then
-      // quote argument
-      if (args[i].contains(" ") && args[i].charAt(0) != '\"') {
-        writer.write('\"');
-        writer.write(args[i]);
-        writer.write("\"\n");
-      } else {
-        writer.write(args[i]);
-        writer.write('\n');
+    try (FileWriter writer = new FileWriter(commandFile)) {
+      for (int i = execArgCount; i < args.length; i++) {
+        //
+        // if embedded space and not quoted then
+        // quote argument
+        if (args[i].contains(" ") && args[i].charAt(0) != '\"') {
+          writer.write('\"');
+          writer.write(args[i]);
+          writer.write("\"\n");
+        } else {
+          writer.write(args[i]);
+          writer.write('\n');
+        }
       }
     }
-    writer.close();
     return execArgs;
   }
 

@@ -39,7 +39,7 @@ import com.github.maven_nar.cpptasks.parser.Parser;
  * @author Adam Murdoch
  */
 public final class GccCCompiler extends GccCompatibleCCompiler {
-  private final static String[] sourceExtensions = new String[] {
+  private static final String[] sourceExtensions = new String[] {
       ".c", /* C */
       ".cc", /* C++ */
       ".cpp", /* C++ */
@@ -51,7 +51,7 @@ public final class GccCCompiler extends GccCompatibleCCompiler {
       ".mm", /* Objected-C++ */
       ".s" /* Assembly */
   };
-  private final static String[] headerExtensions = new String[] {
+  private static final String[] headerExtensions = new String[] {
       ".h", ".hpp", ".inl"
   };
   private static final GccCCompiler cppInstance = new GccCCompiler("c++", sourceExtensions, headerExtensions, false,

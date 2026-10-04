@@ -114,7 +114,8 @@ public class Test implements Executable {
 
   public String getBinding(NarArtifact dependency) {
     for (String dependBind : dependencyBindings ) {
-      String[] pair = dependBind.trim().split( ":", 2 );  // TODO: match how much?
+      // artifactId:binding; only the artifactId is matched, not the groupId.
+      String[] pair = dependBind.trim().split( ":", 2 );
       if( dependency.getArtifactId().equals(pair[0].trim()) ){
         String result = pair[1].trim();
         if( !result.isEmpty() )

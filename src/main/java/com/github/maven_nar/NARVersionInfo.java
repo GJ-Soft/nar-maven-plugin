@@ -31,22 +31,6 @@ import org.apache.tools.ant.Project;
  */
 public class NARVersionInfo
 {
-    /**
-     * Name of the system library
-     * 
-     * @parameter expression=""
-     * @required
-     */
-    //private String name;
-
-    /**
-     * Type of linking for this system library
-     * 
-     * @parameter expression="" default-value="shared"
-     * @required
-     */
-    //private String type = Library.SHARED;
-    
       /**
      * file version.
      *
@@ -132,7 +116,7 @@ public class NARVersionInfo
 		
 		public NARVersionInfo()
 		{
-			
+			// Nothing to initialize: the fields keep their default values.
 		}
 		
     public final VersionInfo getVersionInfo( Project antProject )

@@ -45,12 +45,10 @@ public class UndefineArgument {
    */
   public static UndefineArgument[] merge(final UndefineArgument[] base, final UndefineArgument[] override) {
     if (base.length == 0) {
-      final UndefineArgument[] overrideClone = override.clone();
-      return overrideClone;
+      return override.clone();
     }
     if (override.length == 0) {
-      final UndefineArgument[] baseClone = base.clone();
-      return baseClone;
+      return base.clone();
     }
     final List<UndefineArgument> unduplicated = new ArrayList<>(base.length);
     for (final UndefineArgument current : base) {

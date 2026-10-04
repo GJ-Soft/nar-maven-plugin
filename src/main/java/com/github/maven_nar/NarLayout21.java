@@ -34,8 +34,6 @@ import org.apache.maven.project.MavenProjectHelper;
 import org.codehaus.plexus.archiver.manager.ArchiverManager;
 import org.codehaus.plexus.util.FileUtils;
 
-import com.github.maven_nar.cpptasks.CUtil;
-import com.google.inject.spi.Dependency;
 
 /**
  * Layout which expands a nar file into:
@@ -165,9 +163,8 @@ public class NarLayout21 extends AbstractNarLayout {
 
   @Override
   public File getNarUnpackDirectory(final File baseUnpackDirectory, final File narFile) {
-    final File dir = new File(baseUnpackDirectory, FileUtils.basename(narFile.getPath(), "."
+    return new File(baseUnpackDirectory, FileUtils.basename(narFile.getPath(), "."
         + NarConstants.NAR_EXTENSION));
-    return dir;
   }
 
   @Override

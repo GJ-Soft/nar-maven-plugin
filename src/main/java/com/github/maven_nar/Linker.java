@@ -49,9 +49,13 @@ import com.github.maven_nar.cpptasks.types.SystemLibrarySet;
  */
 public class Linker {
 
+	/** Option that makes the linkers print their version. */
+	private static final String VERSION_OPTION = "--version";
+
 	/**
 	 * The Linker Some choices are: "msvc", "g++", "CC", "icpc", ... Default is
-	 * Architecture-OS-Linker specific: FIXME: table missing
+	 * Architecture-OS specific: the &lt;arch&gt;.&lt;os&gt;.linker entry of
+	 * aol.properties.
 	 */
 	@Parameter
 	private String name;
@@ -95,8 +99,8 @@ public class Linker {
 	private boolean skipDepLink = false;
 
 	/**
-	 * Options for the linker Defaults to Architecture-OS-Linker specific values.
-	 * FIXME table missing
+	 * Options for the linker. Defaults to the Architecture-OS-Linker specific
+	 * &lt;aol&gt;.linker.options entry of aol.properties, if there is one.
 	 */
 	@Parameter
 	private List<String> options;
@@ -387,9 +391,8 @@ public class Linker {
 
 				if (this.libs != null) {
 
-					for (final Object lib1 : this.libs) {
+					for (final Lib lib : this.libs) {
 
-						final Lib lib = (Lib) lib1;
 						lib.addLibSet(mojo, linker, antProject);
 					}
 				}
@@ -409,9 +412,8 @@ public class Linker {
 
 				if (this.sysLibs != null) {
 
-					for (final Object sysLib1 : this.sysLibs) {
+					for (final SysLib sysLib : this.sysLibs) {
 
-						final SysLib sysLib = (SysLib) sysLib1;
 						linker.addSyslibset(sysLib.getSysLibSet(antProject));
 					}
 				}
@@ -466,6 +468,21 @@ public class Linker {
 		return linker;
 	}
 
+	/**
+	 * A version number such as 14.2.0. The dots are escaped: unescaped, they matched
+	 * any character, and the "x86_64" at the start of a prefixed toolchain
+	 * ("x86_64-w64-mingw32-gcc (GCC) 14.2.0") gave "86_64" as the version.
+	 */
+	private static final Pattern VERSION_PATTERN = Pattern.compile("\\d++\\.\\d++(?:\\.\\d++)*+");
+
+	/**
+	 * The first version number in the output of 'compiler --version', or null.
+	 */
+	static String findVersion(final String versionOutput) {
+		final Matcher m = VERSION_PATTERN.matcher(versionOutput);
+		return m.find() ? m.group() : null;
+	}
+
 	public final String getVersion() throws MojoFailureException, MojoExecutionException {
 		return getVersion(new NarCompileMojo());
 	}
@@ -487,31 +504,15 @@ public class Linker {
 		final TextStream dbg = new StringTextStream();
 
 		if (this.name.equals("g++") || this.name.equals("gcc")) {
-			NarUtil.runCommand(linkerPrefix + "gcc", new String[] { "--version" }, null, null, out, err, dbg, this.log);
-			final Pattern p = Pattern.compile("[0-9]+.[0-9]+(.[0-9]+)*");
-			final Matcher m = p.matcher(out.toString());
-			if (m.find()) {
-				version = m.group(0);
-			}
+			NarUtil.runCommand(linkerPrefix + "gcc", new String[] { VERSION_OPTION }, null, null, out, err, dbg, this.log);
+			version = findVersion(out.toString());
 		} else if (name.equals("clang") || name.equals("clang++")) {
-			NarUtil.runCommand("clang", new String[] { "--version" }, null, null, out, err, dbg, log);
-			final Pattern p = Pattern.compile("[0-9]+.[0-9]+(.[0-9]+)*");
-			final Matcher m = p.matcher(out.toString());
-			if (m.find()) {
-				version = m.group(0);
-			}
+			NarUtil.runCommand("clang", new String[] { VERSION_OPTION }, null, null, out, err, dbg, log);
+			version = findVersion(out.toString());
 		} else {
-			// if (!linkerPrefix.isEmpty()) {
-			NarUtil.runCommand(linkerPrefix + this.name, new String[] { "--version" }, null, null, out, err, dbg,
+			NarUtil.runCommand(linkerPrefix + this.name, new String[] { VERSION_OPTION }, null, null, out, err, dbg,
 					this.log);
-			final Pattern p = Pattern.compile("[0-9]+.[0-9]+(.[0-9]+)*");
-			final Matcher m = p.matcher(out.toString());
-			if (m.find()) {
-				version = m.group(0);
-			}
-//      } else {
-//        throw new MojoFailureException("Cannot find version number for linker '" + this.name + "'");
-//      }
+			version = findVersion(out.toString());
 		}
 
 		if (version == null) {

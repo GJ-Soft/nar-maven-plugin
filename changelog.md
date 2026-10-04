@@ -85,6 +85,28 @@ This project is an update to Java 21 from version 3.10.1 as it was on 17/04/2020
   `pushDepsToLowestOrder`. `AbstractDependencyMojo` got a `session` field in the
   move to Maven 3.9 while `NarCompileMojo` kept its own of the same name, and Maven
   only injected the one of the subclass.
+- `AbstractDependencyMojo` declared `session` again, hiding the one of
+  `GjsAbstractMojo`, which was left null. It now uses the inherited one.
+- Files left open: `nar.properties` when reading and writing it (on Windows an
+  open file stays locked), the gcc specs file when reading it, and the
+  dependency and history tables and the linker response file if writing them
+  failed half way.
+- A dependency missing from the local repository, or without NAR properties,
+  ended in a `NullPointerException` while collecting the attached NARs; it is now
+  an error that names it.
+- The linker version was read with unescaped dots, so with a prefixed toolchain
+  ( `x86_64-w64-mingw32-gcc` ) it came out as `86_64`. It was only logged.
+- An interrupted thread lost its interrupted state while running a command,
+  gathering its output or retrying to delete a directory.
+- The old NAR is deleted with `Files.deleteIfExists`, which fails if it cannot
+  remove it, instead of archiving over it; and copying a directory fails if an
+  executable file cannot be made executable at the destination.
+- The compilation progress thread could miss its stop flag, which was not
+  `volatile`.
+- Dead code: the exit code checks after `chmod`, `ln` and `ranlib` (the command
+  already throws), a comparison of an `AOL` with a `String` that was always
+  false, and a `remove` that removed nothing in `directDepsOnly`, which only warns
+  about the stray dependencies.
 
 ### Removed
 - Options that had no use with the GNU toolchains, the only ones this plugin
@@ -109,5 +131,17 @@ This project is an update to Java 21 from version 3.10.1 as it was on 17/04/2020
   plugin and an old copy of `narDependencies.apt`.
 
 ### Changed
+- Code clean-up after a SonarCloud analysis, with no change in behaviour: unused
+  imports and private fields out, modifiers in the order of the language
+  specification, `isEmpty()` instead of comparing lengths, for-each loops over
+  the element type instead of `Object` and a cast, constants for repeated
+  literals, and a comment in every empty method or `catch` saying why it is
+  empty.
+- Commented-out code removed, and every `FIXME` and `TODO` dealt with: the gaps
+  in the parameter documentation filled in (the defaults come from
+  `aol.properties`), the notes about workarounds rewritten as explanations, and
+  the pending work listed in the README, under *Known limitations*.
+- A project `aol.properties` that exists but cannot be read now fails the build;
+  it used to be ignored, and the build went on with the defaults.
 - The copy of `aol.properties` in the site page `aol.apt` was out of date; it is
   now the current file.

@@ -25,7 +25,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
@@ -224,8 +224,6 @@ public final class TargetHistoryTable {
       // timestamp comperation (to compare with
       // System.currentTimeMillis() don't work on Unix, because it
       // maesure timestamps only in seconds).
-      // try {
-
       try {
         final File temp = File.createTempFile("history.xml", Long.toString(System.nanoTime()), outputDir);
         try (FileWriter writer = new FileWriter(temp)) {
@@ -257,61 +255,49 @@ public final class TargetHistoryTable {
           configs.put(configId, configId);
         }
       }
-      final FileOutputStream outStream = new FileOutputStream(this.historyFile);
-      OutputStreamWriter outWriter;
-      //
-      // early VM's don't support UTF-8 encoding
-      // try and fallback to the default encoding
-      // otherwise
-      String encodingName = "UTF-8";
-      try {
-        outWriter = new OutputStreamWriter(outStream, "UTF-8");
-      } catch (final UnsupportedEncodingException ex) {
-        outWriter = new OutputStreamWriter(outStream);
-        encodingName = outWriter.getEncoding();
-      }
-      final BufferedWriter writer = new BufferedWriter(outWriter);
-      writer.write("<?xml version='1.0' encoding='");
-      writer.write(encodingName);
-      writer.write("'?>\n");
-      writer.write("<history>\n");
-      final StringBuilder buf = new StringBuilder(200);
-      final Enumeration<String> configEnum = configs.elements();
-      while (configEnum.hasMoreElements()) {
-        final String configId = configEnum.nextElement();
-        buf.setLength(0);
-        buf.append("   <processor signature=\"");
-        buf.append(CUtil.xmlAttribEncode(configId));
-        buf.append("\">\n");
-        writer.write(buf.toString());
-        elements = this.history.elements();
-        while (elements.hasMoreElements()) {
-          final TargetHistory targetHistory = elements.nextElement();
-          if (targetHistory.getProcessorConfiguration().equals(configId)) {
-            buf.setLength(0);
-            buf.append("      <target file=\"");
-            buf.append(CUtil.xmlAttribEncode(targetHistory.getOutput()));
-            buf.append("\" lastModified=\"");
-            buf.append(Long.toHexString(targetHistory.getOutputLastModified()));
-            buf.append("\">\n");
-            writer.write(buf.toString());
-            final SourceHistory[] sourceHistories = targetHistory.getSources();
-            for (final SourceHistory sourceHistorie : sourceHistories) {
+      // UTF-8 is guaranteed on every JVM since Java 7, so there is no fallback
+      // to the default code page any more.
+      try (BufferedWriter writer = new BufferedWriter(
+          new OutputStreamWriter(new FileOutputStream(this.historyFile), StandardCharsets.UTF_8))) {
+        writer.write("<?xml version='1.0' encoding='UTF-8'?>\n");
+        writer.write("<history>\n");
+        final StringBuilder buf = new StringBuilder(200);
+        final Enumeration<String> configEnum = configs.elements();
+        while (configEnum.hasMoreElements()) {
+          final String configId = configEnum.nextElement();
+          buf.setLength(0);
+          buf.append("   <processor signature=\"");
+          buf.append(CUtil.xmlAttribEncode(configId));
+          buf.append("\">\n");
+          writer.write(buf.toString());
+          elements = this.history.elements();
+          while (elements.hasMoreElements()) {
+            final TargetHistory targetHistory = elements.nextElement();
+            if (targetHistory.getProcessorConfiguration().equals(configId)) {
               buf.setLength(0);
-              buf.append("         <source file=\"");
-              buf.append(CUtil.xmlAttribEncode(sourceHistorie.getRelativePath()));
+              buf.append("      <target file=\"");
+              buf.append(CUtil.xmlAttribEncode(targetHistory.getOutput()));
               buf.append("\" lastModified=\"");
-              buf.append(Long.toHexString(sourceHistorie.getLastModified()));
-              buf.append("\"/>\n");
+              buf.append(Long.toHexString(targetHistory.getOutputLastModified()));
+              buf.append("\">\n");
               writer.write(buf.toString());
+              final SourceHistory[] sourceHistories = targetHistory.getSources();
+              for (final SourceHistory sourceHistorie : sourceHistories) {
+                buf.setLength(0);
+                buf.append("         <source file=\"");
+                buf.append(CUtil.xmlAttribEncode(sourceHistorie.getRelativePath()));
+                buf.append("\" lastModified=\"");
+                buf.append(Long.toHexString(sourceHistorie.getLastModified()));
+                buf.append("\"/>\n");
+                writer.write(buf.toString());
+              }
+              writer.write("      </target>\n");
             }
-            writer.write("      </target>\n");
           }
+          writer.write("   </processor>\n");
         }
-        writer.write("   </processor>\n");
+        writer.write("</history>\n");
       }
-      writer.write("</history>\n");
-      writer.close();
       this.dirty = false;
     }
   }

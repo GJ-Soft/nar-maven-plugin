@@ -24,7 +24,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
@@ -193,10 +193,6 @@ public final class DependencyTable {
 
     @Override
     public boolean preview(final DependencyInfo parent, final DependencyInfo[] children) {
-      // BEGINFREEHEP
-      // int withCompositeTimes = 0;
-      // long parentCompositeLastModified = parent.getSourceLastModified();
-      // ENDFREEHEP
       for (final DependencyInfo element : children) {
         if (element != null) {
           //
@@ -204,23 +200,8 @@ public final class DependencyTable {
           // rebuild
           //
           visit(element);
-          // BEGINFREEHEP
-          // long childCompositeLastModified = children[i]
-          // .getCompositeLastModified();
-          // if (childCompositeLastModified != Long.MIN_VALUE) {
-          // withCompositeTimes++;
-          // if (childCompositeLastModified > parentCompositeLastModified) {
-          // parentCompositeLastModified = childCompositeLastModified;
-          // }
-          // }
-          // ENDFREEHEP
         }
       }
-      // BEGINFREEHEP
-      // if (withCompositeTimes == children.length) {
-      // parent.setCompositeLastModified(parentCompositeLastModified);
-      // }
-      // ENDFREEHEP
       //
       // may have been changed by an earlier call to visit()
       //
@@ -237,20 +218,13 @@ public final class DependencyTable {
     @Override
     public boolean visit(final DependencyInfo dependInfo) {
       if (this.noNeedToRebuild && CUtil.isSignificantlyAfter(dependInfo.getSourceLastModified(), this.outputLastModified)) {
-          // FREEHEP
-          // ||
-          // CUtil.isSignificantlyAfter(dependInfo.getCompositeLastModified(),
-          // outputLastModified)) {
           this.noNeedToRebuild = false;
       }
       //
       // only need to process the children if
       // it has not yet been determined whether
-      // we need to rebuild and the composite modified time
-      // has not been determined for this file
+      // we need to rebuild
       return this.noNeedToRebuild;
-      // FREEHEP
-      // && dependInfo.getCompositeLastModified() == Long.MIN_VALUE;
     }
   }
 
@@ -302,32 +276,17 @@ public final class DependencyTable {
       //
       // write dependency file
       //
-      try {
-        final FileOutputStream outStream = new FileOutputStream(this.dependenciesFile);
-        OutputStreamWriter streamWriter;
-        //
-        // Early VM's may not have UTF-8 support
-        // fallback to default code page which
-        // "should" be okay unless there are
-        // non ASCII file names
-        String encodingName = "UTF-8";
-        try {
-          streamWriter = new OutputStreamWriter(outStream, "UTF-8");
-        } catch (final UnsupportedEncodingException ex) {
-          streamWriter = new OutputStreamWriter(outStream);
-          encodingName = streamWriter.getEncoding();
-        }
-        final BufferedWriter writer = new BufferedWriter(streamWriter);
-        writer.write("<?xml version='1.0' encoding='");
-        writer.write(encodingName);
-        writer.write("'?>\n");
+      // UTF-8 is guaranteed on every JVM since Java 7, so there is no fallback
+      // to the default code page any more.
+      try (BufferedWriter writer = new BufferedWriter(
+          new OutputStreamWriter(new FileOutputStream(this.dependenciesFile), StandardCharsets.UTF_8))) {
+        writer.write("<?xml version='1.0' encoding='UTF-8'?>\n");
         writer.write("<dependencies>\n");
         final StringBuilder buf = new StringBuilder();
         for (final String includePath : includePaths) {
           writeIncludePathDependencies(includePath, writer, buf);
         }
         writer.write("</dependencies>\n");
-        writer.close();
         this.dirty = false;
       } catch (final IOException ex) {
         task.log("Error writing " + this.dependenciesFile.toString() + ":" + ex.toString());
@@ -399,7 +358,6 @@ public final class DependencyTable {
     final CompilerConfiguration compiler = (CompilerConfiguration) target.getConfiguration();
     final String includePathIdentifier = compiler.getIncludePathIdentifier();
     final File[] sources = target.getSources();
-    final DependencyInfo[] dependInfos = new DependencyInfo[sources.length];
     final long outputLastModified = target.getOutput().lastModified();
     //
     // try to solve problem using existing dependency info
@@ -485,30 +443,6 @@ public final class DependencyTable {
     // visit the referenced include and sysInclude dependencies
     //
     if (visitor.visit(dependInfo)) {
-      // BEGINFREEHEP
-      // //
-      // // find first null entry on stack
-      // //
-      // int stackPosition = -1;
-      // for (int i = 0; i < stack.length; i++) {
-      // if (stack[i] == null) {
-      // stackPosition = i;
-      // stack[i] = dependInfo;
-      // break;
-      // } else {
-      // //
-      // // if we have appeared early in the calling history
-      // // then we didn't exceed the criteria
-      // if (stack[i] == dependInfo) {
-      // return;
-      // }
-      // }
-      // }
-      // if (stackPosition == -1) {
-      // visitor.stackExhausted();
-      // return;
-      // }
-      // ENDFREEHEP
       //
       // locate dependency infos
       //
@@ -561,8 +495,6 @@ public final class DependencyTable {
           }
         }
       }
-      // FREEHEP
-      // stack[stackPosition] = null;
     }
   }
 

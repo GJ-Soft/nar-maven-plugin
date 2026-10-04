@@ -38,6 +38,9 @@ import org.codehaus.plexus.util.FileUtils;
 @Mojo(name = "nar-gnu-configure", requiresProject = true, defaultPhase = LifecyclePhase.PROCESS_SOURCES)
 public class NarGnuConfigureMojo extends AbstractGnuMojo {
 
+	/** Start of the message logged before each GNU tool. */
+	private static final String RUNNING_GNU = "Running GNU ";
+
 	private static final String AUTOGEN = "autogen.sh";
 
 	private static final String BUILDCONF = "buildconf";
@@ -104,6 +107,7 @@ public class NarGnuConfigureMojo extends AbstractGnuMojo {
 	private String gnuBuildconfArgs;
 
 	public NarGnuConfigureMojo() {
+		// Nothing to initialize: the fields keep their default values.
 	}
 
 	@Override
@@ -133,10 +137,10 @@ public class NarGnuConfigureMojo extends AbstractGnuMojo {
 					final File autogen = new File(targetDir, AUTOGEN);
 					final File buildconf = new File(targetDir, BUILDCONF);
 					if (autogen.exists()) {
-						getLog().info("Running GNU " + AUTOGEN);
+						getLog().info(RUNNING_GNU + AUTOGEN);
 						runAutogen(autogen, targetDir, null);
 					} else if (buildconf.exists()) {
-						getLog().info("Running GNU " + BUILDCONF);
+						getLog().info(RUNNING_GNU + BUILDCONF);
 						String gnuBuildconfArgsArray[] = null;
 						if (this.gnuBuildconfArgs != null) {
 							gnuBuildconfArgsArray = this.gnuBuildconfArgs.split("\\s");
@@ -150,7 +154,7 @@ public class NarGnuConfigureMojo extends AbstractGnuMojo {
 
 			final File configure = new File(targetDir, CONFIGURE);
 			if (!this.gnuConfigureSkip && configure.exists()) {
-				getLog().info("Running GNU " + CONFIGURE);
+				getLog().info(RUNNING_GNU + CONFIGURE);
 
 				NarUtil.makeExecutable(configure, getLog());
 				String[] args = null;

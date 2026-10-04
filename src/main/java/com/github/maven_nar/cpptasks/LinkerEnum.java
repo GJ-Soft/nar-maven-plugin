@@ -34,7 +34,7 @@ import com.github.maven_nar.cpptasks.gcc.LdLinker;
  * 
  */
 public class LinkerEnum extends EnumeratedAttribute {
-	private final static ProcessorEnumValue[] linkers = new ProcessorEnumValue[] {
+	private static final ProcessorEnumValue[] linkers = new ProcessorEnumValue[] {
 			new ProcessorEnumValue("gcc", GccLinker.getInstance()),
 			new ProcessorEnumValue("g++", GppLinker.getInstance()),
 			new ProcessorEnumValue("clang", GccLinker.getCLangInstance()),

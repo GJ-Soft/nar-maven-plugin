@@ -169,10 +169,9 @@ public class Library implements Executable {
 		return this.run;
 	}
 
-	// FIXME incomplete
+	// Only the type: enough for the log messages.
 	@Override
 	public final String toString() {
-		final String sb = "Library: " + "type: " + getType();
-		return sb;
+		return "Library: " + "type: " + getType();
 	}
 }

@@ -177,8 +177,7 @@ public class NarTestCompileMojo extends AbstractCompileMojo {
 
 		// add dependency include paths, from the normal unpack directory and failing
 		// that from the test one
-		for (final Object depLib1 : dependencies) {
-			final NarArtifact artifact = (NarArtifact) depLib1;
+		for (final NarArtifact artifact : dependencies) {
 			final File include = getDependencyIncludeDirectory(artifact, getUnpackDirectory(),
 					getTestUnpackDirectory());
 			if (include != null) {
@@ -200,21 +199,8 @@ public class NarTestCompileMojo extends AbstractCompileMojo {
 		final File libDir = getLayout().getLibDirectory(getTargetDirectory(), getMavenProject().getArtifactId(),
 				getMavenProject().getVersion(), getAOL().toString(), linkType);
 
-		// copy shared library
-		// FIXME why do we do this ?
-		/*
-		 * Removed in alpha-10 if (test.getLink().equals(Library.SHARED)) { try { //
-		 * defaults are Unix String libPrefix = NarUtil.getDefaults().getProperty(
-		 * getAOLKey() + "shared.prefix", "lib"); String libExt =
-		 * NarUtil.getDefaults().getProperty( getAOLKey() + "shared.extension", "so");
-		 * File copyDir = new File(getTargetDirectory(), (getOS().equals( "Windows") ?
-		 * "bin" : "lib") + "/" + getAOL() + "/" + test.getLink());
-		 * FileUtils.copyFileToDirectory(new File(libDir, libPrefix + libName + "." +
-		 * libExt), copyDir); if (!getOS().equals(OS.WINDOWS)) { libDir = copyDir; } }
-		 * catch (IOException e) { throw new MojoExecutionException(
-		 * "NAR: Could not copy shared library", e); } }
-		 */
-		// FIXME what about copying the other shared libs?
+		// Shared libraries are not copied for the tests (it was done until
+		// alpha-10): nar-test puts their directories in the library path instead.
 
 		// add include of this package
 		if (includeDir.exists()) {
@@ -228,8 +214,7 @@ public class NarTestCompileMojo extends AbstractCompileMojo {
 			final LibrarySet libSet = new LibrarySet();
 			libSet.setProject(antProject);
 
-			// String libs = getNarInfo().getLibs( getAOL() );
-			// using getNarInfo().getLibs( getAOL() ); forces to execute the goal
+			// Not getNarInfo().getLibs( getAOL() ): it forces to execute the goal
 			// nar-prepare-package prior to
 			// nar-testCompile in order to set the "output" property in narInfo with
 			// the call :
@@ -286,15 +271,13 @@ public class NarTestCompileMojo extends AbstractCompileMojo {
 		Set<SysLib> dependencySysLibs = new HashSet<SysLib>();
 		final Set<String> seenExternalLibs = getOwnExternalLibKeys();
 
-		for (final Object depLib : dependencies) {
-			final NarArtifact dependency = (NarArtifact) depLib;
+		for (final NarArtifact dependency : dependencies) {
 
-			// FIXME no handling of "local"
+			// Known limitation: a "local" binding is not handled.
 
 			final String binding = getBinding(test, dependency);
 			getLog().debug("Using Binding: " + binding);
-			AOL aol = getAOL();
-			aol = dependency.getNarInfo().getAOL(getAOL());
+			final AOL aol = dependency.getNarInfo().getAOL(getAOL());
 			getLog().debug("Using Library AOL: " + aol.toString());
 
 			// We dont link against the following library types :
@@ -344,7 +327,7 @@ public class NarTestCompileMojo extends AbstractCompileMojo {
 					// overlay aol nar properties file on top of the default one.
 					aolNarInfo.mergeProperties(dependency.getNarInfo().getInfo());
 
-					// FIXME, no way to override
+					// Known limitation: there is no way to override this at this stage.
 					final String libs = aolNarInfo.getLibs(getAOL());
 					if (libs != null && !libs.isEmpty()) {
 						getLog().debug("Using LIBS = " + libs);
@@ -356,8 +339,7 @@ public class NarTestCompileMojo extends AbstractCompileMojo {
 					getLog().debug("Library Directory " + dir + " does NOT exist.");
 				}
 
-				// FIXME, look again at this, for multiple dependencies we may need to
-				// remove duplicates
+				// Known limitation: with several dependencies the options may be repeated.
 				final String options = dependency.getNarInfo().getOptions(getAOL());
 				if (options != null && !options.isEmpty()) {
 					getLog().debug("Using OPTIONS = " + options);
@@ -454,8 +436,7 @@ public class NarTestCompileMojo extends AbstractCompileMojo {
 			// make sure destination is there
 			getTestTargetDirectory().mkdirs();
 
-			for (final Object o : getTests()) {
-				final Test test = (Test) o;
+			for (final Test test : getTests()) {
 				if (!test.skipCheckFile() && !hasTestSources(test)) {
 					getLog().warn("Skipping test '" + test.getName() + "', no source file named after it was found"
 							+ " under the test source directories, so there is nothing to build it from."

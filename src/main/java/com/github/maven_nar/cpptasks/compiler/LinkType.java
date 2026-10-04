@@ -45,6 +45,7 @@ public class LinkType {
    * 
    */
   public LinkType() {
+    // Nothing to initialize: the fields keep their default values.
   }
 
   /**

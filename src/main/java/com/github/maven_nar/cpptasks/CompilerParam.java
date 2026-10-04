@@ -29,6 +29,7 @@ package com.github.maven_nar.cpptasks;
  ******************************************************************************/
 public class CompilerParam extends ProcessorParam {
   public CompilerParam() {
+    // Nothing to initialize: the fields keep their default values.
   }
 
   public void execute() throws org.apache.tools.ant.BuildException {

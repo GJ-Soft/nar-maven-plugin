@@ -109,7 +109,7 @@ public abstract class AbstractLinker extends AbstractProcessor implements Linker
     return this;
   }
 
-  abstract protected LinkerConfiguration createConfiguration(CCTask task, LinkType linkType,
+  protected abstract LinkerConfiguration createConfiguration(CCTask task, LinkType linkType,
       ProcessorDef[] baseConfigs, LinkerDef specificConfig, TargetDef targetPlatform, VersionInfo versionInfo);
 
   @Override

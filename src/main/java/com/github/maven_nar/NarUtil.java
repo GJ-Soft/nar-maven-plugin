@@ -86,8 +86,8 @@ public final class NarUtil {
 			+ "**/.svn,**/.svn/**,**/.DS_Store";
 
 	public static String addLibraryPathToEnv(final String path, final Map<String, String> environment, final String os) {
-		String pathName = null;
-		char separator = ' ';
+		final String pathName;
+		final char separator;
 		switch (os) {
 		case OS.WINDOWS:
 			pathName = "PATH";
@@ -146,8 +146,11 @@ public final class NarUtil {
 						StandardCopyOption.COPY_ATTRIBUTES);
 				copied++;
 
-				// copy executable bit
-				destination.setExecutable(file.canExecute(), false);
+				// copy executable bit. Only losing it matters: clearing it always fails on
+				// Windows, where files cannot be made non-executable.
+				if (file.canExecute() && !destination.setExecutable(true, false)) {
+					throw new IOException("Could not make executable: " + destination.getAbsolutePath());
+				}
 			} else if (file.isDirectory()) {
 				Files.createDirectories(destination.toPath());
 				copied += copyDirectoryStructure(file, destination, includes, excludes);
@@ -177,15 +180,12 @@ public final class NarUtil {
 				}
 			}
 			if (retries > 0) {
-//      getLog().info("Could not delete directory: " + dir + " : Retrying");
 				try {
 					Thread.sleep(200);
-				} catch (InterruptedException e) {
+				} catch (final InterruptedException e) {
+					Thread.currentThread().interrupt();
+					throw new MojoExecutionException("Interrupted while retrying to delete directory: " + dir, e);
 				}
-				// TODO: if( windows and interactive ) prompt for retry?
-				// @Component(role=org.codehaus.plexus.components.interactivity.Prompter.class,
-				// hint="archetype")
-				// public class ArchetypePrompter
 			}
 		}
 	}
@@ -216,14 +216,6 @@ public final class NarUtil {
 		});
 	}
 
-	// FIXME, should go to AOL.
-	/*
-	 * NOT USED ? public static String getAOLKey( String architecture, String os,
-	 * Linker linker ) throws MojoFailureException, MojoExecutionException { //
-	 * construct AOL key prefix return getArchitecture( architecture ) + "." +
-	 * getOS( os ) + "." + getLinkerName( architecture, os, linker ) + "."; }
-	 */
-
 	public static AOL getAOL(final MavenProject project, final String architecture, final String os,
 			final Linker linker, final String aol, final Log log) throws MojoFailureException, MojoExecutionException {
 
@@ -246,7 +238,7 @@ public final class NarUtil {
 	}
 
 	public static String getAOLKey(final String aol) {
-		// FIXME, this may not always work correctly
+		// Every '-' becomes '.': a part with a '-' of its own would be split.
 		return replace("-", ".", aol);
 	}
 
@@ -344,11 +336,8 @@ public final class NarUtil {
 		}
 		if (file.isFile() && file.canRead() && file.canWrite() && !file.isHidden()) {
 			// chmod +x file
-			final int result = runCommand("chmod", new String[] { "+x", file.getPath() }, null, null, log);
-			if (result != 0) {
-				throw new MojoExecutionException(
-						"Failed to execute 'chmod +x " + file.getPath() + "'" + " return code: \'" + result + "\'.");
-			}
+			// runCommand throws on a non zero exit code.
+			runCommand("chmod", new String[] { "+x", file.getPath() }, null, null, log);
 		}
 	}
 
@@ -367,17 +356,13 @@ public final class NarUtil {
 			}
 		}
 		if (file.isFile() && file.canRead() && file.canWrite() && !file.isHidden()
-				&& file.getName().matches(".*\\.so(\\.\\d+)+$")) {
+				&& file.getName().matches(".*\\.so(?:\\.\\d++)++")) {
 			final File sofile = new File(file.getParent(),
 					file.getName().substring(0, file.getName().indexOf(".so") + 3));
 			if (!sofile.exists()) {
 				// ln -s lib.so.xx lib.so
-				final int result = runCommand("ln", new String[] { "-s", file.getName(), sofile.getPath() }, null, null,
-						log);
-				if (result != 0) {
-					throw new MojoExecutionException("Failed to execute 'ln -s " + file.getName() + " "
-							+ sofile.getPath() + "'" + " return code: \'" + result + "\'.");
-				}
+				// runCommand throws on a non zero exit code.
+				runCommand("ln", new String[] { "-s", file.getName(), sofile.getPath() }, null, null, log);
 			}
 		}
 	}
@@ -483,6 +468,7 @@ public final class NarUtil {
 			outputGobbler.join(timeout);
 			if (exitValue != 0 ^ expectFailure) {
 				if (log == null) {
+					// Called without a Maven log: the standard error is the only place left.
 					System.err.println(err.toString());
 					System.err.println(out.toString());
 					System.err.println(dbg.toString());
@@ -496,6 +482,9 @@ public final class NarUtil {
 			return exitValue;
 		} catch (final MojoExecutionException e) {
 			throw e;
+		} catch (final InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new MojoExecutionException("Interrupted while running " + cmdLine, e);
 		} catch (final Exception e) {
 			throw new MojoExecutionException("Could not launch " + cmdLine, e);
 		}
@@ -517,11 +506,8 @@ public final class NarUtil {
 		}
 		if (file.isFile() && file.canWrite() && !file.isHidden() && file.getName().endsWith(".a")) {
 			// ranlib file
-			final int result = runCommand("ranlib", new String[] { file.getPath() }, null, null, log);
-			if (result != 0) {
-				throw new MojoExecutionException(
-						"Failed to execute 'ranlib " + file.getPath() + "'" + " return code: \'" + result + "\'.");
-			}
+			// runCommand throws on a non zero exit code.
+			runCommand("ranlib", new String[] { file.getPath() }, null, null, log);
 		}
 	}
 

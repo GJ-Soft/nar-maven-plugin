@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -148,14 +147,6 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 	 */
 	@Parameter(defaultValue = "${repositorySystemSession}")
 	private RepositorySystemSession repoSession;
-
-	/**
-	 * The current Maven session, used to obtain a
-	 * {@link org.apache.maven.project.ProjectBuildingRequest} for the dependency
-	 * graph builder.
-	 */
-	@Parameter(defaultValue = "${session}", readonly = true, required = true)
-	private org.apache.maven.execution.MavenSession session;
 
 	/**
 	 * The List of repositories queried by the verbose dependency graph collection
@@ -301,14 +292,13 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 				// only ones linked.
 				Set<String> directDepsSet = getDirectDepsSet(verboseTreeRootNode);
 
-				// Trim all deps from verboseDepList that are not in the directDepsSet, warn if
-				// they are found.
-				Iterator<String> it = reducedDepSet.iterator();
-				while (it.hasNext()) {
-					String dep = it.next();
+				// Warn about the deps that are not in the directDepsSet. They are not taken
+				// out: depLevelOrderStr is already built at this point, and reducedDepSet is
+				// not used afterwards, so the warning is the only effect. (It used to call
+				// reducedDepSet.remove(it), which removed nothing.)
+				for (final String dep : reducedDepSet) {
 					if (!directDepsSet.contains(dep)) {
 						this.getLog().warn("Stray dependency: " + dep + " found. This may cause build failures.");
-						reducedDepSet.remove(it);
 					}
 				}
 			}
@@ -377,7 +367,6 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 
 		// Create list that stores current breadth
 		List<DependencyNode> nodeChildList = rootNode.getChildren();
-		// LevelOrderList.add(rootNode);
 
 		while (!nodeChildList.isEmpty()) {
 			nodeChildList = levelTraverseTreeList(nodeChildList, aggDepNodeList);
@@ -582,9 +571,9 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 			if ("NAR".equalsIgnoreCase(getMavenProject().getPackaging())) {
 				final String bindings[] = getBindings(libraries, dependency);
 
-				// TODO: dependency.getFile(); find out what the stored pom says
-				// about this - what nars should exist, what layout are they
-				// using...
+				// Known limitation: the bindings come from the NAR properties; what the
+				// stored pom of the dependency says (which NARs exist, which layout) is
+				// not checked.
 				for (final String binding : bindings) {
 					artifactList.addAll(getAttachedNarArtifacts(dependency, /* library. */
 							getAOL(), binding));
@@ -625,8 +614,7 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 			throws MojoFailureException, MojoExecutionException {
 		getLog().info("Getting Nar dependencies");
 		final List<NarArtifact> narArtifacts = getNarArtifacts();
-		final List<AttachedNarArtifact> attachedNarArtifacts = getAllAttachedNarArtifacts(narArtifacts, libraries);
-		return attachedNarArtifacts;
+		return getAllAttachedNarArtifacts(narArtifacts, libraries);
 	}
 
 	private List<AttachedNarArtifact> getAttachedNarArtifacts(final NarArtifact dependency, final AOL aol,
@@ -635,7 +623,7 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 		final List<AttachedNarArtifact> artifactList = new ArrayList<>();
 		final NarInfo narInfo = dependency.getNarInfo();
 		final String[] nars = narInfo.getAttachedNars(aol, type);
-		// FIXME Move this to NarInfo....
+		// Parsing of the attached NAR list (also in NarManager); it would belong in NarInfo.
 		if (nars != null) {
 			for (final String nar2 : nars) {
 				getLog().debug("    Checking: " + nar2);
@@ -675,8 +663,7 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 
 		Set<String> bindings = new HashSet<>();
 		if (libraries != null) {
-			for (Object library : libraries) {
-				Executable exec = (Executable) library;
+			for (final Executable exec : libraries) {
 				// how does this project specify the dependency is used
 				String binding = exec.getBinding(dependency);
 				if (null != binding)
@@ -718,14 +705,6 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 		return binding;
 	}
 
-	/**
-	 * The plugin remote repositories declared in the pom.
-	 * 
-	 * @since 2.2
-	 */
-	// @Parameter(defaultValue = "${project.pluginArtifactRepositories}")
-	// private List remotePluginRepositories;
-
 	protected final LocalRepository getLocalRepository() {
 		return this.repoSession.getLocalRepository();
 	}
@@ -758,8 +737,7 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 			throw new MojoExecutionException(e.getMessage(), e);
 		}
 
-		for (final Object element : artifacts) {
-			final Artifact dependency = (Artifact) element;
+		for (final Artifact dependency : artifacts) {
 
 			if ("nar".equalsIgnoreCase(dependency.getType())) {
 				getLog().debug("Examining artifact for NarInfo: " + dependency);
@@ -829,8 +807,9 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 	// exist in Resolver 2.x / Maven 4, so we keep the 1.9.x API here.
 	@SuppressWarnings("deprecation")
 	public final NarInfo getNarInfo(final Artifact dependency) throws MojoExecutionException {
-		// FIXME reported to maven developer list, isSnapshot changes behaviour
-		// of getBaseVersion, called in pathOf.
+		// Workaround: isSnapshot() changes what getBaseVersion() returns, which
+		// pathOf uses, so it has to be called first (reported to the Maven
+		// developer list).
 		dependency.isSnapshot();
 
 		if (dependency.getFile().isDirectory()) {
@@ -896,22 +875,14 @@ public abstract class AbstractDependencyMojo extends AbstractNarMojo {
 
 		getLog().info(String.format("Unpacking %1$d dependencies to %2$s", dependencies.size(), unpackDir));
 
-		for (final Object element : dependencies) {
-			final AttachedNarArtifact dependency = (AttachedNarArtifact) element;
+		for (final AttachedNarArtifact dependency : dependencies) {
 			final File file = getNarManager().getNarFile(dependency); // dependency.getNarFile();
 			getLog().debug(String.format("Unpack %1$s (%2$s) to %3$s", dependency, file, unpackDir));
 
-			// TODO: each dependency may have it's own (earlier) version of layout -
-			// if it is unknown then we should report an error to update the nar
-			// package
-			// NarLayout layout = AbstractNarLayout.getLayout( "NarLayout21"/* TODO:
-			// dependency.getLayout() */, getLog() );
-			// we should then target the layout to match the layout for this nar which
-			// is the workspace we are in.
+			// Known limitation: the dependency is unpacked with the layout of this
+			// project. A NAR built with an older layout, or against another linker
+			// version, is not detected.
 			final NarLayout layout = getLayout();
-			// TODO: the dependency may be specified against a different linker
-			// (version)?
-			// AOL aol = dependency.getClassifier(); Trim
 			layout.unpackNar(unpackDir, this.archiverManager, file, getOS(), getLinker().getName(), getAOL(),
 					isSkipRanlib());
 		}

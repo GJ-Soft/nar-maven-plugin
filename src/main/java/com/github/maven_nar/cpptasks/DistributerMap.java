@@ -73,6 +73,7 @@ public final class DistributerMap extends DataType {
    *
    */
   public DistributerMap() {
+    // Nothing to initialize: the fields keep their default values.
   }
 
   /**

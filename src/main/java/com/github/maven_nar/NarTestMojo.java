@@ -103,9 +103,9 @@ public class NarTestMojo extends AbstractCompileMojo {
 		for (final AttachedNarArtifact dependency : dependencies) {
 			getLog().debug("Looking for dependency " + dependency);
 
-			// FIXME reported to maven developer list, isSnapshot
-			// changes behaviour
-			// of getBaseVersion, called in pathOf.
+			// Workaround: isSnapshot() changes what getBaseVersion() returns, which
+			// pathOf uses, so it has to be called first (reported to the Maven
+			// developer list).
 			dependency.isSnapshot();
 
 			final File libDirectory = getLayout().getLibDirectory(getUnpackDirectory(), dependency.getArtifactId(),
@@ -134,7 +134,7 @@ public class NarTestMojo extends AbstractCompileMojo {
 		if (!sharedPaths.isEmpty()) {
 			final StringBuilder sharedPath = new StringBuilder();
 			for (final File path : sharedPaths) {
-				if (sharedPath.length() > 0) {
+				if (!sharedPath.isEmpty()) {
 					sharedPath.append(File.pathSeparator);
 				}
 				sharedPath.append(path.getPath());
@@ -243,7 +243,7 @@ public class NarTestMojo extends AbstractCompileMojo {
 	private void runExecutable(final Library library) throws MojoExecutionException, MojoFailureException {
 		if (library.getType().equals(Library.EXECUTABLE) && library.shouldRun()) {
 			final MavenProject project = getMavenProject();
-			// FIXME NAR-90, we could make sure we get the final name from layout
+			// Known limitation (NAR-90): the file name is built here instead of asked to the layout.
 			final String extension = getOS().equals(OS.WINDOWS) ? ".exe" : "";
 			final File executable = new File(getLayout().getBinDirectory(getTargetDirectory(),
 					getMavenProject().getArtifactId(), getMavenProject().getVersion(), getAOL().toString()),

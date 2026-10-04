@@ -36,7 +36,6 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.shared.artifact.filter.collection.ScopeFilter;
 import org.apache.tools.ant.BuildException;
@@ -126,7 +125,7 @@ public class NarCompileMojo extends AbstractCompileMojo {
 		outDir.mkdirs();
 
 		// outFile
-		// FIXME NAR-90 we could get the final name from layout
+		// Known limitation (NAR-90): the file name is built here instead of asked to the layout.
 		final File outFile = new File(outDir, getOutput(getAOL(), type));
 		getLog().debug("NAR - output: '" + outFile + "'");
 		task.setOutfile(outFile);
@@ -218,9 +217,8 @@ public class NarCompileMojo extends AbstractCompileMojo {
 		}
 
 		// add dependency include paths
-		for (final Object element : dependencies) {
-			// FIXME, handle multiple includes from one NAR
-			final NarArtifact narDependency = (NarArtifact) element;
+		for (final NarArtifact narDependency : dependencies) {
+			// Known limitation: only one include directory per NAR is used.
 			final String binding = getBinding(library, narDependency);
 			getLog().debug("Looking for " + narDependency + " found binding " + binding);
 			if (!binding.equals(Library.JNI)) {
@@ -249,8 +247,8 @@ public class NarCompileMojo extends AbstractCompileMojo {
 		final Set<String> seenExternalLibs = getOwnExternalLibKeys();
 
 		// add dependency libraries
-		// FIXME: what about PLUGIN and STATIC, depending on STATIC, should we
-		// not add all libraries, see NARPLUGIN-96
+		// Known limitation (NARPLUGIN-96): PLUGIN and STATIC do not get the dependency
+		// libraries, and a STATIC dependency may need all of them.
 		final boolean skipDepLink = linkerDefinition.isSkipDepLink();
 		if (((type.equals(Library.SHARED) || type.equals(Library.JNI) || type.equals(Library.EXECUTABLE)))
 				&& !skipDepLink) {
@@ -263,8 +261,7 @@ public class NarCompileMojo extends AbstractCompileMojo {
 			if (depLibOrder != null && !depLibOrder.isEmpty()) {
 				final List<NarArtifact> tmp = new LinkedList<>();
 
-				for (final Object aDepLibOrder : depLibOrder) {
-					final String depToOrderName = (String) aDepLibOrder;
+				for (final String depToOrderName : depLibOrder) {
 
 					for (final Iterator<NarArtifact> j = depLibs.iterator(); j.hasNext();) {
 						final NarArtifact dep = j.next();
@@ -283,13 +280,12 @@ public class NarCompileMojo extends AbstractCompileMojo {
 
 			for (final NarArtifact dependency : depLibs) {
 
-				// FIXME no handling of "local"
+				// Known limitation: a "local" binding is not handled.
 
-				// FIXME, no way to override this at this stage
+				// Known limitation: there is no way to override this at this stage.
 				final String binding = dependency.getNarInfo().getBinding(getAOL(), Library.NONE);
 				getLog().debug("Using Binding: " + binding);
-				AOL aol = getAOL();
-				aol = dependency.getNarInfo().getAOL(getAOL());
+				final AOL aol = dependency.getNarInfo().getAOL(getAOL());
 				getLog().debug("Using Library AOL: " + aol.toString());
 
 				if (!binding.equals(Library.JNI) && !binding.equals(Library.NONE)
@@ -326,7 +322,7 @@ public class NarCompileMojo extends AbstractCompileMojo {
 						final LibrarySet libSet = new LibrarySet();
 						libSet.setProject(antProject);
 
-						// FIXME, no way to override
+						// Known limitation: there is no way to override this at this stage.
 						final String libs = aolNarInfo.getLibs(getAOL());
 						if (libs != null && !libs.isEmpty()) {
 							getLog().debug("Using LIBS = " + libs);
@@ -338,8 +334,7 @@ public class NarCompileMojo extends AbstractCompileMojo {
 						getLog().debug("Library Directory " + dir + " does NOT exist.");
 					}
 
-					// FIXME, look again at this, for multiple dependencies we may need to
-					// remove duplicates
+					// Known limitation: with several dependencies the options may be repeated.
 					final String options = dependency.getNarInfo().getOptions(getAOL());
 					if (options != null && !options.isEmpty()) {
 						getLog().debug("Using OPTIONS = " + options);
@@ -497,7 +492,7 @@ public class NarCompileMojo extends AbstractCompileMojo {
 		}
 
 		try {
-			// FIXME, should the include paths be defined at a higher level ?
+			// The headers are copied per language; they might be defined at a higher level.
 			copyInclude(getCpp());
 			copyInclude(getC());
 		} catch (final IOException e) {

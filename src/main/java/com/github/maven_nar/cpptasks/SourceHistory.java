@@ -46,6 +46,7 @@ public final class SourceHistory {
     try {
       return new File(baseDir, this.relativePath).getCanonicalPath();
     } catch (final IOException ex) {
+      // No canonical path: the relative path is returned as it is.
     }
     return this.relativePath;
   }

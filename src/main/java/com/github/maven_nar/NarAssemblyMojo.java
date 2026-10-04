@@ -78,13 +78,12 @@ public class NarAssemblyMojo extends AbstractDependencyMojo {
 		unpackAttachedNars(attachedNarArtifacts);
 
 		// this may make some extra copies...
-		for (final Object element : attachedNarArtifacts) {
-			final Artifact dependency = (Artifact) element;
+		for (final Artifact dependency : attachedNarArtifacts) {
 			getLog().debug("Assemble from " + dependency);
 
-			// FIXME reported to maven developer list, isSnapshot
-			// changes behaviour
-			// of getBaseVersion, called in pathOf.
+			// Workaround: isSnapshot() changes what getBaseVersion() returns, which
+			// pathOf uses, so it has to be called first (reported to the Maven
+			// developer list).
 			dependency.isSnapshot();
 
 			final File srcDir = getLayout().getNarUnpackDirectory(getUnpackDirectory(),

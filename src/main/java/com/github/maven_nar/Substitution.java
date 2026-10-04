@@ -22,7 +22,6 @@ package com.github.maven_nar;
 import java.io.File;
 import java.util.regex.Pattern;
 
-import org.apache.maven.plugins.annotations.Parameter;
 
 /**
  * Substitutes matched strings in a replay script
@@ -31,7 +30,6 @@ import org.apache.maven.plugins.annotations.Parameter;
  */
 public class Substitution {
   
-  private static final String[] types = new String[] {"string", "relativePath", "absolutePath", "regex"};
   private Pattern pattern;
   
   protected String type;

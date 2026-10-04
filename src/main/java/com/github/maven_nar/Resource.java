@@ -26,6 +26,7 @@ package com.github.maven_nar;
  */
 public class Resource extends Compiler {
   public Resource() {
+    // Nothing to initialize: the fields keep their default values.
   }
 
   @Override

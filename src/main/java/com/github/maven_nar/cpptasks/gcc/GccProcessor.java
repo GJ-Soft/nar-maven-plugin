@@ -84,11 +84,11 @@ public class GccProcessor {
   public static String[] getLibraryPatterns(final String[] libnames) {
     final StringBuilder buf = new StringBuilder();
     final String[] patterns = new String[libnames.length * 2];
-    int offset = addLibraryPatterns(libnames, buf, "lib", ".a", patterns, 0);
+    final int offset = addLibraryPatterns(libnames, buf, "lib", ".a", patterns, 0);
     if (isHPUX()) {
-      offset = addLibraryPatterns(libnames, buf, "lib", ".sl", patterns, offset);
+      addLibraryPatterns(libnames, buf, "lib", ".sl", patterns, offset);
     } else {
-      offset = addLibraryPatterns(libnames, buf, "lib", ".so", patterns, offset);
+      addLibraryPatterns(libnames, buf, "lib", ".so", patterns, offset);
     }
     return patterns;
   }
@@ -117,10 +117,9 @@ public class GccProcessor {
     } else {
       buf.append(outputFile.replace('\\', '/'));
     }
-    final String[] retval = new String[] {
+    return new String[] {
         letter, buf.toString()
     };
-    return retval;
   }
 
   /**
@@ -156,16 +155,18 @@ public class GccProcessor {
           //
           // read the lines in the file
           //
-          final BufferedReader reader = new BufferedReader(new FileReader(specsFile));
           final List<String> lines = new ArrayList<>(100);
-          String line = reader.readLine();
-          while (line != null) {
-            lines.add(line);
-            line = reader.readLine();
+          try (BufferedReader reader = new BufferedReader(new FileReader(specsFile))) {
+            String line = reader.readLine();
+            while (line != null) {
+              lines.add(line);
+              line = reader.readLine();
+            }
           }
           specs = new String[lines.size()];
           lines.toArray(specs);
         } catch (final IOException ex) {
+          // The specs file could not be read: specs stays null and becomes an empty list below.
         }
       }
     }

@@ -25,14 +25,6 @@ import java.util.List;
  * @author Curt Arnold
  */
 public final class DependencyInfo {
-  /**
-   * Last modified time of this file or anything that it depends on.
-   * 
-   * Not persisted since almost any change could invalidate it. Initialized
-   * to long.MIN_VALUE on construction.
-   */
-  // FREEHEP
-  // private long compositeLastModified;
   private final/* final */String includePathIdentifier;
   private final/* final */String[] includes;
   private final/* final */String source;
@@ -53,14 +45,6 @@ public final class DependencyInfo {
     this.sourceLastModified = sourceLastModified;
     this.includePathIdentifier = includePathIdentifier;
     this.includes = new String[includes.size()];
-    // BEGINFREEHEP
-    // if (includes.size() == 0) {
-    // compositeLastModified = sourceLastModified;
-    // } else {
-    // includes.toArray(this.includes);
-    // compositeLastModified = Long.MIN_VALUE;
-    // }
-    // ENDFREEHEP
     this.sysIncludes = new String[sysIncludes.size()];
     // FREEHEP
     includes.toArray(this.includes);
@@ -73,8 +57,7 @@ public final class DependencyInfo {
   }
 
   public String[] getIncludes() {
-    final String[] includesClone = this.includes.clone();
-    return includesClone;
+    return this.includes.clone();
   }
 
   public String getSource() {
@@ -86,8 +69,7 @@ public final class DependencyInfo {
   }
 
   public String[] getSysIncludes() {
-    final String[] sysIncludesClone = this.sysIncludes.clone();
-    return sysIncludesClone;
+    return this.sysIncludes.clone();
   }
 
   // BEGINFREEHEP
@@ -103,21 +85,6 @@ public final class DependencyInfo {
     return this.tag == t;
   }
 
-  // public void setCompositeLastModified(long lastMod) {
-  // compositeLastModified = lastMod;
-  // }
-  // ENDFREEHEP
-  /*
-   * Returns the latest modification date of the source or anything that it
-   * depends on.
-   * 
-   * @return the composite lastModified time, returns Long.MIN_VALUE if not
-   *          set
-   */
-  // BEGINFREEHEP
-  // public long getCompositeLastModified() {
-  // return compositeLastModified;
-  // }
   public void setTag(final Object t) {
     this.tag = t;
   }

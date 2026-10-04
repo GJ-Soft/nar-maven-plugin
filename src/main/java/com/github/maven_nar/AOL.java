@@ -31,7 +31,7 @@ public class AOL {
 
   private String linkerName;
 
-  // FIXME, need more complicated parsing for numbers as part of os.
+  // Known limitation: an os name that contains numbers is not parsed.
   // The switch below deliberately falls through: a longer AOL sets linker, then
   // os, then architecture, in cascade.
   @SuppressWarnings("fallthrough")
@@ -83,7 +83,7 @@ public class AOL {
     return this.os;
   }
 
-  // FIXME, maybe change to something like isCompatible (AOL).
+  // An exact comparison of the linker name; an isCompatible(AOL) would be more general.
   public final boolean hasLinker(final String linker) {
     return this.linkerName.equals(linker);
   }

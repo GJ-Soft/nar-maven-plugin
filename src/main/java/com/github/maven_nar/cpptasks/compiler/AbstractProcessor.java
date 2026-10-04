@@ -31,11 +31,11 @@ public abstract class AbstractProcessor implements Processor, Cloneable {
    * default bid for a file name that the processor recognizes but does not
    * process and does not want to fall through to the linker
    */
-  public final static int DEFAULT_DISCARD_BID = 1;
+  public static final int DEFAULT_DISCARD_BID = 1;
   /**
    * default bid for a file name that the processor desires to process
    */
-  public final static int DEFAULT_PROCESS_BID = 100;
+  public static final int DEFAULT_PROCESS_BID = 100;
 
   /**
    * Determines the identification of a command line processor by capture the
@@ -110,7 +110,7 @@ public abstract class AbstractProcessor implements Processor, Cloneable {
   }
 
   @Override
-  abstract public String getIdentifier();
+  public abstract String getIdentifier();
 
   /**
    * Gets the target operating system architecture

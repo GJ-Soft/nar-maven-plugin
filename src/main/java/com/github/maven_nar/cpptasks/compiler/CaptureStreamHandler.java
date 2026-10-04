@@ -88,8 +88,10 @@ public class CaptureStreamHandler implements ExecuteStreamHandler {
     final Execute exec = new Execute(handler);
     exec.setCommandline(cmdline);
     try {
-      final int status = exec.execute();
+      exec.execute();
     } catch (final IOException ex) {
+      // The command could not be launched: the handler is returned without any
+      // output (getOutput() is null), which run() turns into an empty array.
     }
     return handler;
   }
@@ -116,6 +118,7 @@ public class CaptureStreamHandler implements ExecuteStreamHandler {
   private InputStream processOutputStream;
 
   public CaptureStreamHandler() {
+    // Nothing to initialize: the fields keep their default values.
   }
 
   /**
@@ -136,6 +139,9 @@ public class CaptureStreamHandler implements ExecuteStreamHandler {
       errorCopier.getLines().toArray(this.stderr);
       this.stdout = new String[outputCopier.getLines().size()];
       outputCopier.getLines().toArray(this.stdout);
+    } catch (final InterruptedException e) {
+      Thread.currentThread().interrupt();
+      this.stderr = this.stdout = new String[0];
     } catch (final Exception e) {
       this.stderr = this.stdout = new String[0];
     }
@@ -206,6 +212,7 @@ public class CaptureStreamHandler implements ExecuteStreamHandler {
    */
   @Override
   public void stop() {
+    // Nothing to stop: start() already waits until both streams have been read.
   }
   // ENDFREEHEP
 }

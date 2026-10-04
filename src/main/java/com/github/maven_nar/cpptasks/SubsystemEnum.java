@@ -28,7 +28,7 @@ import org.apache.tools.ant.types.EnumeratedAttribute;
  * 
  */
 public final class SubsystemEnum extends EnumeratedAttribute {
-  private final static String[] values = new String[] {
+  private static final String[] values = new String[] {
       "gui", "console", "other"
   };
 

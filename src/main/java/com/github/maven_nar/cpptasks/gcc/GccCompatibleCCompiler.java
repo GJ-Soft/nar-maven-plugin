@@ -37,10 +37,10 @@ import com.github.maven_nar.cpptasks.compiler.LinkType;
  * @author Curt Arnold
  */
 public abstract class GccCompatibleCCompiler extends CommandLineCCompiler {
-  private final static String[] headerExtensions = new String[] {
+  private static final String[] headerExtensions = new String[] {
       ".h", ".hpp", ".inl"
   };
-  private final static String[] sourceExtensions = new String[] {
+  private static final String[] sourceExtensions = new String[] {
       ".c", ".cc", ".cpp", ".cxx", ".c++", ".i"
   };
 
@@ -103,11 +103,7 @@ public abstract class GccCompatibleCCompiler extends CommandLineCCompiler {
       args.add("-fno-exceptions");
     }
     // ENDFREEHEP
-    // BEGINFREEHEP moved to GccCCompiler
-    // if (rtti != null && !rtti.booleanValue()) {
-    // args.add("-fno-rtti");
-    // }
-    // ENDFREEHEP
+    // FREEHEP -fno-rtti moved to GccCCompiler
   }
 
   /**
@@ -197,6 +193,7 @@ public abstract class GccCompatibleCCompiler extends CommandLineCCompiler {
       try {
         relative = CUtil.getRelativeCompilerPath(workDir, new File(filename));
       } catch (Exception ex) {
+        // No relative path (another drive, for instance): the file name is used as it is.
       }
     }
 	
@@ -211,7 +208,7 @@ public abstract class GccCompatibleCCompiler extends CommandLineCCompiler {
   public void getDefineSwitch(final StringBuilder buffer, final String define, final String value) {
     buffer.append("-D");
     buffer.append(define);
-    if (value != null && value.length() > 0) {
+    if (value != null && !value.isEmpty()) {
       buffer.append('=');
       buffer.append(value);
     }

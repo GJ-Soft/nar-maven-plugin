@@ -75,7 +75,7 @@ public abstract class AbstractCompiler extends AbstractProcessor implements Comp
     return true;
   }
 
-  abstract protected CompilerConfiguration createConfiguration(CCTask task, LinkType linkType,
+  protected abstract CompilerConfiguration createConfiguration(CCTask task, LinkType linkType,
       ProcessorDef[] baseConfigs, CompilerDef specificConfig, TargetDef targetPlatform, VersionInfo versionInfo);
 
   @Override
@@ -88,7 +88,7 @@ public abstract class AbstractCompiler extends AbstractProcessor implements Comp
     return createConfiguration(task, linkType, baseConfigs, (CompilerDef) specificConfig, targetPlatform, versionInfo);
   }
 
-  abstract protected Parser createParser(File sourceFile);
+  protected abstract Parser createParser(File sourceFile);
   
   protected String getBaseOutputName(final String inputFile) {
     return FilenameUtils.getBaseName(inputFile);

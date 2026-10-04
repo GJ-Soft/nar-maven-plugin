@@ -38,6 +38,13 @@ import com.github.maven_nar.cpptasks.types.LibraryTypeEnum;
  * @author Curt Arnold
  */
 public abstract class AbstractLdLinker extends CommandLineLinker {
+
+  /** Library type of a static library. */
+  private static final String STATIC_TYPE = "static";
+
+  /** Library type of a Darwin framework. */
+  private static final String FRAMEWORK_TYPE = "framework";
+
   private final String outputPrefix;
 
   protected AbstractLdLinker(final String command, final String identifierArg, final String[] extensions,
@@ -78,8 +85,7 @@ public abstract class AbstractLdLinker extends CommandLineLinker {
         // ENDFREEHEP
       } else {
         if (linkType.isSharedLibrary()) {
-          // FREEHEP no longer needed for 10.4+
-          // args.add("-prebind");
+          // FREEHEP -prebind is no longer needed for 10.4+
           args.add("-dynamiclib");
         }
       }
@@ -167,12 +173,11 @@ public abstract class AbstractLdLinker extends CommandLineLinker {
       final String[] libs = set.getLibs();
       if (libdir != null) {
         String relPath = libdir.getAbsolutePath();
-        // File outputFile = task.getOutfile();
         final File currentDir = new File(".");
         if (currentDir.getParentFile() != null) {
           relPath = CUtil.getRelativePath(currentDir.getParentFile().getAbsolutePath(), libdir);
         }
-        if (set.getType() != null && "framework".equals(set.getType().getValue()) && isDarwin()) {
+        if (set.getType() != null && FRAMEWORK_TYPE.equals(set.getType().getValue()) && isDarwin()) {
           endargs.add("-F" + relPath);
         } else {
           endargs.add("-L" + relPath);
@@ -182,7 +187,7 @@ public abstract class AbstractLdLinker extends CommandLineLinker {
       // if there has been a change of library type
       //
       if (set.getType() != previousLibraryType) {
-        if (set.getType() != null && "static".equals(set.getType().getValue())) {
+        if (set.getType() != null && STATIC_TYPE.equals(set.getType().getValue())) {
           // BEGINFREEHEP not on MacOS X
           if (!isDarwin()) {
             endargs.add(getStaticLibFlag());
@@ -191,14 +196,14 @@ public abstract class AbstractLdLinker extends CommandLineLinker {
           // ENDFREEHEP
         } else {
           // FREEHEP not on MacOS X, recheck this!
-          if (set.getType() == null || !"framework".equals(set.getType().getValue()) && !isDarwin()) {
+          if (set.getType() == null || !FRAMEWORK_TYPE.equals(set.getType().getValue()) && !isDarwin()) {
             endargs.add(getDynamicLibFlag());
             previousLibraryType = set.getType();
           }
         }
       }
       final StringBuilder buf = new StringBuilder("-l");
-      if (set.getType() != null && "framework".equals(set.getType().getValue()) && isDarwin()) {
+      if (set.getType() != null && FRAMEWORK_TYPE.equals(set.getType().getValue()) && isDarwin()) {
         buf.setLength(0);
         // FREEHEP, added as endarg w/o trailing space to avoid quoting!
         endargs.add("-framework");
@@ -221,7 +226,7 @@ public abstract class AbstractLdLinker extends CommandLineLinker {
 
     // BEGINFREEHEP if last was -Bstatic reset it to -Bdynamic so that libc and
     // libm can be found as shareables
-    if (previousLibraryType != null && previousLibraryType.getValue().equals("static") && !isDarwin()) {
+    if (previousLibraryType != null && previousLibraryType.getValue().equals(STATIC_TYPE) && !isDarwin()) {
       endargs.add(getDynamicLibFlag());
     }
     // ENDFREEHEP
@@ -293,10 +298,10 @@ public abstract class AbstractLdLinker extends CommandLineLinker {
     }
     final String[] patterns = new String[patternCount];
     int offset = 0;
-    if (libType == null || "static".equals(libType.getValue())) {
+    if (libType == null || STATIC_TYPE.equals(libType.getValue())) {
       offset = addLibraryPatterns(libnames, buf, "lib", ".a", patterns, 0);
     }
-    if (libType != null && "framework".equals(libType.getValue()) && isDarwin()) {
+    if (libType != null && FRAMEWORK_TYPE.equals(libType.getValue()) && isDarwin()) {
       for (final String libname : libnames) {
         buf.setLength(0);
         buf.append(libname);
@@ -305,11 +310,11 @@ public abstract class AbstractLdLinker extends CommandLineLinker {
         patterns[offset++] = buf.toString();
       }
     } else {
-      if (libType == null || !"static".equals(libType.getValue())) {
+      if (libType == null || !STATIC_TYPE.equals(libType.getValue())) {
         if (isHPUX()) {
-          offset = addLibraryPatterns(libnames, buf, "lib", ".sl", patterns, offset);
+          addLibraryPatterns(libnames, buf, "lib", ".sl", patterns, offset);
         } else {
-          offset = addLibraryPatterns(libnames, buf, "lib", ".so", patterns, offset);
+          addLibraryPatterns(libnames, buf, "lib", ".so", patterns, offset);
         }
       }
     }
@@ -325,7 +330,7 @@ public abstract class AbstractLdLinker extends CommandLineLinker {
   @Override
   public String[] getOutputFileNames(final String baseName, final VersionInfo versionInfo) {
     final String[] baseNames = super.getOutputFileNames(baseName, versionInfo);
-    if (this.outputPrefix.length() > 0) {
+    if (!this.outputPrefix.isEmpty()) {
       for (int i = 0; i < baseNames.length; i++) {
         baseNames[i] = this.outputPrefix + baseNames[i];
       }

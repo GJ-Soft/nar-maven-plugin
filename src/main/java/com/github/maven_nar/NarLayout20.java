@@ -95,8 +95,7 @@ public class NarLayout20 extends AbstractNarLayout {
   @Override
   public final File
       getBinDirectory(final File baseDir, final String artifactId, final String version, final String aol) {
-    final File dir = new File(baseDir, this.fileLayout.getBinDirectory(aol));
-    return dir;
+    return new File(baseDir, this.fileLayout.getBinDirectory(aol));
   }
 
   /*
@@ -122,8 +121,7 @@ public class NarLayout20 extends AbstractNarLayout {
       throw new MojoFailureException("INTERNAL ERROR, Replace call to getLibDirectory with getBinDirectory");
     }
 
-    final File dir = new File(baseDir, this.fileLayout.getLibDirectory(aol, type));
-    return dir;
+    return new File(baseDir, this.fileLayout.getLibDirectory(aol, type));
   }
 
   /*
@@ -147,9 +145,8 @@ public class NarLayout20 extends AbstractNarLayout {
 
   @Override
   public File getNarUnpackDirectory(final File baseUnpackDirectory, final File narFile) {
-    final File dir = new File(baseUnpackDirectory, FileUtils.basename(narFile.getPath(), "."
+    return new File(baseUnpackDirectory, FileUtils.basename(narFile.getPath(), "."
         + NarConstants.NAR_EXTENSION));
-    return dir;
   }
 
   /*
@@ -179,16 +176,8 @@ public class NarLayout20 extends AbstractNarLayout {
     }
 
     final String[] binAOL = new File(baseDir, "bin").list();
-    for (int i = 0; binAOL != null && i < binAOL.length; i++) {// TODO: chose
-                                                               // not to apply
-                                                               // new file
-                                                               // naming for
-                                                               // outfile in
-                                                               // case of
-                                                               // backwards
-                                                               // compatability,
-                                                               // may need to
-                                                               // reconsider
+    // Executables keep the old file naming, for backwards compatibility.
+    for (int i = 0; binAOL != null && i < binAOL.length; i++) {
       narInfo.setNar(null, Library.EXECUTABLE, project.getGroupId() + ":" + project.getArtifactId() + ":"
           + NarConstants.NAR_TYPE + ":" + "${aol}" + "-" + Library.EXECUTABLE);
       narInfo.setBinding(new AOL(binAOL[i]), Library.EXECUTABLE);

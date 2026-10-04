@@ -29,6 +29,7 @@ package com.github.maven_nar.cpptasks;
  ******************************************************************************/
 public class LinkerParam extends ProcessorParam {
   public LinkerParam() {
+    // Nothing to initialize: the fields keep their default values.
   }
 
   public void execute() throws org.apache.tools.ant.BuildException {

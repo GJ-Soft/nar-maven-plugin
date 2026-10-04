@@ -29,7 +29,6 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.FlexInteger;
 
-import com.github.maven_nar.cpptasks.compiler.CommandLineLinker;
 import com.github.maven_nar.cpptasks.compiler.LinkType;
 import com.github.maven_nar.cpptasks.compiler.Linker;
 import com.github.maven_nar.cpptasks.compiler.Processor;
@@ -48,6 +47,10 @@ import com.github.maven_nar.cpptasks.types.SystemLibrarySet;
  * @author Curt Arnold
  */
 public class LinkerDef extends ProcessorDef {
+
+  /** Name of this data type in the Ant reference checks. */
+  private static final String DATA_TYPE_NAME = "LinkerDef";
+
   private long base;
   private String entry;
   private Boolean fixed;
@@ -165,7 +168,7 @@ public class LinkerDef extends ProcessorDef {
    */
   public LibrarySet[] getActiveLibrarySets(final LinkerDef[] defaultProviders, final int index) {
     if (isReference()) {
-      return (getCheckedRef(LinkerDef.class, "LinkerDef"))
+      return (getCheckedRef(LinkerDef.class, DATA_TYPE_NAME))
           .getActiveUserLibrarySets(defaultProviders, index);
     }
     final Project p = getProject();
@@ -188,7 +191,7 @@ public class LinkerDef extends ProcessorDef {
    */
   public LibrarySet[] getActiveSystemLibrarySets(final LinkerDef[] defaultProviders, final int index) {
     if (isReference()) {
-      return (getCheckedRef(LinkerDef.class, "LinkerDef"))
+      return (getCheckedRef(LinkerDef.class, DATA_TYPE_NAME))
           .getActiveUserLibrarySets(defaultProviders, index);
     }
     final Project p = getProject();
@@ -207,7 +210,7 @@ public class LinkerDef extends ProcessorDef {
    */
   public LibrarySet[] getActiveUserLibrarySets(final LinkerDef[] defaultProviders, final int index) {
     if (isReference()) {
-      return (getCheckedRef(LinkerDef.class, "LinkerDef"))
+      return (getCheckedRef(LinkerDef.class, DATA_TYPE_NAME))
           .getActiveUserLibrarySets(defaultProviders, index);
     }
     final Project p = getProject();
@@ -223,7 +226,7 @@ public class LinkerDef extends ProcessorDef {
 
   public long getBase(final LinkerDef[] defaultProviders, final int index) {
     if (isReference()) {
-      return (getCheckedRef(LinkerDef.class, "LinkerDef")).getBase(defaultProviders, index);
+      return (getCheckedRef(LinkerDef.class, DATA_TYPE_NAME)).getBase(defaultProviders, index);
     }
     if (this.base <= 0 && defaultProviders != null && index < defaultProviders.length) {
         return defaultProviders[index].getBase(defaultProviders, index + 1);
@@ -233,7 +236,7 @@ public class LinkerDef extends ProcessorDef {
 
   public String getEntry(final LinkerDef[] defaultProviders, final int index) {
     if (isReference()) {
-      return (getCheckedRef(LinkerDef.class, "LinkerDef")).getEntry(defaultProviders, index);
+      return (getCheckedRef(LinkerDef.class, DATA_TYPE_NAME)).getEntry(defaultProviders, index);
     }
     if (this.entry != null) {
       return this.entry;
@@ -246,7 +249,7 @@ public class LinkerDef extends ProcessorDef {
 
   public Boolean getFixed(final LinkerDef[] defaultProviders, final int index) {
     if (isReference()) {
-      return (getCheckedRef(LinkerDef.class, "LinkerDef")).getFixed(defaultProviders, index);
+      return (getCheckedRef(LinkerDef.class, DATA_TYPE_NAME)).getFixed(defaultProviders, index);
     }
     if (this.fixed == null && defaultProviders != null && index < defaultProviders.length) {
         return defaultProviders[index].getFixed(defaultProviders, index + 1);
@@ -256,7 +259,7 @@ public class LinkerDef extends ProcessorDef {
 
   public boolean getIncremental(final LinkerDef[] defaultProviders, final int index) {
     if (isReference()) {
-      return (getCheckedRef(LinkerDef.class, "LinkerDef")).getIncremental(defaultProviders, index);
+      return (getCheckedRef(LinkerDef.class, DATA_TYPE_NAME)).getIncremental(defaultProviders, index);
     }
     if (this.incremental != null) {
       return this.incremental.booleanValue();
@@ -273,7 +276,7 @@ public class LinkerDef extends ProcessorDef {
 
   public boolean getMap(final LinkerDef[] defaultProviders, final int index) {
     if (isReference()) {
-      return (getCheckedRef(LinkerDef.class, "LinkerDef")).getMap(defaultProviders, index);
+      return (getCheckedRef(LinkerDef.class, DATA_TYPE_NAME)).getMap(defaultProviders, index);
     }
     if (this.map != null) {
       return this.map.booleanValue();
@@ -301,7 +304,7 @@ public class LinkerDef extends ProcessorDef {
 
   public int getStack(final LinkerDef[] defaultProviders, final int index) {
     if (isReference()) {
-      return (getCheckedRef(LinkerDef.class, "LinkerDef")).getStack(defaultProviders, index);
+      return (getCheckedRef(LinkerDef.class, DATA_TYPE_NAME)).getStack(defaultProviders, index);
     }
     if (this.stack < 0 && defaultProviders != null && index < defaultProviders.length) {
         return defaultProviders[index].getStack(defaultProviders, index + 1);

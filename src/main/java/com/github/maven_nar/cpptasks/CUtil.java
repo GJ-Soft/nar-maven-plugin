@@ -49,7 +49,7 @@ public class CUtil {
 			final Vector<String> vallist = new Vector<>();
 			while (tokens.hasMoreTokens()) {
 				final String val = tokens.nextToken().trim();
-				if (val.length() == 0) {
+				if (val.isEmpty()) {
 					continue;
 				}
 				vallist.add(val);
@@ -63,7 +63,7 @@ public class CUtil {
 		}
 	}
 
-	public final static int FILETIME_EPSILON = 500;
+	public static final int FILETIME_EPSILON = 500;
 
 	/**
 	 * Checks a array of names for non existent or non directory entries and nulls
@@ -90,7 +90,6 @@ public class CUtil {
 	 * Extracts the basename of a file, removing the extension, if present
 	 */
 	public static String getBasename(final File file) {
-		final String path = file.getPath();
 		// Remove the extension
 		String basename = file.getName();
 		final int pos = basename.lastIndexOf('.');
@@ -142,8 +141,7 @@ public class CUtil {
 		if (path != null) {
 			return parsePath(path, delim);
 		}
-		final File[] noPath = new File[0];
-		return noPath;
+		return new File[0];
 	}
 
 	/**
@@ -254,20 +252,21 @@ public class CUtil {
 			//
 			for (int i = lastCommonSeparator + 1; i < canonicalBase.length(); i++) {
 				if (canonicalBase.charAt(i) == separator) {
-					if (relativePath.length() > 0) {
+					if (!relativePath.isEmpty()) {
 						relativePath.append(separator);
 					}
 					relativePath.append("..");
 				}
 			}
 			if (canonicalTarget.length() > lastCommonSeparator + 1) {
-				if (relativePath.length() > 0) {
+				if (!relativePath.isEmpty()) {
 					relativePath.append(separator);
 				}
 				relativePath.append(canonicalTarget.substring(lastCommonSeparator + 1));
 			}
 			return relativePath.toString();
 		} catch (final IOException ex) {
+			// No canonical path: the target is returned as it was given.
 		}
 		return targetFile.toString();
 	}
@@ -364,7 +363,7 @@ public class CUtil {
 	static String toCommandLine(final String[] cmdline) {
 		final StringBuilder result = new StringBuilder();
 		for (final String arg : cmdline) {
-			if (result.length() > 0) {
+			if (!result.isEmpty()) {
 				result.append(' ');
 			}
 			if (arg.indexOf(' ') >= 0 && arg.indexOf('"') < 0) {

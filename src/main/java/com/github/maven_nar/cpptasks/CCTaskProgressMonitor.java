@@ -43,6 +43,8 @@ public class CCTaskProgressMonitor implements ProgressMonitor {
         this.history.commit();
         this.lastCommit = System.currentTimeMillis();
       } catch (final IOException ex) {
+        // Saving the history midway is only a safeguard. If it fails, the build
+        // goes on: at worst some files are compiled again next time.
       }
     }
   }
@@ -56,6 +58,8 @@ public class CCTaskProgressMonitor implements ProgressMonitor {
         this.history.commit();
         this.lastCommit = current;
       } catch (final IOException ex) {
+        // Saving the history midway is only a safeguard. If it fails, the build
+        // goes on: at worst some files are compiled again next time.
       }
     }
   }

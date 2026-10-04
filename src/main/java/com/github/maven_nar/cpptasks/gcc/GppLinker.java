@@ -42,7 +42,7 @@ public class GppLinker extends AbstractLdLinker {
   protected static final String[] objFiles = new String[] {
       ".o", ".a", ".lib", ".dll", ".so", ".sl"
   };
-  private final static String libPrefix = "libraries: =";
+  private static final String libPrefix = "libraries: =";
   private static String[] linkerOptions = new String[] {
       "-bundle", "-dylib", "-dynamic", "-dynamiclib", "-nostartfiles", "-nostdlib", "-prebind", "-s", "-static",
       "-shared", "-symbolic", "-Xlinker", "-static-libgcc", "-shared-libgcc", "-p", "-pg", "-pthread"
@@ -259,13 +259,34 @@ public class GppLinker extends AbstractLdLinker {
     }
     // BEGINFREEHEP
     if (type.isJNIModule()) {
-      return isDarwin() ? machJNILinker : isWindows() ? dllLinker : soLinker;
+      if (isDarwin()) {
+        return machJNILinker;
+      }
+      if (isWindows()) {
+        return dllLinker;
+      }
+      return soLinker;
     }
     if (type.isPluginModule()) {
-      return isDarwin() ? machPluginLinker : isWindows() ? dllLinker : soLinker;
+      if (isDarwin()) {
+        return machPluginLinker;
+      }
+      if (isWindows()) {
+        return dllLinker;
+      }
+      return soLinker;
     }
     if (type.isSharedLibrary()) {
-      return isDarwin() ? machDllLinker : isWindows() ? dllLinker :isAIX() ?  aLinker : soLinker;
+      if (isDarwin()) {
+        return machDllLinker;
+      }
+      if (isWindows()) {
+        return dllLinker;
+      }
+      if (isAIX()) {
+        return aLinker;
+      }
+      return soLinker;
     }
     // ENDFREEHEP
     return instance;

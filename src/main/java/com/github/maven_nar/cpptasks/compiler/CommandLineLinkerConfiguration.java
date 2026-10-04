@@ -86,8 +86,7 @@ public final class CommandLineLinkerConfiguration implements LinkerConfiguration
   }
 
   public String[] getEndArguments() {
-    final String[] clone = this.args[1].clone();
-    return clone;
+    return this.args[1].clone();
   }
 
   /**
@@ -101,8 +100,7 @@ public final class CommandLineLinkerConfiguration implements LinkerConfiguration
   }
 
   public String[] getLibraryNames() {
-    final String[] clone = this.libraryNames.clone();
-    return clone;
+    return this.libraryNames.clone();
   }
 
   @Override
@@ -135,8 +133,7 @@ public final class CommandLineLinkerConfiguration implements LinkerConfiguration
   }
 
   public String[] getPreArguments() {
-    final String[] clone = this.args[0].clone();
-    return clone;
+    return this.args[0].clone();
   }
 
   @Override

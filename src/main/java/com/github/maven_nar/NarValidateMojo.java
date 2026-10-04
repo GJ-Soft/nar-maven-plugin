@@ -54,7 +54,6 @@ public class NarValidateMojo extends AbstractCompileMojo {
 
 	@Override
 	public final void narExecute() throws MojoExecutionException, MojoFailureException {
-		// super.narExecute();
 		if (this.skip) {
 			getLog().info(getClass().getName() + " skipped");
 			return;

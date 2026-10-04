@@ -84,8 +84,7 @@ public class NarResourcesMojo extends AbstractResourcesMojo {
 				}
 
 				boolean ignore = false;
-				for (final Object element : FileUtils.getDefaultExcludesAsList()) {
-					final String exclude = (String) element;
+				for (final String exclude : FileUtils.getDefaultExcludesAsList()) {
 					if (SelectorUtils.matchPath(exclude.replace('/', File.separatorChar), anAol)) {
 						ignore = true;
 						break;

@@ -137,16 +137,14 @@ public class Lib {
   private void addMultipleLibSets(final AbstractDependencyMojo mojo, final LinkerDef linker, final Project antProject,
       final String name) throws MojoFailureException, MojoExecutionException {
     final List<NarArtifact> dependencies = mojo.getNarArtifacts();
-    for (final Object lib1 : this.libs) {
-      final Lib lib = (Lib) lib1;
+    for (final Lib lib : this.libs) {
       final String[] ids = name.split(":", 2);
       if (ids.length != 2) {
         throw new MojoFailureException("NAR: Please specify <Name> as part of <Lib> in format 'groupId:artifactId'");
       }
-      for (final Object dependency1 : dependencies) {
-        final Artifact dependency = (Artifact) dependency1;
+      for (final Artifact dependency : dependencies) {
         if (dependency.getGroupId().equals(ids[0]) && dependency.getArtifactId().equals(ids[1])) {
-          // FIXME NAR-90
+          // Known limitation (NAR-90): the file name is built here instead of asked to the layout.
           final File narDir = new File(dependency.getFile().getParentFile(),
               "nar/lib/" + mojo.getAOL() + "/" + lib.type);
           final String narName = dependency.getArtifactId() + "-" + lib.name + "-" + dependency.getBaseVersion();

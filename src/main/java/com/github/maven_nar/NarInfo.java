@@ -66,7 +66,9 @@ public class NarInfo {
         if (propertiesFile.isDirectory()) {
           propertiesFile = new File(propertiesFile, getNarInfoFileName());
         }
-        this.info.load(new FileInputStream(propertiesFile));
+        try (FileInputStream in = new FileInputStream(propertiesFile)) {
+          this.info.load(in);
+        }
       } catch (final FileNotFoundException e) {
         // ignored
       } catch (final IOException e) {
@@ -89,7 +91,7 @@ public class NarInfo {
     return aol == null ? null : new AOL(getProperty(aol, aol.toString(), aol.toString()));
   }
 
-  // FIXME replace with list of AttachedNarArtifacts
+  // A comma separated list; a list of AttachedNarArtifacts would be clearer.
   public final String[] getAttachedNars(final AOL aol, final String type) {
     final String attachedNars = getProperty(aol, NarConstants.NAR + "." + type);
     return attachedNars != null ? attachedNars.split(",") : null;
@@ -345,7 +347,8 @@ public class NarInfo {
       parent.mkdirs();
     }
     log.debug("Write NAR Properties: " + file.toString());
-    this.info.store(new FileOutputStream(file), "NAR Properties for " + this.groupId + "." + this.artifactId + "-"
-        + this.version);
+    try (FileOutputStream out = new FileOutputStream(file)) {
+      this.info.store(out, "NAR Properties for " + this.groupId + "." + this.artifactId + "-" + this.version);
+    }
   }
 }

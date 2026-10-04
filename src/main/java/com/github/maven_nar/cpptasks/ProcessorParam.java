@@ -34,6 +34,7 @@ public class ProcessorParam {
   private String value;
 
   public ProcessorParam() {
+    // Nothing to initialize: the fields keep their default values.
   }
 
   public String getName() {

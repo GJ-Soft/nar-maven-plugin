@@ -65,6 +65,7 @@ public final class WindresResourceCompiler extends CommandLineCompiler {
 
   @Override
   protected void addWarningSwitch(final List<String> args, final int level) {
+    // windres has no warning options.
   }
 
   @Override
@@ -93,7 +94,7 @@ public final class WindresResourceCompiler extends CommandLineCompiler {
   protected void getDefineSwitch(final StringBuilder buffer, final String define, final String value) {
     buffer.append("-D");
     buffer.append(define);
-    if (value != null && value.length() > 0) {
+    if (value != null && !value.isEmpty()) {
       buffer.append('=');
       buffer.append(value);
     }
@@ -125,6 +126,7 @@ public final class WindresResourceCompiler extends CommandLineCompiler {
     try {
         relative = CUtil.getRelativeCompilerPath(workDir, new File(filename));
     } catch (Exception ex) {
+      // No relative path (another drive, for instance): the file name is used as it is.
     }
     if (relative.isEmpty()) {
         return filename;

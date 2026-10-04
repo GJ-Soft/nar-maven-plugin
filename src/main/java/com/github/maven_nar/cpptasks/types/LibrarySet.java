@@ -49,6 +49,10 @@ import com.github.maven_nar.cpptasks.compiler.Linker;
  * @author Curt Arnold
  */
 public class LibrarySet extends DataType {
+
+  /** Name of this data type in the Ant reference checks. */
+  private static final String DATA_TYPE_NAME = "LibrarySet";
+
   private String dataset;
   private boolean explicitCaseSensitive;
   private String ifCond;
@@ -72,7 +76,7 @@ public class LibrarySet extends DataType {
    */
   public String getDataset() {
     if (isReference()) {
-      final LibrarySet master = getCheckedRef(LibrarySet.class, "LibrarySet");
+      final LibrarySet master = getCheckedRef(LibrarySet.class, DATA_TYPE_NAME);
       return master.getDataset();
     }
     return this.dataset;
@@ -80,7 +84,7 @@ public class LibrarySet extends DataType {
 
   public File getDir(final Project project) {
     if (isReference()) {
-      final LibrarySet master = getCheckedRef(LibrarySet.class, "LibrarySet");
+      final LibrarySet master = getCheckedRef(LibrarySet.class, DATA_TYPE_NAME);
       return master.getDir(project);
     }
     return this.set.getDir(project);
@@ -88,7 +92,7 @@ public class LibrarySet extends DataType {
 
   protected FileSet getFileSet() {
     if (isReference()) {
-      final LibrarySet master = getCheckedRef(LibrarySet.class, "LibrarySet");
+      final LibrarySet master = getCheckedRef(LibrarySet.class, DATA_TYPE_NAME);
       return master.getFileSet();
     }
     return this.set;
@@ -96,11 +100,10 @@ public class LibrarySet extends DataType {
 
   public String[] getLibs() {
     if (isReference()) {
-      final LibrarySet master = getCheckedRef(LibrarySet.class, "LibrarySet");
+      final LibrarySet master = getCheckedRef(LibrarySet.class, DATA_TYPE_NAME);
       return master.getLibs();
     }
-    final String[] retval = this.libnames.clone();
-    return retval;
+    return this.libnames.clone();
   }
 
   /**
@@ -110,7 +113,7 @@ public class LibrarySet extends DataType {
    */
   public LibraryTypeEnum getType() {
     if (isReference()) {
-      final LibrarySet master = getCheckedRef(LibrarySet.class, "LibrarySet");
+      final LibrarySet master = getCheckedRef(LibrarySet.class, DATA_TYPE_NAME);
       return master.getType();
     }
     return this.libraryType;
@@ -146,7 +149,7 @@ public class LibrarySet extends DataType {
       }
     }
     if (isReference()) {
-      final LibrarySet master = getCheckedRef(LibrarySet.class, "LibrarySet");
+      final LibrarySet master = getCheckedRef(LibrarySet.class, DATA_TYPE_NAME);
       return master.isActive(getProject());
     }
     if (this.libnames.length == 0) {
@@ -269,7 +272,7 @@ public class LibrarySet extends DataType {
       visitLibraries(final Project project, final Linker linker, final File[] libpath, final FileVisitor visitor)
           throws BuildException {
     if (isReference()) {
-      final LibrarySet master = getCheckedRef(LibrarySet.class, "LibrarySet");
+      final LibrarySet master = getCheckedRef(LibrarySet.class, DATA_TYPE_NAME);
       master.visitLibraries(project, linker, libpath, visitor);
     }
     //
@@ -328,11 +331,6 @@ public class LibrarySet extends DataType {
               visitor.visit(basedir, file);
             }
           }
-          //
-          // TODO: following section works well for Windows
-          // style linkers but unnecessary fails
-          // Unix style linkers. Will need to revisit.
-          //
           // Only worth reporting where finding nothing really does mean the library
           // is not there. A linker whose libraries take the shape of names other
           // than the ones it looks for, gcc building for Windows among them, matches
@@ -355,8 +353,7 @@ public class LibrarySet extends DataType {
             msg.append(" for library name \"");
             msg.append(libname);
             msg.append("\" was found.");
-            // TODO: raising the message in the log rather 
-            //throw new BuildException(msg.toString());
+            // Only a warning, not a build failure: the link may still find it by name.
             project.log(msg.toString(), Project.MSG_WARN);
           }
         }

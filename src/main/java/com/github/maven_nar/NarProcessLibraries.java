@@ -112,8 +112,8 @@ public class NarProcessLibraries extends AbstractCompileMojo {
 			} while (endOfStream != -1);
 
 			if (process.waitFor() != 0) {
-				// TODO: Maybe this shouldn't be an exception, it might have
-				// still worked?!
+				// A non zero exit code is taken as a failure, even if the command may
+				// have done its job.
 				throw new MojoFailureException("Process exited abnormally");
 			}
 		} catch (final IOException | InterruptedException e) {

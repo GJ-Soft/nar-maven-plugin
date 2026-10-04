@@ -60,9 +60,6 @@ public class NarManager {
 
 	private RepositorySystemSession repoSession;
 
-	private final String[] narTypes = { NarConstants.NAR_NO_ARCH, Library.STATIC, Library.SHARED, Library.JNI,
-			Library.PLUGIN };
-
 	public NarManager(final Log log, final LocalRepository repository, final MavenProject project,
 			final String architecture, final String os, final Linker linker, final RepositorySystem repoSystem,
 			final RepositorySystemSession repoSession) throws MojoFailureException, MojoExecutionException {
@@ -78,8 +75,8 @@ public class NarManager {
 	public final void downloadAttachedNars(final List<Artifact> narArtifacts,
 			final List<RemoteRepository> remoteRepositories, final ArtifactResolver resolver, final String classifier)
 			throws MojoExecutionException, MojoFailureException {
-		// FIXME this may not be the right way to do this.... -U ignored and
-		// also SNAPSHOT not used
+		// Known limitation: -U is not honoured here, and newer SNAPSHOTs of the
+		// attached NARs are not looked for.
 		final List<AttachedNarArtifact> dependencies = getAttachedNarDependencies(narArtifacts, classifier);
 
 		this.log.debug("Download called with classifier: " + classifier + " for NarDependencies {");
@@ -88,8 +85,7 @@ public class NarManager {
 		}
 		this.log.debug("}");
 
-		for (final Object dependency1 : dependencies) {
-			final Artifact dependency = (Artifact) dependency1;
+		for (final Artifact dependency : dependencies) {
 			try {
 				this.log.debug("Resolving " + dependency);
 				ArtifactRequest request = new ArtifactRequest(RepositoryUtils.toArtifact(dependency),
@@ -112,9 +108,9 @@ public class NarManager {
 		AOL aol = archOsLinker;
 		this.log.debug("GetNarDependencies for " + dependency + ", aol: " + aol + ", type: " + type);
 		final List<AttachedNarArtifact> artifactList = new ArrayList<>();
-		final NarInfo narInfo = getNarInfo(dependency);
+		final NarInfo narInfo = requireNarInfo(dependency);
 		final String[] nars = narInfo.getAttachedNars(aol, type);
-		// FIXME Move this to NarInfo....
+		// Parsing of the attached NAR list (also in AbstractDependencyMojo); it would belong in NarInfo.
 		if (nars != null) {
 			for (final String nar2 : nars) {
 				this.log.debug("    Checking: " + nar2);
@@ -181,7 +177,7 @@ public class NarManager {
 		final List<AttachedNarArtifact> artifactList = new ArrayList<>();
 		for (final Object narArtifact : narArtifacts) {
 			final Artifact dependency = (Artifact) narArtifact;
-			final NarInfo narInfo = getNarInfo(dependency);
+			final NarInfo narInfo = requireNarInfo(dependency);
 			if (noarch) {
 				artifactList.addAll(getAttachedNarDependencies(dependency, null, NarConstants.NAR_NO_ARCH));
 			}
@@ -189,13 +185,10 @@ public class NarManager {
 			// use preferred binding, unless non existing.
 			final String binding = narInfo.getBinding(aol, type != null ? type : Library.STATIC);
 
-			// FIXME kludge, but does not work anymore since AOL is now a class
-			if (aol.equals(NarConstants.NAR_NO_ARCH)) {
-				// FIXME no handling of local
-				artifactList.addAll(getAttachedNarDependencies(dependency, null, NarConstants.NAR_NO_ARCH));
-			} else {
-				artifactList.addAll(getAttachedNarDependencies(dependency, aol, binding));
-			}
+			// There used to be a branch for aol.equals(NAR_NO_ARCH) here, but an AOL is
+			// never equal to a String, so it was dead code: the noarch NARs are added
+			// above, when no AOL is given.
+			artifactList.addAll(getAttachedNarDependencies(dependency, aol, binding));
 		}
 		return artifactList;
 	}
@@ -238,23 +231,37 @@ public class NarManager {
 	// exist in Resolver 2.x / Maven 4, so we keep the 1.9.x API here.
 	@SuppressWarnings("deprecation")
 	public final File getNarFile(final Artifact dependency) throws MojoFailureException {
-		// FIXME reported to maven developer list, isSnapshot changes behaviour
-		// of getBaseVersion, called in pathOf.
+		// Workaround: isSnapshot() changes what getBaseVersion() returns, which
+		// pathOf uses, so it has to be called first (reported to the Maven
+		// developer list).
 		dependency.isSnapshot();
 		final org.eclipse.aether.repository.LocalRepositoryManager localRepoManager = repoSession
 				.getLocalRepositoryManager();
 		final String relativePath = localRepoManager
 				.getPathForLocalArtifact(RepositoryUtils.toArtifact(dependency));
 		final File resolvedFile = new File(localRepoManager.getRepository().getBasedir(), relativePath);
-		final File file = new File(
-				NarUtil.replace("${aol}", this.defaultAOL.toString(), resolvedFile.getAbsolutePath()));
-		return file;
+		return new File(NarUtil.replace("${aol}", this.defaultAOL.toString(), resolvedFile.getAbsolutePath()));
+	}
+
+	/**
+	 * Like {@link #getNarInfo(Artifact)}, for the callers that cannot go on without
+	 * it: a dependency that is not in the local repository, or has no NAR
+	 * properties, is an error with its name, instead of a NullPointerException.
+	 */
+	private NarInfo requireNarInfo(final Artifact dependency) throws MojoExecutionException {
+		final NarInfo narInfo = getNarInfo(dependency);
+		if (narInfo == null) {
+			throw new MojoExecutionException("No NAR properties for " + dependency
+					+ ": the artifact is not in the local repository, or it is not a NAR");
+		}
+		return narInfo;
 	}
 
 	@SuppressWarnings("deprecation") // Resolver 1.9.x getPathForLocalArtifact/getBasedir (see getNarFile)
 	public final NarInfo getNarInfo(final Artifact dependency) throws MojoExecutionException {
-		// FIXME reported to maven developer list, isSnapshot changes behaviour
-		// of getBaseVersion, called in pathOf.
+		// Workaround: isSnapshot() changes what getBaseVersion() returns, which
+		// pathOf uses, so it has to be called first (reported to the Maven
+		// developer list).
 		dependency.isSnapshot();
 
 		final org.eclipse.aether.repository.LocalRepositoryManager localRepoManager = repoSession
@@ -293,11 +300,11 @@ public class NarManager {
 			final String classifier, final String os, final NarLayout layout, final File unpackDir, boolean skipRanlib)
 			throws MojoExecutionException, MojoFailureException {
 		this.log.debug("Unpack called for OS: " + os + ", classifier: " + classifier + " for NarArtifacts {");
-		for (final Object narArtifact : narArtifacts) {
+		for (final Artifact narArtifact : narArtifacts) {
 			this.log.debug("  - " + narArtifact);
 		}
 		this.log.debug("}");
-		// FIXME, kludge to get to download the -noarch, based on classifier
+		// The noarch NAR is reached through the classifier.
 		final List<AttachedNarArtifact> dependencies = getAttachedNarDependencies(narArtifacts, classifier);
 		for (final Object dependency1 : dependencies) {
 			final Artifact dependency = (Artifact) dependency1;

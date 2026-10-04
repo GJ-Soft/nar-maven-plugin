@@ -24,6 +24,7 @@ package com.github.maven_nar.cpptasks.types;
  */
 public class LinkerArgument extends CommandLineArgument {
   public LinkerArgument() {
+    // Nothing to initialize: the fields keep their default values.
   }
 
   public void execute() throws org.apache.tools.ant.BuildException {

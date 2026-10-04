@@ -75,8 +75,7 @@ public abstract class AbstractNarMojo extends GjsAbstractMojo implements NarCons
 
 	/**
 	 * The Operating System for the nar. Some choices are: "Windows", "Linux",
-	 * "MacOSX", "SunOS","AIX" ... Defaults to a derived value from ${os.name} FIXME
-	 * table missing
+	 * "MacOSX", "SunOS","AIX" ... Defaults to the one derived from ${os.name}.
 	 */
 	@Parameter(property = "nar.os")
 	protected String os;
@@ -225,6 +224,10 @@ public abstract class AbstractNarMojo extends GjsAbstractMojo implements NarCons
 	}
 
 	protected final AOL getAOL() throws MojoFailureException, MojoExecutionException {
+		// Set by validate(), which execute() runs before narExecute().
+		if (this.aolId == null) {
+			throw new MojoExecutionException("NAR: the AOL is not known yet: validate() has not run");
+		}
 		return this.aolId;
 	}
 
@@ -237,7 +240,7 @@ public abstract class AbstractNarMojo extends GjsAbstractMojo implements NarCons
 	}
 
 	protected final File getJavaHome(final AOL aol) throws MojoExecutionException {
-		// FIXME should be easier by specifying default...
+		// The javaHome of the AOL properties if there is one, else the configured or derived one.
 		return getNarInfo().getProperty(aol, "javaHome", NarUtil.getJavaHome(this.javaHome));
 	}
 

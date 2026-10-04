@@ -27,6 +27,7 @@ package com.github.maven_nar;
 public class C extends Compiler {
 
   public C() {
+    // Nothing to initialize: the fields keep their default values.
   }
 
   @Override

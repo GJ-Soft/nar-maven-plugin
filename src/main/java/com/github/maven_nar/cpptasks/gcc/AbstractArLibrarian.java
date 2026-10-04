@@ -68,7 +68,7 @@ public abstract class AbstractArLibrarian extends CommandLineLinker {
   @Override
   public String[] getOutputFileNames(final String baseName, final VersionInfo versionInfo) {
     final String[] baseNames = super.getOutputFileNames(baseName, versionInfo);
-    if (this.outputPrefix.length() > 0) {
+    if (!this.outputPrefix.isEmpty()) {
       for (int i = 0; i < baseNames.length; i++) {
         baseNames[i] = this.outputPrefix + baseNames[i];
       }

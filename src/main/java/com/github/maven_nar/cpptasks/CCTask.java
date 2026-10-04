@@ -114,7 +114,8 @@ public class CCTask extends Task {
   // BEGINFREEHEP
   class Progress extends Thread {
 
-    private boolean stop = false;
+    // volatile: finish() is called from the thread that runs the compilation.
+    private volatile boolean stop = false;
     private final File objDir;
     private final int rebuildCount;
 
@@ -123,7 +124,8 @@ public class CCTask extends Task {
       this.rebuildCount = rebuildCount;
     }
 
-    public void exit() {
+    /** Asks the thread to stop. Not called exit(): Thread has a private method with that name. */
+    public void finish() {
       this.stop = true;
     }
 
@@ -141,6 +143,8 @@ public class CCTask extends Task {
             return file.lastModified() > this.startTime && !file.getName().endsWith(".xml");
           }
         };
+        // Straight to the console: the progress line is redrawn in place with \r,
+        // which the Maven log cannot do.
         while (!this.stop) {
           System.err.print("\r" + this.objDir.listFiles(updatedFiles).length + " / " + this.rebuildCount
               + " files compiled...");
@@ -180,8 +184,6 @@ public class CCTask extends Task {
     }
   }
 
-  private static final ProcessorConfiguration[] EMPTY_CONFIG_ARRAY = new ProcessorConfiguration[0];
-
   /**
    * Builds a Hashtable to targets needing to be rebuilt keyed by compiler
    * configuration
@@ -191,15 +193,9 @@ public class CCTask extends Task {
     final Map<CompilerConfiguration, List<TargetInfo>> targetsByConfig = new HashMap<>();
     for (final TargetInfo target : targets.values()) {
       if (target.getRebuild()) {
-        // FIXME: Types do not match between the key of targetsByConfig and the return value of target.getConfiguration
-        List<TargetInfo> targetsForSameConfig = targetsByConfig.get(target.getConfiguration());
-        if (targetsForSameConfig != null) {
-          targetsForSameConfig.add(target);
-        } else {
-          targetsForSameConfig = new ArrayList<>();
-          targetsForSameConfig.add(target);
-          targetsByConfig.put((CompilerConfiguration) target.getConfiguration(), targetsForSameConfig);
-        }
+        // The targets to compile always carry a compiler configuration.
+        final CompilerConfiguration config = (CompilerConfiguration) target.getConfiguration();
+        targetsByConfig.computeIfAbsent(config, k -> new ArrayList<>()).add(target);
       }
     }
     return targetsByConfig;
@@ -215,10 +211,6 @@ public class CCTask extends Task {
    * alongside the compiled ".o" files, rather than resolving them via -l.
    */
   private final List<File> additionalStaticObjects = new ArrayList<>();
-  /** The output file type. */
-  // private LinkType _linkType = LinkType.EXECUTABLE;
-  /** The library sets. */
-  private final List<LibrarySet> _libsets = new ArrayList<>();
   /** The linker definitions. */
   private final List<LinkerDef> _linkers = new ArrayList<>();
   /** The object directory. */
@@ -287,6 +279,7 @@ public class CCTask extends Task {
   private String sharedObjectName = "";
 
   public CCTask() {
+    // Nothing to initialize: the fields keep their default values.
   }
 
   /**
@@ -765,7 +758,7 @@ public class CCTask extends Task {
         compileException = runTargetPool(monitor, compileException, targetVectors);
 
       // BEGINFREEHEP
-      progress.exit();
+      progress.finish();
       try {
         progress.join();
       } catch (final InterruptedException ex) {
@@ -1156,8 +1149,7 @@ public class CCTask extends Task {
         String compf0 = FilenameUtils.getBaseName(f0);
         String compf1 = FilenameUtils.getBaseName(f1);
 
-        // remove the hash
-        // TODO: well we hope it's a hash
+        // remove the hash, assumed to be the last extension
         compf0 = FilenameUtils.removeExtension(compf0);
         compf1 = FilenameUtils.removeExtension(compf1);
 
@@ -1175,7 +1167,7 @@ public class CCTask extends Task {
 
           if (i0 > 0 && i1 > 0) {
             // both in list
-            return i0 == i1 ? 0 : i0 < i1 ? -1 : +1;
+            return Integer.compare(i0, i1);
           } else if (i1 < 0) {
             // i0 in list
             return -1;
@@ -1414,9 +1406,6 @@ public class CCTask extends Task {
     this.failOnError = fail;
   }
 
-  // public LinkType getLinkType() {
-  // return linkType;
-  // }
   /**
    * Enables or disables incremental linking.
    * 
@@ -1618,7 +1607,7 @@ public class CCTask extends Task {
     //
     // if file name was empty, skip link step
     //
-    if (outfile == null || outfile.toString().length() > 0) {
+    if (outfile == null || !outfile.toString().isEmpty()) {
       this._outfile = outfile;
     }
   }

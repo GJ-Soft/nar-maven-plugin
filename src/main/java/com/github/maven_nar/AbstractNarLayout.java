@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
 
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -80,10 +81,9 @@ public abstract class AbstractNarLayout implements NarLayout, NarConstants {
 			throws MojoExecutionException {
 		final File narFile = new File(project.getBuild().getDirectory(),
 				project.getBuild().getFinalName() + "-" + classifier + "." + NarConstants.NAR_EXTENSION);
-		if (narFile.exists()) {
-			narFile.delete();
-		}
 		try {
+			// Fails if the old NAR cannot be removed, instead of archiving over it.
+			Files.deleteIfExists(narFile.toPath());
 			final Archiver archiver = archiverManager.getArchiver(NarConstants.NAR_ROLE_HINT);
 			archiver.addFileSet(org.codehaus.plexus.archiver.util.DefaultFileSet.fileSet(dir)
 					.include(new String[] { include }));
@@ -124,7 +124,7 @@ public abstract class AbstractNarLayout implements NarLayout, NarConstants {
 		// process
 		if (!NarUtil.getOS(os).equals(OS.WINDOWS)) {
 			NarUtil.makeExecutable(new File(narLocation, "bin/" + defaultAOL), this.log);
-			// FIXME clumsy
+			// A g++ AOL also covers the directory of its gcc twin.
 			if (defaultAOL.hasLinker(gpp)) {
 				NarUtil.makeExecutable(new File(narLocation, "bin/" + NarUtil.replace(gpp, gcc, defaultAOL.toString())),
 						this.log);
@@ -136,7 +136,7 @@ public abstract class AbstractNarLayout implements NarLayout, NarConstants {
 			if (!skipRanlib) {
 				NarUtil.runRanlib(new File(narLocation, "lib/" + defaultAOL), this.log);
 			}
-			// FIXME clumsy
+			// A g++ AOL also covers the directory of its gcc twin.
 			if (defaultAOL.hasLinker(gpp)) {
 				if (!skipRanlib) {
 					NarUtil.runRanlib(new File(narLocation, "lib/" + NarUtil.replace(gpp, gcc, defaultAOL.toString())),
@@ -144,23 +144,9 @@ public abstract class AbstractNarLayout implements NarLayout, NarConstants {
 				}
 			}
 		}
-		// TODO: Find replacement action to install name tool
-		// install name tool adjusts the internal lookup directory for the
-		// libraries,
-		// this isn't really appropriate, removing signatures for one.
-		// however don't have a replacement action currently... having commented
-		// this,
-		// may break some usage, perhaps if don't find solution make configurable.
-		// if ( NarUtil.getOS( os ).equals( OS.MACOSX ) )
-		// {
-		// File[] dylibDirs = new File[2];
-		// dylibDirs[0] = new File( narLocation, "lib/" + defaultAOL + "/" +
-		// Library.SHARED );
-		// dylibDirs[1] = new File( narLocation, "lib/" + defaultAOL + "/" +
-		// Library.JNI );
-		//
-		// NarUtil.runInstallNameTool( dylibDirs, log );
-		// }
+		// Known limitation (macOS): install_name_tool is no longer run on the
+		// unpacked shared and JNI libraries. It rewrote their lookup paths, but it
+		// also removed their signatures, and there is no replacement for it yet.
 	}
 
 }

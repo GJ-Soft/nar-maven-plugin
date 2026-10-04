@@ -398,6 +398,41 @@ _82 configurable parameters across 19 goals (9 of them read-only Maven injection
 
 
 
+## Known limitations
+
+Inherited from the original NAR plugin and not solved yet. In the code each one
+is marked with a `Known limitation` comment.
+
+**Dependencies**
+
+- The bindings of a dependency come from its NAR properties; what its stored pom
+  says (which NARs exist, which layout) is not checked.
+- A dependency is unpacked with the layout of the project that uses it. A NAR
+  built with an older layout, or against another linker version, is not
+  detected.
+- Only one include directory per NAR is used.
+- A `local` binding is not handled, and the binding, the libraries and the
+  options of a dependency cannot be overridden at that stage.
+- With several dependencies, their compiler options may be repeated.
+- `PLUGIN` and `STATIC` libraries do not get the libraries of their dependencies
+  (NARPLUGIN-96).
+- When the attached NARs are downloaded, `-U` is not honoured and newer
+  SNAPSHOTs are not looked for.
+
+**Packaging and file names**
+
+- `nar-package` and `nar-prepare-package` work from what is present in the
+  target area, not from what the pom asked to build.
+- Some file names are built in place instead of being asked to the layout
+  (NAR-90).
+
+**Platforms**
+
+- macOS: `install_name_tool` is no longer run on the unpacked shared and JNI
+  libraries. It rewrote their lookup paths, but it also removed their
+  signatures, and there is no replacement for it yet.
+- An operating system name that contains numbers is not parsed in an AOL.
+
 ## Documentation
 -------------
 * [Wiki](https://github.com/GJ-Soft/nar-maven-plugin/wiki)

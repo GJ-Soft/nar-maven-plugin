@@ -60,7 +60,8 @@ public class Java {
 
 	/**
 	 * Relative path from derived ${java.home} to the java runtime to link with
-	 * Defaults to Architecture-OS-Linker specific value. FIXME table missing
+	 * Defaults to the Architecture-OS-Linker specific &lt;aol&gt;.java.runtimeDirectory
+	 * entry of aol.properties.
 	 */
 	@Parameter
 	private String runtimeDirectory;
@@ -74,6 +75,7 @@ public class Java {
 	private AbstractCompileMojo mojo;
 
 	public Java() {
+		// Nothing to initialize: the fields keep their default values.
 	}
 
 	public final void addIncludePaths(final CCTask task, final String outType)

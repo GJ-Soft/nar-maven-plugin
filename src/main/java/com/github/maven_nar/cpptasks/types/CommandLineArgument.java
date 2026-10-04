@@ -43,6 +43,7 @@ public class CommandLineArgument {
   private String value;
 
   public CommandLineArgument() {
+    // Nothing to initialize: the fields keep their default values.
   }
 
   public int getLocation() {

@@ -60,7 +60,7 @@ import com.github.maven_nar.cpptasks.gcc.WindresResourceCompiler;
  * 
  */
 public class CompilerEnum extends EnumeratedAttribute {
-	private final static ProcessorEnumValue[] compilers = new ProcessorEnumValue[] {
+	private static final ProcessorEnumValue[] compilers = new ProcessorEnumValue[] {
 			new ProcessorEnumValue("gcc", GccCCompiler.getInstance()),
 			new ProcessorEnumValue("g++", GccCCompiler.getGppInstance()),
 			new ProcessorEnumValue("clang", GccCCompiler.getCLangInstance()),

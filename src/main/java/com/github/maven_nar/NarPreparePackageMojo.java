@@ -50,8 +50,8 @@ public class NarPreparePackageMojo extends AbstractCompileMojo {
 		return "nar-prepare-package";
 	}
 
-	// TODO: this is working of what is present rather than what was requested to
-	// be built, POM ~/= artifacts!
+	// Known limitation: this works from what is present in the target area, not
+	// from what the pom asked to build.
 	@Override
 	public final void narExecute() throws MojoExecutionException, MojoFailureException {
 		// let the layout decide which (additional) nars to attach

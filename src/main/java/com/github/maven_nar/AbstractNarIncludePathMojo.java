@@ -290,7 +290,7 @@ public abstract class AbstractNarIncludePathMojo extends AbstractCompileMojo {
 		if (!awaiting.isEmpty()) {
 			final StringBuilder names = new StringBuilder();
 			for (final NarArtifact dependency : awaiting) {
-				names.append(names.length() == 0 ? "" : ", ").append(dependency.getArtifactId());
+				names.append(names.isEmpty() ? "" : ", ").append(dependency.getArtifactId());
 			}
 			// the advice only makes sense where there is something to advise: with
 			// unpacking forbidden it is the setting to lift, and otherwise the unpack
@@ -492,8 +492,14 @@ public abstract class AbstractNarIncludePathMojo extends AbstractCompileMojo {
 		final Compiler c = getC();
 		final Compiler cpp = getCpp();
 
-		final String compiler = this.compilerPath != null && !this.compilerPath.isEmpty() ? this.compilerPath
-				: c != null ? c.getName() : null;
+		final String compiler;
+		if (this.compilerPath != null && !this.compilerPath.isEmpty()) {
+			compiler = this.compilerPath;
+		} else if (c != null) {
+			compiler = c.getName();
+		} else {
+			compiler = null;
+		}
 		if (compiler != null) {
 			json.append("      \"compilerPath\": ").append(quote(compiler)).append(",").append(System.lineSeparator());
 		}

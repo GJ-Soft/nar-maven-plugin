@@ -36,6 +36,7 @@ public class ConditionalFileSet extends FileSet {
   private String unlessCond;
 
   public ConditionalFileSet() {
+    // Nothing to initialize: the fields keep their default values.
   }
 
   public void execute() throws org.apache.tools.ant.BuildException {

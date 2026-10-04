@@ -101,14 +101,13 @@ public abstract class AbstractResourcesMojo extends AbstractNarMojo {
     // copy libraries
     File baseLibDir = new File(srcDir, this.resourceLibDir);
     if (baseLibDir.exists()) {
-      // TODO: copyLibraries is used on more than just this artifact - this
-      // check needs to be placed elsewhere
+      // This check would belong where copyLibraries is called, since it runs
+      // for more than this artifact.
       if (getLibraries().isEmpty()) {
         getLog().warn("Appear to have library resources, but not Libraries are defined");
       }
       // create all types of libs
-      for (final Object element : getLibraries()) {
-        final Library library = (Library) element;
+      for (final Library library : getLibraries()) {
         final String type = library.getType();
 
         File libDir = baseLibDir;

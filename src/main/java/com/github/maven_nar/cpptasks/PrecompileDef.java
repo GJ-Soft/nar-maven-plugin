@@ -49,6 +49,7 @@ public final class PrecompileDef extends DataType {
    * 
    */
   public PrecompileDef() {
+    // Nothing to initialize: the fields keep their default values.
   }
 
   /**

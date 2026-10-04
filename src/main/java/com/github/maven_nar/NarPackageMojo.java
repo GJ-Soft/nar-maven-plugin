@@ -53,8 +53,8 @@ public class NarPackageMojo extends AbstractNarMojo {
 	@Component
 	private MavenProjectHelper projectHelper;
 
-	// TODO: this is working of what is present rather than what was requested to
-	// be built, POM ~/= artifacts!
+	// Known limitation: this works from what is present in the target area, not
+	// from what the pom asked to build.
 	@Override
 	public final void narExecute() throws MojoExecutionException, MojoFailureException {
 		// let the layout decide which nars to attach

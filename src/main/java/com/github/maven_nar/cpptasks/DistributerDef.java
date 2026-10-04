@@ -30,6 +30,10 @@ import org.apache.tools.ant.types.Reference;
  *
  */
 public final class DistributerDef extends DataType {
+
+  /** Name of this data type in the Ant reference checks. */
+  private static final String DATA_TYPE_NAME = "DistributerDef";
+
   /**
    * if property.
    */
@@ -72,6 +76,7 @@ public final class DistributerDef extends DataType {
    *
    */
   public DistributerDef() {
+    // Nothing to initialize: the fields keep their default values.
   }
 
   /**
@@ -101,7 +106,7 @@ public final class DistributerDef extends DataType {
    */
   public String getHosts() {
     if (isReference()) {
-      final DistributerDef refDistributer = getCheckedRef(DistributerDef.class, "DistributerDef");
+      final DistributerDef refDistributer = getCheckedRef(DistributerDef.class, DATA_TYPE_NAME);
       return refDistributer.getHosts();
     }
     return this.hosts;
@@ -115,7 +120,7 @@ public final class DistributerDef extends DataType {
    */
   public DistributerProtocolEnum getProtocol() {
     if (isReference()) {
-      final DistributerDef refDistributer = getCheckedRef(DistributerDef.class, "DistributerDef");
+      final DistributerDef refDistributer = getCheckedRef(DistributerDef.class, DATA_TYPE_NAME);
       return refDistributer.getProtocol();
     }
     return this.protocol;
@@ -129,7 +134,7 @@ public final class DistributerDef extends DataType {
    */
   public int getTcpcork() {
     if (isReference()) {
-      final DistributerDef refDistributer = getCheckedRef(DistributerDef.class, "DistributerDef");
+      final DistributerDef refDistributer = getCheckedRef(DistributerDef.class, DATA_TYPE_NAME);
       return refDistributer.getTcpcork();
     }
     return this.tcpCork;

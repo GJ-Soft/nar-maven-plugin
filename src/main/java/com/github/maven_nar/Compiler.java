@@ -55,8 +55,8 @@ public abstract class Compiler {
 
 	/**
 	 * The name of the compiler. Some choices are: "msvc", "g++", "gcc", "CC", "cc",
-	 * "icc", "icpc", ... Default is Architecture-OS-Linker specific: FIXME: table
-	 * missing
+	 * "icc", "icpc", ... Default is Architecture-OS-Linker specific: the
+	 * &lt;aol&gt;.cpp.compiler or &lt;aol&gt;.c.compiler entry of aol.properties.
 	 */
 	@Parameter
 	private String name;
@@ -236,8 +236,8 @@ public abstract class Compiler {
 	private List<String> systemIncludePaths;
 
 	/**
-	 * Additional options for the C++ compiler Defaults to Architecture-OS-Linker
-	 * specific values. FIXME table missing
+	 * Additional options for the C++ compiler. Defaults to the Architecture-OS-Linker
+	 * specific &lt;aol&gt;.cpp.options or &lt;aol&gt;.c.options entry of aol.properties.
 	 */
 	@Parameter
 	private List<String> options;
@@ -298,11 +298,13 @@ public abstract class Compiler {
 	 * 
 	 * @param type   - main or test library - used to determine include and exclude
 	 *               paths.
-	 * @param output - TODO Not sure..
+	 * @param output - name of the test being compiled, which keeps its own source
+	 *               while the other tests are excluded; null for the main compilation.
 	 * @return {@link CompilerDef} which contains the configuration for this
 	 *         compiler given the type and output.
-	 * @throws MojoFailureException   TODO
-	 * @throws MojoExecutionException TODO
+	 * @throws MojoFailureException   if a configured include path does not exist.
+	 * @throws MojoExecutionException if the Architecture-OS-Linker settings cannot be
+	 *                                obtained.
 	 */
 	public final CompilerDef getCompiler(final String type, final String output)
 			throws MojoFailureException, MojoExecutionException {
@@ -498,8 +500,7 @@ public abstract class Compiler {
 		// matches no test name, and excluding them there would drop a source file of
 		// the library for no other reason than a test carrying its name.
 		if (type.equals(TEST)) {
-			for (final Object o : this.mojo.getTests()) {
-				final Test test = (Test) o;
+			for (final Test test : this.mojo.getTests()) {
 				if (!test.getName().equals(output)) {
 					excludeSet.add("**/" + test.getName() + ".*");
 				}
@@ -638,8 +639,8 @@ public abstract class Compiler {
 				sourceDirectories.add(this.testSourceDirectory);
 			}
 
-			for (final Object element : this.mojo.getMavenProject().getTestCompileSourceRoots()) {
-				final File extraTestSourceDirectory = new File((String) element);
+			for (final String element : this.mojo.getMavenProject().getTestCompileSourceRoots()) {
+				final File extraTestSourceDirectory = new File(element);
 				if (extraTestSourceDirectory.exists()) {
 					sourceDirectories.add(extraTestSourceDirectory);
 				}
@@ -652,8 +653,8 @@ public abstract class Compiler {
 				sourceDirectories.add(this.sourceDirectory);
 			}
 
-			for (final Object element : this.mojo.getMavenProject().getCompileSourceRoots()) {
-				final File extraSourceDirectory = new File((String) element);
+			for (final String element : this.mojo.getMavenProject().getCompileSourceRoots()) {
+				final File extraSourceDirectory = new File(element);
 				if (extraSourceDirectory.exists()) {
 					sourceDirectories.add(extraSourceDirectory);
 				}
