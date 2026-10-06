@@ -1,0 +1,61 @@
+/*
+ * #%L
+ * Native ARchive plugin for Maven
+ * %%
+ * Copyright (C) 2002 - 2014 NAR Maven Plugin developers.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
+/*
+ * The compilation database: under target, with one entry for the library
+ * source and one for the test, each with its command line and object file.
+ */
+
+import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+
+database = new File(basedir, "target/compile_commands.json");
+if (!database.isFile()) {
+	print("Missing " + database);
+	return false;
+}
+if (new File(basedir, "compile_commands.json").exists() || new File(basedir, "src/compile_commands.json").exists()) {
+	print("compile_commands.json written outside target");
+	return false;
+}
+
+text = new String(Files.readAllBytes(database.toPath()), StandardCharsets.UTF_8);
+lines = text.split("\\r?\\n");
+entries = 0;
+for (line : lines) {
+	if (line.trim().startsWith("{")) {
+		entries++;
+		if (line.indexOf("\"arguments\": [") < 0 || line.indexOf("\"output\": ") < 0
+				|| line.indexOf("\"directory\": ") < 0) {
+			print("Incomplete entry: " + line);
+			return false;
+		}
+	}
+}
+if (entries != 2) {
+	print("Expected 2 entries, found " + entries + ":\n" + text);
+	return false;
+}
+if (text.indexOf("HelloWorldLib.c\"") < 0 || text.indexOf("HelloWorldTest.c\"") < 0) {
+	print("Missing the library or the test source:\n" + text);
+	return false;
+}
+return true;

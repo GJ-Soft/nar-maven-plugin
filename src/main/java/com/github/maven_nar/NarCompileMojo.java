@@ -142,6 +142,7 @@ public class NarCompileMojo extends AbstractCompileMojo {
 		objDir = new File(objDir, getAOL().toString());
 		objDir.mkdirs();
 		task.setObjdir(objDir);
+		task.setCompileCommandsFile(getCompileCommandsFile());
 
 		// failOnError
 		task.setFailonerror(failOnError(getAOL()));

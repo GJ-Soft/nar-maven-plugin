@@ -49,4 +49,7 @@ public interface NarConstants {
   String REPLAY_LINK_NAME = "link-commands";
   String REPLAY_TEST_COMPILE_NAME = "test-compile-commands";
   String REPLAY_TEST_LINK_NAME = "test-link-commands";
+
+  /** The compilation database, in the build directory of the module. */
+  String COMPILE_COMMANDS_NAME = "compile_commands.json";
 }

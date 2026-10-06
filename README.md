@@ -75,7 +75,7 @@ The plugin exposes **19 goals**, each implemented by a Mojo class in the
 | Goal | Default phase | Implementing Mojo class | Description |
 |------|---------------|-------------------------|-------------|
 | `nar-assembly` | process-resources | `com.github.maven_nar.NarAssemblyMojo` | Assemble libraries of NAR files. |
-| `nar-compile` | compile | `com.github.maven_nar.NarCompileMojo` | Compiles native source files. |
+| `nar-compile` | compile | `com.github.maven_nar.NarCompileMojo` | Compiles native source files, and writes `target/compile_commands.json`. |
 | `nar-download` | initialize | `com.github.maven_nar.NarDownloadMojo` | List all dependencies needed by the project (compilation, tests, execution) and download the NAR files to the local repository. |
 | `nar-download-dependencies` | generate-sources | `com.github.maven_nar.NarDownloadDependenciesMojo` | List all dependencies of the project and download the `noarch`/`aol` NAR files to the local repository if needed. |
 | `nar-gnu-configure` | process-sources | `com.github.maven_nar.NarGnuConfigureMojo` | Copies the GNU style source files to a target area, autogens and configures them. |
@@ -89,7 +89,7 @@ The plugin exposes **19 goals**, each implemented by a Mojo class in the
 | `nar-system-generate` | generate-resources | `com.github.maven_nar.NarSystemMojo` | Generates a `NarSystem` class with static methods to use from the Java part of the library. |
 | `nar-test` | test | `com.github.maven_nar.NarTestMojo` | Tests NAR files. Runs native tests and executables if produced. |
 | `nar-test-unpack` | generate-test-sources | `com.github.maven_nar.NarTestUnpackMojo` | Unpacks NAR files needed for test compilation and execution. |
-| `nar-testCompile` | test-compile | `com.github.maven_nar.NarTestCompileMojo` | Compiles native test source files. |
+| `nar-testCompile` | test-compile | `com.github.maven_nar.NarTestCompileMojo` | Compiles native test source files, and adds them to `target/compile_commands.json`. |
 | `nar-unpack` | generate-sources | `com.github.maven_nar.NarUnpackMojo` | Unpacks NAR files needed for compilation into the project target folder. |
 | `nar-unpack-dependencies` | generate-sources | `com.github.maven_nar.NarUnpackDependenciesMojo` | Download and unpack all the dependencies' NAR files into the project target folder. |
 | `nar-validate` | validate | `com.github.maven_nar.NarValidateMojo` | Validates the configuration of the NAR project (aol and pom). |

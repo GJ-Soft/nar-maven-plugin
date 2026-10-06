@@ -103,6 +103,7 @@ public class NarTestCompileMojo extends AbstractCompileMojo {
 		objDir = new File(objDir, getAOL().toString());
 		objDir.mkdirs();
 		task.setObjdir(objDir);
+		task.setCompileCommandsFile(getCompileCommandsFile());
 
 		// The archive of this project must be linked into the test executable as an
 		// object input (alongside the .o files), not resolved via -l. See

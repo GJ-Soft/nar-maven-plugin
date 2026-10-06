@@ -215,6 +215,7 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
       final String[] endArgs, final boolean relentless, final CommandLineCompilerConfiguration config,
       final ProgressMonitor monitor) throws BuildException {
     BuildException exc = null;
+    final String[] compilerArgs = args;
     //
     // determine length of executable name and args
     //
@@ -240,7 +241,6 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
     // typically either 1 or Integer.MAX_VALUE
     //
     final int maxInputFilesPerCommand = getMaximumInputFilesPerCommand();
-    final int argumentCountPerInputFile = getArgumentCountPerInputFile();
     for (int sourceIndex = 0; sourceIndex < sourceFiles.length;) {
       int cmdLength = baseLength;
       int firstFileNextExec;
@@ -255,21 +255,9 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
         throw new BuildException("Extremely long file name, can't fit on command line");
       }
 
-      ArrayList<String> commandlinePrefix = new ArrayList<>();
-      commandlinePrefix.add(command);
-      Collections.addAll(commandlinePrefix, args);
-
       int retval = 0;
       for (int j = sourceIndex; j < firstFileNextExec; j++) {
-        ArrayList<String> commandlineSuffix = new ArrayList<>();
-
-        for (int k = 0; k < argumentCountPerInputFile; k++) {
-          commandlineSuffix.add(getInputFileArgument(outputDir, sourceFiles[j], k));
-        }
-        Collections.addAll(commandlineSuffix, endArgs);
-
-        ArrayList<String> commandline = new ArrayList<>(commandlinePrefix);
-        commandline.addAll(commandlineSuffix);
+        final List<String> commandline = getCommandLine(outputDir, sourceFiles[j], compilerArgs, endArgs, config);
         final int ret = runCommand(task, workDir,
             commandline.toArray(new String[commandline.size()]));
         if (ret != 0) { retval = ret; }
@@ -464,6 +452,45 @@ public abstract class CommandLineCompiler extends AbstractCompiler {
 
     return new CommandLineCompilerConfiguration(compiler, configId, incPath, sysIncPath, envIncludePath,
         includePathIdentifier.toString(), argArray, paramArray, rebuild, endArgs, path, specificDef.getCcache());
+  }
+
+  /**
+   * The command line that compiles one source file: the one {@link #compile}
+   * runs, ccache included, and the one written to the compilation database.
+   *
+   * @param outputDir
+   *          the object directory
+   * @param sourceFile
+   *          the source file
+   * @param args
+   *          the compiler arguments, before the input file
+   * @param endArgs
+   *          the arguments after the input file
+   * @param config
+   *          the configuration that gives the compiler command
+   * @return the command line, the executable first
+   */
+  public List<String> getCommandLine(final File outputDir, final String sourceFile, final String[] args,
+      final String[] endArgs, final CommandLineCompilerConfiguration config) {
+    final List<String> commandline = new ArrayList<>();
+    if (config.isUseCcache()) {
+      commandline.add(CCACHE_CMD);
+    }
+    commandline.add(getCommandWithPath(config));
+    Collections.addAll(commandline, args);
+    for (int k = 0; k < getArgumentCountPerInputFile(); k++) {
+      commandline.add(getInputFileArgument(outputDir, sourceFile, k));
+    }
+    Collections.addAll(commandline, endArgs);
+    return commandline;
+  }
+
+  /**
+   * @return the working directory of the compiler process; null for the
+   *         current directory
+   */
+  public File getWorkDir() {
+    return this.workDir;
   }
 
   protected int getArgumentCountPerInputFile() {

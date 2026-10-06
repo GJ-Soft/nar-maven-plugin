@@ -28,6 +28,12 @@ This project is an update to Java 21 from version 3.10.1 as it was on 17/04/2020
   bound in the NAR lifecycle, so they need no configuration, and they run before
   anything is compiled so that an IDE can resolve the includes of a project that
   does not build yet.
+- `nar-compile` and `nar-testCompile` write the JSON compilation database
+  `target/compile_commands.json` ( directory, command line and object file of
+  each C and C++ source ), for clangd, clang-tidy and the SonarQube C/C++
+  analyzer. Always under the build directory, with nothing to configure; the
+  library and the tests share it, and an incremental build records every source,
+  not only the ones it recompiles.
 
 ### Changed
 - Java 21, Maven 3.9 and Resolver 1.9.x. Tests migrated to JUnit 5. Documentation

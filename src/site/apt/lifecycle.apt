@@ -37,9 +37,9 @@ standard maven goals) attached to them. The order is left to right, top to botto
 *------------------------+---------------------------------------------------------------------+ 
 | initialize             | <<nar-download>>                                                    |
 *------------------------+---------------------------------------------------------------------+ 
-| generate-sources       | <<nar-unpack>>                                                      |
+| generate-sources       | <<nar-unpack>>, <<nar-test-unpack>>                                 |
 *------------------------+---------------------------------------------------------------------+ 
-| process-sources        | <<nar-gnu-configure>>, <<nar-include-path>>                         |
+| process-sources        | <<nar-gnu-configure>>, <<nar-include-path>>, <<nar-test-include-path>>|
 *------------------------+---------------------------------------------------------------------+ 
 | generate-resources     | <<nar-system-generate>>                             |
 *------------------------+---------------------------------------------------------------------+ 
@@ -49,9 +49,9 @@ standard maven goals) attached to them. The order is left to right, top to botto
 *------------------------+---------------------------------------------------------------------+ 
 | process-classes        | <<nar-gnu-process>>, <<nar-process-libraries>>                      |
 *------------------------+---------------------------------------------------------------------+ 
-| generate-test-sources  | <<nar-test-unpack>>                                                 |
+| generate-test-sources  |                                                                     |
 *------------------------+---------------------------------------------------------------------+ 
-| process-test-sources   | <<nar-test-include-path>>                                           |
+| process-test-sources   |                                                                     |
 *------------------------+---------------------------------------------------------------------+ 
 | generate-test-resources|                                                                     |
 *------------------------+---------------------------------------------------------------------+ 
@@ -86,37 +86,61 @@ install and deploy plugins of maven do their job.
 
 	The nar-assembly goal is not part of the lifestyle and should be called independently.
 
-Include Path Goals: Pending Work
+Compilation Database
+
+	<<nar-compile>> and <<nar-testCompile>> write <<<target/compile_commands.json>>>, the
+JSON compilation database that clangd, clang-tidy and the SonarQube C/C++ analyzer read
+to learn how each source file is compiled: its working directory, its whole command
+line and its object file. It always goes in the build directory of the module, never
+next to the sources, and there is nothing to configure.
+
+	Both goals write to the same file, so it holds the library and the test sources
+together; each compilation replaces its own entries and keeps the others. Every source
+the task knows how to compile gets an entry, not only those it recompiles, so an
+incremental build leaves the database as complete as a clean one. Only C and C++
+sources are recorded: a Windows resource compiled with windres is not.
+
+Include Path Goals
 
 	The <<nar-include-path>> and <<nar-test-include-path>> goals publish the include
 directories the sources compile against, so that an IDE can resolve the headers of a
-project that <does not compile yet>. Two known limitations still get in the way of that
-purpose, and both are pending:
+project that <does not compile yet>. Each writes a plain list (<<<nar-include-path.txt>>>),
+a Visual Studio Code C/C++ configuration (<<<c_cpp_properties.json>>>) and a project
+property (<<<nar.include.path>>>, and <<<nar.include.path.test>>> for the tests); the
+main-scope files go to target/nar and the test-scope ones to target/test-nar.
 
-	[[1]] <<The test goals run too late.>> <<nar-test-unpack>> is bound to
-	generate-test-sources and <<nar-test-include-path>> to process-test-sources, and
-	both of those phases come <after> compile in the standard lifecycle. There is
-	therefore no way to obtain the include path of the test sources without compiling
-	the module first, which is precisely what these goals exist to avoid. They should
-	be rebound to phases before compile, as their main-scope counterparts already are
-	(initialize, generate-sources and process-sources).
+	[[1]] <<They run before compile, both of them.>> The test pair is bound next to the
+	main one: <<nar-test-unpack>> in generate-sources and <<nar-test-include-path>> in
+	process-sources. generate-test-sources and process-test-sources come after compile
+	in the standard lifecycle, so binding them there would make the test include path
+	unreachable without compiling the module first. <<<mvn process-sources>>> therefore
+	yields both configurations.
 
-	[[2]] <<The goals are not self-sufficient on their own.>> They are meant to be
-	callable from the command line (<<<mvn nar:nar-include-path>>>) even though they
-	also run inside the lifecycle. They are invocable, but they collect the dependency
-	include directories from the unpack directory and silently drop the ones that do
-	not exist, so on a module that has just been cleaned they produce a
-	c_cpp_properties.json holding only the project's own include directory, with no
-	error or warning. To be genuinely standalone they must make sure the dependencies
-	are resolved and unpacked themselves, instead of relying on earlier phases having
-	run.
+	Running earlier has a price: a plain <<<mvn compile>>> now reaches the test unpack.
+	<<nar-test-unpack>> honours <<<skipTests>>>, like <<nar-testCompile>> and
+	<<nar-test>>, so <<<-DskipTests>>> or <<<-Dmaven.test.skip=true>>> leave the test
+	dependencies packed.
+
+	[[2]] <<They are self-sufficient on their own.>> They can be called directly from the
+	command line (<<<mvn nar:nar-include-path nar:nar-test-include-path>>>) on a module
+	that has just been cleaned. Whether they unpack the dependencies themselves is
+	decided by <<<nar.includePath.unpack>>>:
+
+		* unset, the default: they unpack only when something is missing, that is, when a
+		dependency declares a <<<noarch>>> NAR in its nar.properties (where the headers
+		travel) and its directory is not there. Inside a build, where the unpack goals
+		have already run, this costs nothing.
+
+		* true: they always unpack.
+
+		* false: they never unpack.
+
+		[]
+
+	Whatever is still missing is reported with a warning naming the dependencies left
+	out, instead of being dropped silently: an incomplete include path is worse than
+	none, because the IDE resolves some headers and flags the others as missing.
 
 	[]
-
-	Until both are addressed, a consumer of these goals has to drive them through the
-lifecycle instead of calling them directly, and stop before compile. That is what the
-Gjs Maven VS Code extension does: its Maven Update runs <<<mvn process-sources>>> on
-C/C++ modules, and uses only target/nar/c_cpp_properties.json, leaving the test one
-unused.
 	
 	

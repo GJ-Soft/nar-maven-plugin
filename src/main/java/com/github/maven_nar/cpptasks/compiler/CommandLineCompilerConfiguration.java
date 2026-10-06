@@ -20,6 +20,7 @@
 package com.github.maven_nar.cpptasks.compiler;
 
 import java.io.File;
+import java.util.List;
 
 import org.apache.tools.ant.BuildException;
 
@@ -152,6 +153,31 @@ public final class CommandLineCompilerConfiguration implements CompilerConfigura
       }
     }
     return compilerBid;
+  }
+
+  /**
+   * The command line that compiles one source file with this configuration.
+   *
+   * @see CommandLineCompiler#getCommandLine
+   */
+  public List<String> getCommandLine(final File outputDir, final String sourceFile) {
+    return this.compiler.getCommandLine(outputDir, sourceFile, this.args, this.endArgs, this);
+  }
+
+  /**
+   * @return the working directory of the compiler process; null for the
+   *         current directory
+   */
+  public File getWorkDir() {
+    return this.compiler.getWorkDir();
+  }
+
+  /**
+   * @return true if the compiler is a C or C++ compiler, the only ones that
+   *         belong in a compilation database (not windres, for instance)
+   */
+  public boolean isCCompiler() {
+    return this.compiler instanceof CommandLineCCompiler;
   }
 
   @Override

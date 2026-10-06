@@ -217,6 +217,8 @@ public class CCTask extends Task {
   private File _objDir;
   /** The output file. */
   private File _outfile;
+  /** The compilation database; null to write none. */
+  private File compileCommandsFile;
   /** The linker definitions. */
   private final List<TargetDef> targetPlatforms = new ArrayList<>();
   /** The distributer definitions. */
@@ -717,6 +719,13 @@ public class CCTask extends Task {
     // the same as the history to be rebuilt
     //
     objHistory.markForRebuild(targets);
+    //
+    // every target, not only those to rebuild: an incremental build
+    // must leave the database as complete as a clean one
+    //
+    if (this.compileCommandsFile != null) {
+      writeCompileCommands(targets);
+    }
     final CCTaskProgressMonitor monitor = new CCTaskProgressMonitor(objHistory, versionInfo);
     //
     // check for changed include files
@@ -1570,8 +1579,47 @@ public class CCTask extends Task {
   }
 
   /**
+   * Writes to the compilation database the command line of every C and C++
+   * target. A failure is only a warning: the database is for tools, the build
+   * does not need it.
+   */
+  private void writeCompileCommands(final Map<String, TargetInfo> targets) {
+    final CompileCommands commands = new CompileCommands(this.compileCommandsFile);
+    for (final TargetInfo target : targets.values()) {
+      if (!(target.getConfiguration() instanceof CommandLineCompilerConfiguration)) {
+        continue;
+      }
+      final CommandLineCompilerConfiguration config = (CommandLineCompilerConfiguration) target.getConfiguration();
+      if (!config.isCCompiler() || config.isPrecompileGeneration()) {
+        continue;
+      }
+      final File source = target.getSources()[0];
+      final File workDir = config.getWorkDir();
+      final File directory = workDir != null ? workDir : new File(System.getProperty("user.dir"));
+      commands.add(directory, source, config.getCommandLine(this._objDir, source.toString()), target.getOutput());
+    }
+    try {
+      commands.write();
+    } catch (final IOException ex) {
+      log("Error writing " + this.compileCommandsFile + ": " + ex, Project.MSG_WARN);
+    }
+  }
+
+  /**
+   * Sets the compilation database (<code>compile_commands.json</code>) that
+   * records how each C and C++ source file is compiled. It is merged with the
+   * entries other tasks have already written to the same file.
+   *
+   * @param file
+   *          the compilation database; null to write none
+   */
+  public void setCompileCommandsFile(final File file) {
+    this.compileCommandsFile = file;
+  }
+
+  /**
    * Sets the destination directory for object files.
-   * 
+   *
    * Generally this should be a property expression that evaluates to
    * distinct debug and release object file directories.
    * 

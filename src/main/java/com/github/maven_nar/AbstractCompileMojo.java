@@ -143,6 +143,15 @@ public abstract class AbstractCompileMojo extends AbstractDependencyMojo {
 	protected final List<String[]> testCompileCommands = new ArrayList<>();
 	protected final List<String[]> testLinkCommands = new ArrayList<>();
 
+	/**
+	 * The compilation database of the module, shared by the library and the
+	 * tests. It always goes under the build directory (target), never next to
+	 * the sources: it is generated, and a clean removes it with the rest.
+	 */
+	protected final File getCompileCommandsFile() {
+		return new File(getMavenProject().getBuild().getDirectory(), NarConstants.COMPILE_COMMANDS_NAME);
+	}
+
 	protected final boolean failOnError(final AOL aol) throws MojoExecutionException {
 		return getNarInfo().getProperty(aol, "failOnError", this.failOnError);
 	}
