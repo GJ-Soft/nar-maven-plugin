@@ -255,7 +255,7 @@ public class NarTestMojo extends AbstractCompileMojo {
 			getLog().info("Running executable " + executable);
 			final List<String> args = library.getArgs();
 			final int result = NarUtil.runCommand(executable.getPath(), args.toArray(new String[0]), null,
-					generateEnvironment(), getLog());
+					generateEnvironment(), getLog(), false);
 			if (result != 0) {
 				throw new MojoFailureException("Test " + executable + " failed with exit code: " + result + " 0x"
 						+ Integer.toHexString(result));
@@ -306,7 +306,7 @@ public class NarTestMojo extends AbstractCompileMojo {
 
 			final List<String> args = test.getArgs();
 			final int result = NarUtil.runCommand(path.toString(), args.toArray(new String[0]),
-					workingDir, generateEnvironment(test.getEnvironmentVariables()), getLog());
+					workingDir, generateEnvironment(test.getEnvironmentVariables()), getLog(), false);
 			if (result != 0) {
 				throw new MojoFailureException(
 						"Test " + name + " failed with exit code: " + result + " 0x" + Integer.toHexString(result));

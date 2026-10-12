@@ -484,14 +484,13 @@ public final class DependencyTable {
           // recurse into
           //
           for (final DependencyInfo includeInfo : includeInfos) {
-            // Darren Sargent 23Oct2008
-            // only recurse for direct includes of current source
-            // file
-            if (includeInfo.getSource().contains(File.separatorChar + "src" + File.separatorChar + "main")
-                || includeInfo.getSource().contains(File.separatorChar + "src" + File.separatorChar + "test")) {
-              task.log("Walking dependencies for " + includeInfo.getSource(), Project.MSG_VERBOSE);
-              walkDependencies(task, includeInfo, compiler, stack, visitor);
-            }
+            // Every header found through the include path is walked, not only
+            // those under src/main or src/test: the headers of a dependency
+            // (unpacked under target) include each other too, and a change two
+            // levels down left the objects stale. System headers are not
+            // affected, they are sysIncludes and are never walked.
+            task.log("Walking dependencies for " + includeInfo.getSource(), Project.MSG_VERBOSE);
+            walkDependencies(task, includeInfo, compiler, stack, visitor);
           }
         }
       }

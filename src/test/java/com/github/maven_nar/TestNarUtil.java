@@ -21,12 +21,18 @@ package com.github.maven_nar;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.SystemStreamLog;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -80,5 +86,60 @@ public class TestNarUtil {
   public void testParseOctalPermissionGroupRead() {
     final Set<PosixFilePermission> permissions = NarUtil.parseOctalPermission("040");
     assertEquals(PosixFilePermissions.fromString("---r-----"), permissions);
+  }
+
+  /** Records the warnings, which is where a failed command reports its output. */
+  private static final class WarnLog extends SystemStreamLog {
+    private final List<String> warnings = new ArrayList<>();
+
+    @Override
+    public void warn(final CharSequence content) {
+      this.warnings.add(content.toString());
+    }
+  }
+
+  /** A command that always fails, printing something to the standard error. */
+  private static String failingJava() {
+    return Paths.get(System.getProperty("java.home"), "bin", "java").toString();
+  }
+
+  private static final String[] FAILING_ARGS = { "-XX:+NoSuchNarOption" };
+
+  /**
+   * Regression: with the streams that log line by line, a failure warned with
+   * their identity ("com.github.maven_nar.NarUtil$3@52d1600c") instead of
+   * anything useful. The output was already logged, so nothing is repeated.
+   */
+  @Test
+  public void testRunCommandFailureWithLoggingStreamsWarnsNoIdentity() {
+    final WarnLog log = new WarnLog();
+    assertThrows(MojoExecutionException.class,
+        () -> NarUtil.runCommand(failingJava(), FAILING_ARGS, null, null, log));
+    assertTrue(log.warnings.isEmpty(), log.warnings.toString());
+  }
+
+  /**
+   * Without checking the exit value the failure is returned, not thrown: that is
+   * what lets nar-test say which test failed and with what code.
+   */
+  @Test
+  public void testRunCommandWithoutCheckReturnsTheExitValue() throws Exception {
+    final WarnLog log = new WarnLog();
+    assertEquals(1, NarUtil.runCommand(failingJava(), FAILING_ARGS, null, null, log, false));
+    assertTrue(log.warnings.isEmpty(), log.warnings.toString());
+  }
+
+  /** With capturing streams the failure still warns with what they captured. */
+  @Test
+  public void testRunCommandFailureWithStringStreamsWarnsTheOutput() {
+    final WarnLog log = new WarnLog();
+    final StringTextStream out = new StringTextStream();
+    final StringTextStream err = new StringTextStream();
+    final StringTextStream dbg = new StringTextStream();
+    assertThrows(MojoExecutionException.class,
+        () -> NarUtil.runCommand(failingJava(), FAILING_ARGS, null, null, out, err, dbg, log));
+    assertEquals(3, log.warnings.size());
+    assertTrue(log.warnings.get(0).contains("NoSuchNarOption"), log.warnings.get(0));
+    assertEquals(dbg.toString(), log.warnings.get(2));
   }
 }

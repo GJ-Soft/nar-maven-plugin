@@ -74,6 +74,21 @@ This project is an update to Java 21 from version 3.10.1 as it was on 17/04/2020
   there could depend on the working directory.
 - The warnings gcc emits on Windows for libraries named `libX.a` / `libX.so` are no
   longer printed.
+- A change in a header two levels down a dependency did not recompile anything.
+  The incremental check only walked into headers under `src/main` or `src/test`,
+  so the headers of a dependency, unpacked under `target`, were checked by date
+  but not followed. A test that includes the umbrella header of its own library,
+  which comes from `target/nar`, kept objects built against an older layout of
+  a class, and crashed. Every header found through the include path is walked
+  now; system headers still are not.
+- A test that failed was reported as `exit code: N`, without its name: running
+  the command already threw before `nar-test` could say which test it was. The
+  exit value is now returned to `nar-test`, which names the test and gives the
+  code in decimal and hexadecimal.
+- A failed command printed `com.github.maven_nar.NarUtil$3@52d1600c` and the like,
+  three times: the identity of the streams that log line by line, whose output
+  had already been printed. Only streams that capture the output are printed
+  now.
 
 ## 4.0.0
 

@@ -386,6 +386,18 @@ public final class NarUtil {
 
 	public static int runCommand(final String cmd, final String[] args, final File workingDirectory, final String[] env,
 			final Log log) throws MojoExecutionException, MojoFailureException {
+		return runCommand(cmd, args, workingDirectory, env, log, true);
+	}
+
+	/**
+	 * Runs a command logging its output line by line.
+	 *
+	 * @param checkExitValue with false a non-zero exit value is returned instead of
+	 *                       thrown, so the caller can report the failure in its own
+	 *                       terms (a test that fails is not a launch problem).
+	 */
+	public static int runCommand(final String cmd, final String[] args, final File workingDirectory, final String[] env,
+			final Log log, final boolean checkExitValue) throws MojoExecutionException, MojoFailureException {
 		if (log.isInfoEnabled()) {
 			final StringBuilder argLine = new StringBuilder();
 			if (args != null) {
@@ -414,7 +426,7 @@ public final class NarUtil {
 			public void println(final String text) {
 				log.debug(text);
 			}
-		}, log);
+		}, log, false, checkExitValue);
 	}
 
 	public static int runCommand(final String cmd, final String[] args, final File workingDirectory, final String[] env,
@@ -426,6 +438,13 @@ public final class NarUtil {
 	public static int runCommand(final String cmd, final String[] args, final File workingDirectory, final String[] env,
 			final TextStream out, final TextStream err, final TextStream dbg, final Log log,
 			final boolean expectFailure) throws MojoExecutionException, MojoFailureException {
+		return runCommand(cmd, args, workingDirectory, env, out, err, dbg, log, expectFailure, true);
+	}
+
+	private static int runCommand(final String cmd, final String[] args, final File workingDirectory,
+			final String[] env, final TextStream out, final TextStream err, final TextStream dbg, final Log log,
+			final boolean expectFailure, final boolean checkExitValue)
+			throws MojoExecutionException, MojoFailureException {
 		final Commandline cmdLine = new Commandline();
 
 		try {
@@ -466,16 +485,18 @@ public final class NarUtil {
 			final int timeout = 5000;
 			errorGobbler.join(timeout);
 			outputGobbler.join(timeout);
-			if (exitValue != 0 ^ expectFailure) {
-				if (log == null) {
-					// Called without a Maven log: the standard error is the only place left.
-					System.err.println(err.toString());
-					System.err.println(out.toString());
-					System.err.println(dbg.toString());
-				} else {
-					log.warn(err.toString());
-					log.warn(out.toString());
-					log.warn(dbg.toString());
+			if (checkExitValue && (exitValue != 0 ^ expectFailure)) {
+				// Only a StringTextStream holds the output to show here; any other stream
+				// already printed it line by line, and its toString() is just its identity.
+				for (final TextStream stream : new TextStream[] { err, out, dbg }) {
+					if (stream instanceof StringTextStream) {
+						if (log == null) {
+							// Called without a Maven log: the standard error is the only place left.
+							System.err.println(stream.toString());
+						} else {
+							log.warn(stream.toString());
+						}
+					}
 				}
 				throw new MojoExecutionException("exit code: " + exitValue);
 			}
