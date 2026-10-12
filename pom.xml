@@ -5,13 +5,13 @@
     <parent>
         <groupId>org.gjsoft.java.maven</groupId>
         <artifactId>gjs-java-maven-parent</artifactId>
-        <version>1.0.0-RC.2</version>    
+        <version>1.0.0</version>    
         <relativePath/>
     </parent>
 
     <groupId>org.gjsoft.maven.plugins</groupId>
     <artifactId>nar-maven-plugin</artifactId>
-    <version>4.0.0-RC.1</version>
+    <version>4.0.0</version>
     <packaging>maven-plugin</packaging>
 
     <name>Native ARchive plugin for Maven</name>

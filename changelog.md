@@ -28,12 +28,6 @@ This project is an update to Java 21 from version 3.10.1 as it was on 17/04/2020
   bound in the NAR lifecycle, so they need no configuration, and they run before
   anything is compiled so that an IDE can resolve the includes of a project that
   does not build yet.
-- `nar-compile` and `nar-testCompile` write the JSON compilation database
-  `target/compile_commands.json` ( directory, command line and object file of
-  each C and C++ source ), for clangd, clang-tidy and the SonarQube C/C++
-  analyzer. Always under the build directory, with nothing to configure; the
-  library and the tests share it, and an incremental build records every source,
-  not only the ones it recompiles.
 
 ### Changed
 - Java 21, Maven 3.9 and Resolver 1.9.x. Tests migrated to JUnit 5. Documentation
@@ -74,21 +68,6 @@ This project is an update to Java 21 from version 3.10.1 as it was on 17/04/2020
   there could depend on the working directory.
 - The warnings gcc emits on Windows for libraries named `libX.a` / `libX.so` are no
   longer printed.
-- A change in a header two levels down a dependency did not recompile anything.
-  The incremental check only walked into headers under `src/main` or `src/test`,
-  so the headers of a dependency, unpacked under `target`, were checked by date
-  but not followed. A test that includes the umbrella header of its own library,
-  which comes from `target/nar`, kept objects built against an older layout of
-  a class, and crashed. Every header found through the include path is walked
-  now; system headers still are not.
-- A test that failed was reported as `exit code: N`, without its name: running
-  the command already threw before `nar-test` could say which test it was. The
-  exit value is now returned to `nar-test`, which names the test and gives the
-  code in decimal and hexadecimal.
-- A failed command printed `com.github.maven_nar.NarUtil$3@52d1600c` and the like,
-  three times: the identity of the streams that log line by line, whose output
-  had already been printed. Only streams that capture the output are printed
-  now.
 
 ## 4.0.0
 
@@ -99,6 +78,12 @@ This project is an update to Java 21 from version 3.10.1 as it was on 17/04/2020
   been run. They are copied to `target/it` and use a repository of their own,
   `target/it-repo`. On Windows `it-parent` sets the linker to `g++`, since the
   default in `aol.properties` is still `msvc`.
+- `nar-compile` and `nar-testCompile` write the JSON compilation database
+  `target/compile_commands.json` ( directory, command line and object file of
+  each C and C++ source ), for clangd, clang-tidy and the SonarQube C/C++
+  analyzer. Always under the build directory, with nothing to configure; the
+  library and the tests share it, and an incremental build records every source,
+  not only the ones it recompiles.
 
 ### Fixed
 - `nar-compile` failed with a `NullPointerException` ( `this.session` is null )
@@ -128,6 +113,21 @@ This project is an update to Java 21 from version 3.10.1 as it was on 17/04/2020
   already throws), a comparison of an `AOL` with a `String` that was always
   false, and a `remove` that removed nothing in `directDepsOnly`, which only warns
   about the stray dependencies.
+- A change in a header two levels down a dependency did not recompile anything.
+  The incremental check only walked into headers under `src/main` or `src/test`,
+  so the headers of a dependency, unpacked under `target`, were checked by date
+  but not followed. A test that includes the umbrella header of its own library,
+  which comes from `target/nar`, kept objects built against an older layout of
+  a class, and crashed. Every header found through the include path is walked
+  now; system headers still are not.
+- A test that failed was reported as `exit code: N`, without its name: running
+  the command already threw before `nar-test` could say which test it was. The
+  exit value is now returned to `nar-test`, which names the test and gives the
+  code in decimal and hexadecimal.
+- A failed command printed `com.github.maven_nar.NarUtil$3@52d1600c` and the like,
+  three times: the identity of the streams that log line by line, whose output
+  had already been printed. Only streams that capture the output are printed
+  now.
 
 ### Removed
 - Options that had no use with the GNU toolchains, the only ones this plugin
