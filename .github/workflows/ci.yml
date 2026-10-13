@@ -148,11 +148,17 @@ jobs:
 
       # Plain Windows: the MinGW-w64 g++ that ships with the runner image, put
       # ahead of any other gcc in the PATH.
+      #
+      # From a drive letter of its own: the MinGW ar is not long path aware,
+      # and from the workspace (D:\a\nar-maven-plugin\nar-maven-plugin\...) the
+      # static libraries of it0031 and it0039 go beyond MAX_PATH (303 and 281
+      # characters): "ar: unable to copy file". Cygwin has no such limit.
       - name: Integration tests (Windows, MinGW)
         if: matrix.mode == 'windows'
-        working-directory: nar-maven-plugin
         shell: pwsh
         run: |
+          subst W: "$env:GITHUB_WORKSPACE\nar-maven-plugin"
+          Set-Location W:\
           $env:PATH = "C:\mingw64\bin;$env:PATH"
           g++ --version | Select-Object -First 1
           mvn -B -ntp -Prun-its -DskipTests "-Dinvoker.test=$env:ITS_FILTER" verify
