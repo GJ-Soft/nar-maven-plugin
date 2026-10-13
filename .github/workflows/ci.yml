@@ -2,9 +2,11 @@
 #
 # The parent pom (org.gjsoft.java.maven:gjs-java-maven-parent) lives in the gjs
 # repository and is not on Maven Central yet. So every job checks out gjs next
-# to the plugin and runs its arranque.sh, which installs the chain of parent
-# poms in the runner's local repository. Once gjs is published those steps go
-# away: the parent will resolve from Central like any other.
+# to the plugin and builds its pomMinInstall.xml, which installs the parent poms
+# and the bit of Java the plugin needs in the runner's local repository. It is
+# the first step of gjs/install-gjs.sh; the rest of that script builds the whole
+# of gjs and is not needed here. Once gjs is published those steps go away: the
+# parent will resolve from Central like any other.
 #
 # Jobs:
 #   - unit-tests:        build and unit tests. Plain Java, one job is enough.
@@ -61,12 +63,6 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      # arranque.sh installs gjs-python-common, which is built with pip.
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.14'
-
       # Everything but the org/gjsoft artifacts: they keep the same version
       # from one run to the next, and a cached copy would be a stale parent.
       - name: Cache the local Maven repository
@@ -78,10 +74,8 @@ jobs:
           key: m2-${{ runner.os }}-${{ hashFiles('nar-maven-plugin/pom.xml', 'gjs/**/pom.xml') }}
           restore-keys: m2-${{ runner.os }}-
 
-      # Through bash: on Windows, git does not keep the executable bit.
       - name: Install the gjs parent poms
-        shell: bash
-        run: bash gjs/arranque.sh
+        run: mvn -B -ntp -DskipTests -f gjs/pomMinInstall.xml install
 
       - name: Build and run the unit tests
         working-directory: nar-maven-plugin
@@ -92,9 +86,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: unit-tests-logs
-          path: |
-            gjs/target/arranque/
-            nar-maven-plugin/target/surefire-reports/
+          path: nar-maven-plugin/target/surefire-reports/
           if-no-files-found: ignore
           retention-days: 7
 
@@ -123,11 +115,6 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.14'
-
       - name: Cache the local Maven repository
         uses: actions/cache@v4
         with:
@@ -138,8 +125,7 @@ jobs:
           restore-keys: m2-${{ runner.os }}-
 
       - name: Install the gjs parent poms
-        shell: bash
-        run: bash gjs/arranque.sh
+        run: mvn -B -ntp -DskipTests -f gjs/pomMinInstall.xml install
 
       - name: Install Cygwin with gcc and g++
         if: matrix.mode == 'cygwin'
@@ -176,8 +162,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: integration-tests-${{ matrix.mode }}-logs
-          path: |
-            gjs/target/arranque/
-            nar-maven-plugin/target/it/**/build.log
+          path: nar-maven-plugin/target/it/**/build.log
           if-no-files-found: ignore
           retention-days: 7
