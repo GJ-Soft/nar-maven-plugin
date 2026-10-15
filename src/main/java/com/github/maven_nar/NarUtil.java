@@ -85,6 +85,19 @@ public final class NarUtil {
 			+ "**/CVS,**/CVS/**,**/.cvsignore," + "**/SCCS,**/SCCS/**,**/vssver.scc,"
 			+ "**/.svn,**/.svn/**,**/.DS_Store";
 
+	/**
+	 * Puts {@code path} in the runtime library path variable of {@code os} (PATH,
+	 * LD_LIBRARY_PATH...), AHEAD of the value it already has. The directories of
+	 * the build have to win: on Windows, a libstdc++-6.dll of another MinGW that is
+	 * already in the PATH would otherwise be loaded first, and the executable dies
+	 * on start with 0xc0000139 (entry point not found).
+	 *
+	 * @param path        directories to add, separated by {@link File#pathSeparator}
+	 * @param environment where to read and write the variable; {@code null} reads
+	 *                    the process environment and writes nothing
+	 * @param os          the target operating system
+	 * @return the resulting {@code NAME=value} entry
+	 */
 	public static String addLibraryPathToEnv(final String path, final Map<String, String> environment, final String os) {
 		final String pathName;
 		final char separator;
@@ -115,7 +128,7 @@ public final class NarUtil {
 		String libPath = path;
 		libPath = libPath.replace(File.pathSeparatorChar, separator);
 		if (value != null) {
-			value += separator + libPath;
+			value = libPath + separator + value;
 		} else {
 			value = libPath;
 		}

@@ -24,11 +24,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.File;
 import java.nio.file.Paths;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.maven.plugin.MojoExecutionException;
@@ -141,5 +144,28 @@ public class TestNarUtil {
     assertEquals(3, log.warnings.size());
     assertTrue(log.warnings.get(0).contains("NoSuchNarOption"), log.warnings.get(0));
     assertEquals(dbg.toString(), log.warnings.get(2));
+  }
+
+  /**
+   * The directories of the build go ahead of the PATH there was: with them behind,
+   * a libstdc++-6.dll of another MinGW already in the PATH won, and the test
+   * executable died on start with 0xc0000139.
+   */
+  @Test
+  public void testAddLibraryPathToEnvGoesAheadOnWindows() {
+    final Map<String, String> environment = new HashMap<>();
+    environment.put("PATH", "C:\\otro\\mingw64\\bin");
+    final String entry = NarUtil.addLibraryPathToEnv("C:\\toolchain\\bin" + File.pathSeparator + "C:\\dep\\lib",
+        environment, OS.WINDOWS);
+    assertEquals("PATH=C:\\toolchain\\bin;C:\\dep\\lib;C:\\otro\\mingw64\\bin", entry);
+    assertEquals("C:\\toolchain\\bin;C:\\dep\\lib;C:\\otro\\mingw64\\bin", environment.get("PATH"));
+  }
+
+  @Test
+  public void testAddLibraryPathToEnvGoesAheadOnLinux() {
+    final Map<String, String> environment = new HashMap<>();
+    environment.put("LD_LIBRARY_PATH", "/usr/local/lib");
+    assertEquals("LD_LIBRARY_PATH=/opt/dep/lib:/usr/local/lib",
+        NarUtil.addLibraryPathToEnv("/opt/dep/lib", environment, OS.LINUX));
   }
 }
